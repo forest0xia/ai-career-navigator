@@ -44,9 +44,9 @@ function exposureLabel(pct) {
 }
 function readinessLabel(pct) {
   if (isCN()) {
-    if (pct >= 70) return { label: READINESS_LABELS_CN.strong, color: "var(--success)" };
-    if (pct >= 40) return { label: READINESS_LABELS_CN.building, color: "var(--accent2)" };
-    return { label: READINESS_LABELS_CN.early, color: "var(--warning)" };
+    if (pct >= 70) return { label: READINESS_LABELS_CN.strong.label, color: "var(--success)", detail: READINESS_LABELS_CN.strong.detail };
+    if (pct >= 40) return { label: READINESS_LABELS_CN.building.label, color: "var(--accent2)", detail: READINESS_LABELS_CN.building.detail };
+    return { label: READINESS_LABELS_CN.early.label, color: "var(--warning)", detail: READINESS_LABELS_CN.early.detail };
   }
   return getReadinessLabel(pct);
 }
@@ -356,7 +356,10 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       <p style="font-size:14px;color:var(--text2);margin:8px 0 16px">${expInfo.detail}</p>
       <div class="score-label"><span>${t('readiness_label')} — ${readInfo.label}</span><span>${readiness}%</span></div>
       <div class="score-bar"><div class="score-fill" style="width:${readiness}%;background:${readInfo.color}"></div></div>
+      <p style="font-size:14px;color:var(--text2);margin:8px 0 0">${readInfo.detail} ${t('readiness_action_hint')}</p>
     </div>
+    <div class="result-section" id="dashboardSection"></div>
+    ${communityHTML}
     <div class="result-section">
       <h3>${t('strength_title')}</h3>
       ${dims.map(d => {
@@ -366,9 +369,7 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
           <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:var(--accent2)"></div></div>`;
       }).join('')}
     </div>
-    ${communityHTML}
     ${renderToolRankings(toolRankings, userTools)}
-    <div class="result-section" id="dashboardSection"></div>
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>

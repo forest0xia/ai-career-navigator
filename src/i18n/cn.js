@@ -194,7 +194,7 @@ const EXPOSURE_LABELS_CN = {
 };
 
 const READINESS_LABELS_CN = {
-  strong: "准备充分",
-  building: "正在积累",
-  early: "起步阶段——增长潜力大"
+  strong: { label: "准备充分", detail: "你拥有扎实的 AI 相关技能和心态基础。专注于深化专长并紧跟新兴趋势。" },
+  building: { label: "正在积累", detail: "你正走在正确的道路上，AI 意识不断增长。持续、专注地提升 AI 技能将显著增强你的竞争力。" },
+  early: { label: "起步阶段——增长潜力大", detail: "你的 AI 准备度有很大的提升空间。好消息是：在这个阶段，即使少量的 AI 学习投入也能带来超额回报。" }
 };

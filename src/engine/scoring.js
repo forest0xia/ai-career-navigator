@@ -64,9 +64,9 @@ function getExposureLabel(pct) {
 }
 
 function getReadinessLabel(pct) {
-  if (pct >= 70) return { label: "Well Positioned", color: "var(--success)" };
-  if (pct >= 40) return { label: "Building Momentum", color: "var(--accent2)" };
-  return { label: "Early Stage — High Growth Potential", color: "var(--warning)" };
+  if (pct >= 70) return { label: "Well Positioned", color: "var(--success)", detail: "You have a strong foundation of AI-relevant skills and mindset. Focus on deepening your expertise and staying ahead of emerging trends." };
+  if (pct >= 40) return { label: "Building Momentum", color: "var(--accent2)", detail: "You're on the right track with growing AI awareness. Consistent, focused effort on AI skills will significantly strengthen your position." };
+  return { label: "Early Stage — High Growth Potential", color: "var(--warning)", detail: "You have significant room to grow your AI readiness. The good news: even small investments in AI learning will yield outsized returns at this stage." };
 }
 
 // Generate personalized insight text based on user's unique profile
