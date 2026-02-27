@@ -106,7 +106,7 @@ function renderWelcome() {
     ['🗺️', 'feature_plan', 'feature_plan_desc']
   ];
   features.forEach((el, i) => {
-    if (fData[i]) el.innerHTML = `<span class="icon">${fData[i][0]}</span><strong>${t(fData[i][1])}</strong><br>${t(fData[i][2])}`;
+    if (fData[i]) el.innerHTML = `<strong>${fData[i][0]} ${t(fData[i][1])}</strong><br>${t(fData[i][2])}`;
   });
   document.querySelector('#welcome .data-note').innerHTML = `<strong>${t('research_note')}</strong> ${t('research_sources')}`;
   document.querySelector('#welcome .time-note').textContent = t('time_note');
