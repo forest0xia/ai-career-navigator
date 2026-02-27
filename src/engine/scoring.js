@@ -58,15 +58,15 @@ function computeReadiness(scores) {
 }
 
 function getExposureLabel(pct) {
-  if (pct >= 75) return { label: "High Transformation Zone", color: "var(--warning)", detail: "AI will significantly reshape your day-to-day work within 2–3 years. This isn't a threat — it's an opportunity to redefine your role. Act now for maximum advantage." };
-  if (pct >= 45) return { label: "Moderate Evolution Zone", color: "var(--accent2)", detail: "AI will augment and change parts of your work. You have time to prepare, but starting now gives you a major advantage over peers who wait." };
-  return { label: "Gradual Shift Zone", color: "var(--success)", detail: "AI will change your field more slowly. Your human-centric skills provide natural resilience, but AI literacy still matters for long-term competitiveness." };
+  if (pct >= 75) return { label: "High Transformation Zone", color: "var(--warning)", detail: "AI will significantly reshape your work within 2–3 years. Act now for maximum advantage." };
+  if (pct >= 45) return { label: "Moderate Evolution Zone", color: "var(--accent2)", detail: "AI will augment parts of your work. Starting now gives you a major edge over peers who wait." };
+  return { label: "Gradual Shift Zone", color: "var(--success)", detail: "AI will change your field more slowly, but AI literacy still matters long-term." };
 }
 
 function getReadinessLabel(pct) {
-  if (pct >= 70) return { label: "Well Positioned", color: "var(--success)", detail: "You have a strong foundation of AI-relevant skills and mindset. Focus on deepening your expertise and staying ahead of emerging trends." };
-  if (pct >= 40) return { label: "Building Momentum", color: "var(--accent2)", detail: "You're on the right track with growing AI awareness. Consistent, focused effort on AI skills will significantly strengthen your position." };
-  return { label: "Early Stage — High Growth Potential", color: "var(--warning)", detail: "You have significant room to grow your AI readiness. The good news: even small investments in AI learning will yield outsized returns at this stage." };
+  if (pct >= 70) return { label: "Well Positioned", color: "var(--success)", detail: "Strong AI-relevant foundation. Focus on deepening expertise and staying ahead of trends." };
+  if (pct >= 40) return { label: "Building Momentum", color: "var(--accent2)", detail: "You're on the right track. Consistent effort on AI skills will significantly strengthen your position." };
+  return { label: "Early Stage — High Growth Potential", color: "var(--warning)", detail: "Significant room to grow. Even small investments in AI learning will yield outsized returns." };
 }
 
 // Generate personalized insight text based on user's unique profile

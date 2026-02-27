@@ -188,13 +188,13 @@ const ARCHETYPES_CN = {
 
 // Exposure/readiness labels in Chinese
 const EXPOSURE_LABELS_CN = {
-  high: { label: "高度转型区", detail: "AI 将在 2–3 年内显著重塑你的日常工作。这不是威胁——而是重新定义你角色的机会。现在行动可获得最大优势。" },
-  moderate: { label: "适度演进区", detail: "AI 将增强和改变你工作的部分内容。你有时间准备，但现在开始会让你比等待的同行拥有巨大优势。" },
-  low: { label: "渐进变化区", detail: "AI 对你所在领域的改变会更慢。你以人为中心的技能提供了天然的韧性，但 AI 素养对长期竞争力仍然重要。" }
+  high: { label: "高度转型区", detail: "AI 将在 2–3 年内显著重塑你的工作。现在行动可获得最大优势。" },
+  moderate: { label: "适度演进区", detail: "AI 将增强你工作的部分内容。现在开始会让你比等待的同行更有优势。" },
+  low: { label: "渐进变化区", detail: "AI 对你领域的改变会更慢，但 AI 素养对长期竞争力仍然重要。" }
 };
 
 const READINESS_LABELS_CN = {
-  strong: { label: "准备充分", detail: "你拥有扎实的 AI 相关技能和心态基础。专注于深化专长并紧跟新兴趋势。" },
-  building: { label: "正在积累", detail: "你正走在正确的道路上，AI 意识不断增长。持续、专注地提升 AI 技能将显著增强你的竞争力。" },
-  early: { label: "起步阶段——增长潜力大", detail: "你的 AI 准备度有很大的提升空间。好消息是：在这个阶段，即使少量的 AI 学习投入也能带来超额回报。" }
+  strong: { label: "准备充分", detail: "AI 技能基础扎实。专注于深化专长并紧跟新趋势。" },
+  building: { label: "正在积累", detail: "方向正确。持续提升 AI 技能将显著增强你的竞争力。" },
+  early: { label: "起步阶段——增长潜力大", detail: "提升空间很大。在这个阶段，少量 AI 学习投入就能带来超额回报。" }
 };
