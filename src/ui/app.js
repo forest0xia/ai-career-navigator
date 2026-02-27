@@ -267,6 +267,10 @@ function showResults() {
   let communityHTML = '';
   if (community && community.totalSessions > 1) {
     const topArch = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
+    const topArchPct = Math.round(topArch[1] / community.totalSessions * 100);
+    const archetypeLine = topArchPct < 100
+      ? `<p style="font-size:13px;color:var(--text2)"><strong style="color:var(--text)">${t('common_archetype')}</strong> ${archName(topArch[0])} (${topArchPct}%)</p>`
+      : '';
     communityHTML = `
     <div class="result-section">
       <h3>${t('community_title')}</h3>
@@ -280,11 +284,17 @@ function showResults() {
       </div>
       <div class="community-stats">
         <div class="stat-card"><div class="stat-value">${community.totalSessions}</div><div class="stat-label">${t('stat_total')}</div></div>
-        <div class="stat-card"><div class="stat-value">${community.avgExposure}%</div><div class="stat-label">${t('stat_exposure')}</div></div>
-        <div class="stat-card"><div class="stat-value">${community.avgReadiness}%</div><div class="stat-label">${t('stat_readiness')}</div></div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text2)">${community.avgExposure}% <span style="color:#818cf8">(${exposure}%)</span></div>
+          <div class="stat-label">${t('stat_exposure')}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text2)">${community.avgReadiness}% <span style="color:#818cf8">(${readiness}%)</span></div>
+          <div class="stat-label">${t('stat_readiness')}</div>
+        </div>
       </div>
       <div style="margin-top:16px">
-        <p style="font-size:13px;color:var(--text2)"><strong style="color:var(--text)">${t('common_archetype')}</strong> ${archName(topArch[0])} (${Math.round(topArch[1] / community.totalSessions * 100)}%)</p>
+        ${archetypeLine}
         <p style="font-size:13px;color:var(--text2);margin-top:4px"><strong style="color:var(--text)">${t('readiness_dist')}</strong> ${community.readinessBuckets.strong} ${t('readiness_strong')} · ${community.readinessBuckets.building} ${t('readiness_building')} · ${community.readinessBuckets.early} ${t('readiness_early')}</p>
       </div>
     </div>`;
