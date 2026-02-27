@@ -71,11 +71,14 @@ function getFilteredQuestions() {
 }
 
 // Initialize on load
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
   I18N.init();
   $('langEn').classList.toggle('active', I18N.lang() === 'en');
   $('langCn').classList.toggle('active', I18N.lang() === 'cn');
   $('logoText').textContent = t('logo');
+
+  // Fetch shared community data from community-data.json
+  await Analytics.fetchRemote();
 
   // Check for saved session in URL
   const params = new URLSearchParams(window.location.search);
