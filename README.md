@@ -205,14 +205,74 @@ Add to the `ARCHETYPES` object in `src/data/archetypes.js` and update the scorin
 
 Add options to the `ai_tools` question in `src/data/questions.js`. Include a `toolCategory` field for potential future filtering.
 
+## Backend: Supabase (Community Data)
+
+The app uses [Supabase](https://supabase.com) (free tier) as a shared backend for community data. No SDK — just plain `fetch()` calls to Supabase's REST API.
+
+### How It Works
+
+```
+User completes assessment
+  → POST to Supabase (insert session row)
+  → PostgreSQL trigger auto-updates community_stats (single row)
+  → Next user loads page → GET community_stats (1 row, instant)
+  → Scatter plots → GET sessions (exposure, readiness, scores only)
+```
+
+### Setup (One-Time, 2 Minutes)
+
+1. Create a free project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** → **New Query** → paste `scripts/supabase-setup.sql` → **Run**
+3. Go to **Settings** → **API** → copy the **`anon` `public`** key (starts with `eyJ...`)
+4. Update `SUPABASE_URL` and `SUPABASE_KEY` in `src/engine/analytics.js`
+5. Deploy — community data is now shared across all users
+
+### What the SQL Script Creates
+
+| Object | Purpose |
+|--------|---------|
+| `sessions` table | Stores each assessment result (scores, archetype, exposure, readiness, tools, answers) |
+| `community_stats` table | Single row with pre-aggregated community data (updated by trigger) |
+| `update_community_stats()` function | PostgreSQL trigger function — incrementally updates stats on every new session |
+| RLS policies | Insert-only for sessions (no read/update/delete), read-only for stats |
+
+### Security
+
+- **Anon key is safe to expose** in client code (same model as Firebase — identifies the project, doesn't grant access)
+- **Row Level Security (RLS)** enforces access control server-side:
+  - Users can insert sessions but cannot read, update, or delete other sessions
+  - Users can read aggregate stats but cannot write them
+  - The trigger function runs as `security definer` (server-side, bypasses RLS)
+- **No authentication required** — anonymous survey submissions by design
+
+### Offline / China Support
+
+- Supabase is hosted on AWS — **works in China** (unlike Firebase/Google)
+- Community stats cached in `localStorage` — if fetch fails, shows cached data
+- Sessions always saved locally too for `?id=UUID` report retrieval
+
+### Shareable Report URLs
+
+Each completed assessment generates a UUID. The URL updates to `?id=<uuid>`:
+
+```
+https://yoursite.github.io/ai-career-navigator/?id=a1b2c3d4-...&lang=cn
+```
+
+- Opening this URL loads the saved user results (fixed) with live community data (updates)
+- Report page includes a copy-URL button and report ID for bookmarking
+- Sessions stored in `localStorage` for retrieval (Supabase stores the canonical copy)
+
 ## Tech Stack
 
-- **Zero dependencies** — pure HTML, CSS, JavaScript
+- **Zero frontend dependencies** — pure HTML, CSS, JavaScript
+- **Supabase** — PostgreSQL backend for shared community data (free tier)
+- **No SDK** — plain `fetch()` to Supabase REST API
 - **No build step** — open `index.html` directly
-- **No server required** — all data in localStorage
+- **SVG charts** — crisp text at any DPI, CJK-friendly
 - **Mobile responsive** — works on all screen sizes
 - **Dark theme** — professional, modern UI
-- **Canvas radar chart** — no charting library needed
+- **i18n** — English + Chinese, URL-based switching (`?lang=cn`)
 
 ## Browser Support
 
