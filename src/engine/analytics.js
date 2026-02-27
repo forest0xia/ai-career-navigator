@@ -2,7 +2,7 @@
 // Supabase REST API via plain fetch() — no SDK needed
 
 const SUPABASE_URL = 'https://esymcblyhmeuiudpmdff.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_DzisycoATuStepsFEjdn9Q_lDVlIp7a';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeW1jYmx5aG1ldWl1ZHBtZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTU3ODIsImV4cCI6MjA4Nzc5MTc4Mn0.rTHFZ9yBxdz5Uy70pQRE7avt5k_mwUVOxmCEyAF3LiA';
 const LOCAL_KEY = 'ai_career_nav_sessions';
 const STATS_CACHE_KEY = 'ai_career_nav_stats_cache';
 const _DIMS = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
