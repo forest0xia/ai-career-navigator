@@ -101,6 +101,25 @@ const Analytics = {
 
   getSession(id) { return this._loadLocal()[id] || null; },
 
+  // Fetch a session from Supabase when not found locally
+  async fetchSession(id) {
+    const local = this.getSession(id);
+    if (local) return local;
+    try {
+      const rows = await _sbGet('sessions', `select=id,scores,archetype,exposure,readiness,tool_selections,answers,tags,feedback&id=eq.${id}`);
+      if (rows.length > 0) {
+        const r = rows[0];
+        const session = { id: r.id, scores: r.scores, archetype: r.archetype, exposure: r.exposure, readiness: r.readiness, toolSelections: r.tool_selections || [], answers: r.answers || {}, tags: r.tags || [], feedback: r.feedback };
+        // Cache locally
+        const loc = this._loadLocal();
+        loc[id] = session;
+        this._saveLocal();
+        return session;
+      }
+    } catch {}
+    return null;
+  },
+
   async recordFeedback(sessionId, feedback) {
     const local = this._loadLocal();
     if (local[sessionId]) { local[sessionId].feedback = feedback; this._saveLocal(); }

@@ -84,7 +84,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('id');
   if (sessionId) {
-    const saved = Analytics.getSession(sessionId);
+    const saved = await Analytics.fetchSession(sessionId);
     if (saved) {
       currentSessionId = sessionId;
       answers = saved.answers || {};
