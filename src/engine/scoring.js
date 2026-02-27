@@ -1,16 +1,36 @@
 // Scoring engine — archetype determination, exposure/readiness, personalized insights
 
+// Normalize raw scores: each dimension gets different max opportunities,
+// so we normalize to 0-10 scale before archetype comparison
+function _normalizeScores(raw) {
+  // Approximate realistic max per dimension (top ~2 answers per question that feeds it)
+  const maxExpected = {
+    adaptability: 14, technical: 10, creative: 8,
+    leadership: 10, aiReadiness: 12, humanEdge: 10
+  };
+  const norm = {};
+  for (const d of Object.keys(maxExpected)) {
+    norm[d] = Math.max(0, (raw[d] || 0) / maxExpected[d]) * 10;
+  }
+  return norm;
+}
+
 function determineArchetype(scores, tags) {
-  const { technical, creative, leadership, adaptability, aiReadiness, humanEdge } = scores;
+  const n = _normalizeScores(scores);
   const isTech = tags.includes("tech");
 
+  // Find the user's dominant dimension
+  const dims = ['adaptability', 'technical', 'creative', 'leadership', 'aiReadiness', 'humanEdge'];
+  const sorted = dims.slice().sort((a, b) => n[b] - n[a]);
+  const top = sorted[0];
+
   const archetypeScores = {
-    aiArchitect: technical * 2 + aiReadiness * 2 + (isTech ? 4 : 0),
-    aiCollaborator: adaptability * 2 + aiReadiness * 1.5 + technical,
-    humanEdge: humanEdge * 2.5 + leadership - aiReadiness * 0.5,
-    strategicLeader: leadership * 2.5 + adaptability + aiReadiness * 0.5,
-    creativeInnovator: creative * 2.5 + adaptability + aiReadiness * 0.5,
-    careerPivot: adaptability * 2 - technical * 0.5 - leadership * 0.5 + (tags.includes("early") ? 4 : 0)
+    aiArchitect:      n.technical * 2.5 + n.aiReadiness * 2 + (isTech ? 3 : 0),
+    aiCollaborator:   n.adaptability * 1.5 + n.aiReadiness * 1.5 + n.technical * 0.5,
+    humanEdge:        n.humanEdge * 3 + n.leadership * 1 - n.aiReadiness * 0.3,
+    strategicLeader:  n.leadership * 3 + n.adaptability * 0.8 + n.humanEdge * 0.5,
+    creativeInnovator:n.creative * 3 + n.adaptability * 0.8 + n.aiReadiness * 0.3,
+    careerPivot:      n.adaptability * 2 - n.technical * 0.8 - n.leadership * 0.5 + (tags.includes("early") ? 5 : 0)
   };
 
   let best = "aiCollaborator", bestScore = -Infinity;
@@ -68,21 +88,18 @@ function generateInsight(scores, exposure, readiness, archetypeKey, community) {
 
   const parts = [];
 
-  // Opening — varies by archetype
   if (cn) {
     parts.push(`你的画像显示你最适合作为<strong style="color:var(--accent2)">${archLabel}</strong>。`);
   } else {
     parts.push(`Your profile identifies you as <strong style="color:var(--accent2)">${archLabel}</strong>.`);
   }
 
-  // Strength combo — unique per user
   if (cn) {
     parts.push(`你最突出的优势组合是<strong style="color:var(--accent2)">${dimNames[top1]}</strong>和<strong style="color:var(--accent2)">${dimNames[top2]}</strong>——这种组合在 AI 时代尤其有价值，因为它很难被自动化复制。`);
   } else {
     parts.push(`Your standout combination of <strong style="color:var(--accent2)">${dimNames[top1]}</strong> and <strong style="color:var(--accent2)">${dimNames[top2]}</strong> is particularly valuable in the AI era — this pairing is difficult for automation to replicate.`);
   }
 
-  // Exposure-readiness gap analysis
   if (exposure >= 65 && readiness >= 65) {
     parts.push(cn
       ? '你的 AI 影响度和准备度都很高——你处于最佳位置，可以将 AI 变革转化为职业加速器。'
@@ -101,14 +118,12 @@ function generateInsight(scores, exposure, readiness, archetypeKey, community) {
       : 'You have time to build AI capabilities at your own pace. The key is starting small and staying consistent — even a few hours per week on AI tools compounds dramatically over time.');
   }
 
-  // Growth area — personalized
   if (scores[lowest] <= 0) {
     parts.push(cn
       ? `你的<strong style="color:var(--text2)">${dimNames[lowest]}</strong>是最大的成长空间。即使小幅提升这个维度，也能显著拓宽你的职业选择。`
       : `Your biggest growth opportunity is <strong style="color:var(--text2)">${dimNames[lowest]}</strong>. Even a modest improvement here would significantly broaden your career options.`);
   }
 
-  // Community comparison (if available)
   if (community && community.totalSessions > 2) {
     const pctile = Math.round(
       community.avgReadiness < readiness
@@ -126,7 +141,6 @@ function generateInsight(scores, exposure, readiness, archetypeKey, community) {
     }
   }
 
-  // Closing — always action-oriented, varies
   parts.push(cn
     ? '世界经济论坛预测到 2030 年将新增 1.7 亿个岗位。主动规划的人始终优于被动等待的人。小而持续的行动会带来巨大的职业转变。'
     : 'The WEF projects 170 million new roles by 2030. Those who act intentionally consistently outperform those who wait. Small, consistent steps compound into transformative career moves.');

@@ -51,8 +51,8 @@ const QUESTIONS = [
       { text: "Analyzing data, building models, research", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
       { text: "Writing, designing, creating content", scores: { creative: 3 } },
       { text: "Meetings, strategy, managing people", scores: { leadership: 3, humanEdge: 1 } },
-      { text: "Client/patient/student interaction, advising", scores: { humanEdge: 3 } },
-      { text: "Hands-on physical or operational work", scores: { humanEdge: 2, adaptability: 1 } },
+      { text: "Client/patient/student interaction, advising", scores: { humanEdge: 4 } },
+      { text: "Hands-on physical or operational work", scores: { humanEdge: 3, adaptability: 1 } },
       { text: "Administrative tasks, data entry, processing", scores: { adaptability: -1 } }
     ]
   },
@@ -77,9 +77,9 @@ const QUESTIONS = [
     insight: 'McKinsey now operates with 20,000 AI agents alongside 40,000 humans. 30% of companies are planning AI-driven workforce reductions in 2026. Yet despite surging AI demand, communication, collaboration, and adaptability remain the most sought-after human attributes (cited by 39% of employers).<div class="source">— McKinsey, Jan 2026; ManpowerGroup 2026 Talent Shortage Survey</div>',
     options: [
       { text: "Analytical thinking and complex problem-solving", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 3 } },
-      { text: "Creative ideation and design thinking", scores: { creative: 3 } },
-      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 3 } },
+      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 4 } },
+      { text: "Creative ideation and design thinking", scores: { creative: 4 } },
+      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 4 } },
       { text: "Deep technical expertise in a specialized area", scores: { technical: 3 } },
       { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 3 } },
       { text: "Adaptability and rapid learning", scores: { adaptability: 3 } }
@@ -92,13 +92,13 @@ const QUESTIONS = [
     desc: "Your skill combination matters — people with complementary strengths are harder to replace.",
     insight: 'Cross-functional skill combinations are increasingly valuable. A developer who communicates well, a designer who understands data, a manager who can code — these "T-shaped" professionals command premium compensation because AI can\'t replicate their cross-domain synthesis.<div class="source">— Deloitte Human Capital Trends 2025</div>',
     options: [
-      { text: "Analytical thinking and complex problem-solving", scores: { technical: 1 } },
-      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 1 } },
-      { text: "Creative ideation and design thinking", scores: { creative: 1 } },
-      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 1 } },
-      { text: "Deep technical expertise in a specialized area", scores: { technical: 1 } },
-      { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 1 } },
-      { text: "Adaptability and rapid learning", scores: { adaptability: 1 } }
+      { text: "Analytical thinking and complex problem-solving", scores: { technical: 2 } },
+      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 2 } },
+      { text: "Creative ideation and design thinking", scores: { creative: 2 } },
+      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 2 } },
+      { text: "Deep technical expertise in a specialized area", scores: { technical: 2 } },
+      { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 2 } },
+      { text: "Adaptability and rapid learning", scores: { adaptability: 2 } }
     ]
   },
   {
@@ -121,8 +121,8 @@ const QUESTIONS = [
     desc: "E.g., a developer who also does product design, or a marketer who analyzes data.",
     insight: 'AI handles narrow, well-defined tasks well. But connecting insights across domains — seeing patterns between marketing data and engineering constraints, for example — remains a distinctly human capability and is increasingly valued by employers.<div class="source">— Deloitte Human Capital Trends 2025</div>',
     options: [
-      { text: "Constantly — I wear many hats and bridge multiple functions", scores: { adaptability: 3, creative: 1 } },
-      { text: "Often — I collaborate across teams on most projects", scores: { adaptability: 2, leadership: 1 } },
+      { text: "Constantly — I wear many hats and bridge multiple functions", scores: { adaptability: 2, creative: 2 } },
+      { text: "Often — I collaborate across teams on most projects", scores: { adaptability: 1, leadership: 2 } },
       { text: "Sometimes — when specific projects require it", scores: { adaptability: 1 } },
       { text: "Rarely — I'm deep in my specialty and that's where I add value", scores: { technical: 2 } }
     ]
@@ -239,7 +239,7 @@ const QUESTIONS = [
     insight: 'Employers now value judgment and output quality over mere effort. The professionals who thrive are those who use AI to eliminate drudgery and free themselves for higher-value work they actually enjoy.<div class="source">— Economic Times, "How to get hired in an AI-first world," 2026</div>',
     options: [
       { text: "Automating repetitive tasks so I can focus on higher-value work", scores: { adaptability: 2, aiReadiness: 1 } },
-      { text: "Generating first drafts of content, code, or analysis", scores: { creative: 1, aiReadiness: 2 } },
+      { text: "Generating first drafts of content, code, or analysis", scores: { creative: 2, aiReadiness: 2 } },
       { text: "Analyzing large datasets to find patterns I'd miss", scores: { technical: 2, aiReadiness: 1 } },
       { text: "Helping me learn new skills and domains faster", scores: { adaptability: 2 } },
       { text: "Improving communication — writing, presentations, translations", scores: { humanEdge: 1, aiReadiness: 1 } },
@@ -255,9 +255,9 @@ const QUESTIONS = [
     insight: 'As AI absorbs routine tasks, it shifts human work toward judgment, strategy, and complex problem-solving. Roles centered on meaning, relationships, and creative expression are more resilient than those centered purely on efficiency and output volume.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
       { text: "Solving complex, novel problems nobody else can crack", scores: { technical: 2, creative: 1 } },
-      { text: "Making a direct, visible impact on people's lives", scores: { humanEdge: 3 } },
-      { text: "Building and creating tangible things", scores: { creative: 2, technical: 1 } },
-      { text: "Leading teams and shaping organizational direction", scores: { leadership: 3 } },
+      { text: "Making a direct, visible impact on people's lives", scores: { humanEdge: 4 } },
+      { text: "Building and creating tangible things", scores: { creative: 3, technical: 1 } },
+      { text: "Leading teams and shaping organizational direction", scores: { leadership: 4 } },
       { text: "Stability, predictability, and work-life balance", scores: { adaptability: -1, humanEdge: 1 } },
       { text: "Continuous learning, growth, and new challenges", scores: { adaptability: 3 } }
     ]
@@ -281,9 +281,9 @@ const QUESTIONS = [
     insight: 'The WEF framework emphasizes cross-functional "innovation pods" combining HR, technology, and operations. Individual contributors who can orchestrate AI tools become force multipliers; collaborative leaders who integrate AI into team workflows are in highest demand.<div class="source">— WEF Workforce Transformation Framework, Feb 2026</div>',
     options: [
       { text: "Independently — deep focus, minimal interruptions", scores: { technical: 1, creative: 1 } },
-      { text: "Small team — close collaboration with a few trusted people", scores: { humanEdge: 1, leadership: 1 } },
-      { text: "Cross-functional — I thrive connecting different groups and ideas", scores: { leadership: 2, adaptability: 1 } },
-      { text: "Client/stakeholder-facing — I'm energized by external interaction", scores: { humanEdge: 2 } }
+      { text: "Small team — close collaboration with a few trusted people", scores: { humanEdge: 2, leadership: 1 } },
+      { text: "Cross-functional — I thrive connecting different groups and ideas", scores: { leadership: 3, adaptability: 1 } },
+      { text: "Client/stakeholder-facing — I'm energized by external interaction", scores: { humanEdge: 3 } }
     ]
   },
   {
@@ -293,8 +293,8 @@ const QUESTIONS = [
     insight: 'AI excels at data-driven pattern recognition but struggles with decisions involving ambiguity, ethics, stakeholder politics, and novel situations. Understanding your decision-making style reveals where you naturally complement AI — and where you might over-rely on it.<div class="source">— Deloitte Human Capital Trends 2025</div>',
     options: [
       { text: "Data-driven — I gather evidence and analyze before deciding", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Intuition-guided — I trust my experience and gut feeling", scores: { humanEdge: 2 } },
-      { text: "Collaborative — I consult others and build consensus", scores: { leadership: 2, humanEdge: 1 } },
+      { text: "Intuition-guided — I trust my experience and gut feeling", scores: { humanEdge: 3 } },
+      { text: "Collaborative — I consult others and build consensus", scores: { leadership: 3, humanEdge: 1 } },
       { text: "Experimental — I try things quickly and iterate based on results", scores: { adaptability: 3 } }
     ]
   },
@@ -306,8 +306,8 @@ const QUESTIONS = [
     title: "Where do you want to be in 5 years?",
     insight: 'By 2030, 70% of workplace skills will change because of AI. People with a clear direction can use AI to accelerate toward their goals. Those without one risk being swept along by default — the "safe" choice of staying still is becoming the riskiest strategy.<div class="source">— BusinessWorld, Feb 2026; Forbes Career Strategy</div>',
     options: [
-      { text: "Leading a team, department, or organization", scores: { leadership: 3 } },
-      { text: "Recognized as a deep technical expert or thought leader", scores: { technical: 3 } },
+      { text: "Leading a team, department, or organization", scores: { leadership: 4 } },
+      { text: "Recognized as a deep technical expert or thought leader", scores: { technical: 4 } },
       { text: "Running my own business, consultancy, or freelance practice", scores: { adaptability: 2, leadership: 2 } },
       { text: "Doing meaningful work with more autonomy and impact", scores: { creative: 1, humanEdge: 1, adaptability: 1 } },
       { text: "Working in a completely different field than today", scores: { adaptability: 3 } },
@@ -348,7 +348,7 @@ const QUESTIONS = [
       { text: "Not knowing which AI skills to invest in", scores: { aiReadiness: 1 } },
       { text: "AI replacing my specific role or function", scores: {} },
       { text: "Falling behind peers who adopt AI faster", scores: { adaptability: 1, aiReadiness: 1 } },
-      { text: "Ethical concerns about AI in my industry", scores: { humanEdge: 2 } },
+      { text: "Ethical concerns about AI in my industry", scores: { humanEdge: 3 } },
       { text: "I'm not particularly concerned — I see mostly opportunity", scores: { aiReadiness: 2, adaptability: 1 } }
     ]
   }
