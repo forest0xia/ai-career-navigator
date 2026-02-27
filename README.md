@@ -138,29 +138,46 @@ python3 -m http.server 8000
 
 ```
 ai-career-navigator/
-├── index.html        # Main HTML — screens, modals, layout
-├── style.css         # Dark theme, responsive, animations
-├── questions.js      # 23 questions with research citations, adaptive logic, multi-select
-├── archetypes.js     # 6 archetypes with scoring engine, how-to action plans, resource links
-├── analytics.js      # localStorage persistence, community stats, radar chart renderer
-├── app.js            # Navigation engine, multi-select handling, results rendering, feedback
+├── index.html              # Entry point — screens, modals, script loading
+├── css/
+│   └── style.css           # Dark theme, responsive layout, animations
+├── src/
+│   ├── data/               # Pure data — no logic, easy to edit
+│   │   ├── questions.js    # 23 questions, options, scoring weights, citations
+│   │   └── archetypes.js   # 6 archetypes, action plans, skills, roles
+│   ├── engine/             # Business logic — scoring, storage, aggregation
+│   │   ├── scoring.js      # Archetype determination, exposure/readiness calculators
+│   │   └── analytics.js    # localStorage persistence, community stats, tool rankings
+│   └── ui/                 # Rendering — DOM manipulation, charts, user interaction
+│       ├── app.js          # Navigation, question rendering, results, feedback modal
+│       └── charts.js       # Canvas radar chart renderer
 └── README.md
 ```
 
-### File Responsibilities
+### Architecture
 
-| File | Size | Purpose |
-|------|------|---------|
-| `questions.js` | Data | All questions, options, scoring weights, conditional display logic, research citations |
-| `archetypes.js` | Data + Logic | Archetype definitions, action plans with how-to steps, scoring algorithm, exposure/readiness calculators |
-| `analytics.js` | Storage + Viz | localStorage CRUD, community aggregation, tool rankings, canvas radar chart |
-| `app.js` | UI Engine | Screen navigation, single/multi-select handling, results rendering, feedback modal |
+```
+index.html
+  ├── css/style.css              (presentation)
+  ├── src/data/questions.js      (question definitions + research citations)
+  ├── src/data/archetypes.js     (archetype definitions + action plans)
+  ├── src/engine/scoring.js      (scoring algorithms)
+  ├── src/engine/analytics.js    (data persistence + aggregation)
+  ├── src/ui/charts.js           (canvas radar chart)
+  └── src/ui/app.js              (navigation + rendering + feedback)
+```
+
+| Layer | Files | Responsibility |
+|-------|-------|----------------|
+| **Data** | `questions.js`, `archetypes.js` | Pure data definitions. Edit these to change questions, options, archetypes, or action plans. No logic. |
+| **Engine** | `scoring.js`, `analytics.js` | Business logic. Scoring algorithms, archetype determination, localStorage CRUD, community aggregation. |
+| **UI** | `app.js`, `charts.js` | DOM rendering, screen navigation, multi-select handling, radar chart, feedback modal. |
 
 ## Customization
 
 ### Adding Questions
 
-Add to the `QUESTIONS` array in `questions.js`:
+Add to the `QUESTIONS` array in `src/data/questions.js`:
 
 ```js
 {
@@ -182,11 +199,11 @@ Add to the `QUESTIONS` array in `questions.js`:
 
 ### Adding Archetypes
 
-Add to the `ARCHETYPES` object in `archetypes.js` and update the scoring logic in `determineArchetype()`.
+Add to the `ARCHETYPES` object in `src/data/archetypes.js` and update the scoring logic in `src/engine/scoring.js`.
 
 ### Adding AI Tools
 
-Add options to the `ai_tools` question in `questions.js`. Include a `toolCategory` field for potential future filtering.
+Add options to the `ai_tools` question in `src/data/questions.js`. Include a `toolCategory` field for potential future filtering.
 
 ## Tech Stack
 

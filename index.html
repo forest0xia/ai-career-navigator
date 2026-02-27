@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Career Navigator</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div id="app">
@@ -30,7 +30,7 @@
         <div class="data-note">
           <strong>Built on research from:</strong> World Economic Forum Future of Jobs Report 2025, Forbes Career Strategy, Deloitte Human Capital Trends 2025, and current labor market data.
         </div>
-        <p class="time-note">⏱ Takes about 5–8 minutes · Your results include community comparison data</p>
+        <p class="time-note">⏱ Takes about 6–8 minutes · Your results include community comparison data</p>
         <button class="btn primary" onclick="startAssessment()">Begin Assessment</button>
       </div>
     </section>
@@ -73,9 +73,17 @@
     </div>
   </main>
 </div>
-<script src="questions.js"></script>
-<script src="archetypes.js"></script>
-<script src="analytics.js"></script>
-<script src="app.js"></script>
+
+<!-- Data -->
+<script src="src/data/questions.js"></script>
+<script src="src/data/archetypes.js"></script>
+
+<!-- Engine -->
+<script src="src/engine/scoring.js"></script>
+<script src="src/engine/analytics.js"></script>
+
+<!-- UI -->
+<script src="src/ui/charts.js"></script>
+<script src="src/ui/app.js"></script>
 </body>
 </html>
