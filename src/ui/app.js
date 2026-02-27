@@ -77,8 +77,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('langCn').classList.toggle('active', I18N.lang() === 'cn');
   $('logoText').textContent = t('logo');
 
-  // Fetch shared community data from community-data.json
-  await Analytics.fetchRemote();
+  // Fetch shared community data from Supabase
+  await Analytics.fetchCommunityStats();
 
   // Check for saved session in URL
   const params = new URLSearchParams(window.location.search);
@@ -262,7 +262,7 @@ function showSavedResults(saved) {
   renderResultsPage(saved.scores, saved.archetype, saved.exposure, saved.readiness, saved.toolSelections || [], saved.answers);
 }
 
-function showResults() {
+async function showResults() {
   $('progressContainer').style.display = 'none';
   const scores = computeScores();
   const archetypeKey = determineArchetype(scores, userTags);
@@ -270,7 +270,7 @@ function showResults() {
   const readiness = computeReadiness(scores);
   const userTools = getToolSelections();
 
-  currentSessionId = Analytics.recordSession(answers, userTags, scores, archetypeKey, exposure, readiness, userTools);
+  currentSessionId = await Analytics.recordSession(answers, userTags, scores, archetypeKey, exposure, readiness, userTools);
 
   // Push session ID to URL for sharing
   const url = new URL(window.location);
@@ -410,13 +410,13 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   }
 
   // Render charts after DOM is ready
-  setTimeout(() => {
+  setTimeout(async () => {
     if (community && community.totalSessions > 1) {
       drawRadarChart('radarChart', scores, community.avgScores);
     }
 
     // Dashboard: scatter plots + sentiment chart (need 2+ sessions)
-    const allSessions = Analytics.getScatterData();
+    const allSessions = await Analytics.getScatterData();
     if (allSessions.length > 1) {
       const currentPt = { exposure, readiness, aiReadiness: scores.aiReadiness || 0, adaptability: scores.adaptability || 0 };
 

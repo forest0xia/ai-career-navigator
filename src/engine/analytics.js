@@ -1,182 +1,147 @@
-// Analytics: local sessions + remote community data (fetched from community-data.json)
-// Remote data is published aggregate stats you update in the repo.
-// Local data is the user's own sessions in this browser.
-// Community views merge both: remote + local.
+// Analytics: Supabase for shared community data + localStorage for local session retrieval
+// Supabase REST API via plain fetch() — no SDK needed
 
-const STORAGE_KEY = "ai_career_nav_analytics";
-const LOCAL_STATS_KEY = "ai_career_nav_local_stats";
-const REMOTE_CACHE_KEY = "ai_career_nav_remote";
-
+const SUPABASE_URL = 'https://esymcblyhmeuiudpmdff.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_DzisycoATuStepsFEjdn9Q_lDVlIp7a';
+const LOCAL_KEY = 'ai_career_nav_sessions';
+const STATS_CACHE_KEY = 'ai_career_nav_stats_cache';
 const _DIMS = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
 
-function _emptyStats() {
-  const s = { n: 0, sumExposure: 0, sumReadiness: 0, sumScores: {}, archetypeCounts: {},
-    exposureBuckets: { low: 0, moderate: 0, high: 0 }, readinessBuckets: { early: 0, building: 0, strong: 0 },
-    toolCounts: {}, toolUsers: 0, answerCounts: {}, scatterPoints: [] };
-  _DIMS.forEach(d => { s.sumScores[d] = 0; });
-  return s;
+function _sbHeaders() {
+  return { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 }
 
-function _addSessionToStats(stats, s) {
-  stats.n++;
-  _DIMS.forEach(d => { stats.sumScores[d] = (stats.sumScores[d] || 0) + (s.scores?.[d] || 0); });
-  stats.sumExposure += s.exposure || 0;
-  stats.sumReadiness += s.readiness || 0;
-  stats.archetypeCounts[s.archetype] = (stats.archetypeCounts[s.archetype] || 0) + 1;
-  if (s.exposure >= 75) stats.exposureBuckets.high++; else if (s.exposure >= 45) stats.exposureBuckets.moderate++; else stats.exposureBuckets.low++;
-  if (s.readiness >= 70) stats.readinessBuckets.strong++; else if (s.readiness >= 40) stats.readinessBuckets.building++; else stats.readinessBuckets.early++;
-  if (s.toolSelections?.length > 0) {
-    stats.toolUsers++;
-    s.toolSelections.forEach(t => { stats.toolCounts[t] = (stats.toolCounts[t] || 0) + 1; });
-  }
-  const answers = s.answers || {};
-  for (const [qId, ans] of Object.entries(answers)) {
-    if (!stats.answerCounts[qId]) stats.answerCounts[qId] = {};
-    if (Array.isArray(ans)) ans.forEach(i => { stats.answerCounts[qId][i] = (stats.answerCounts[qId][i] || 0) + 1; });
-    else if (ans !== undefined && ans !== null) stats.answerCounts[qId][ans] = (stats.answerCounts[qId][ans] || 0) + 1;
-  }
-  stats.scatterPoints.push({ exposure: s.exposure, readiness: s.readiness,
-    aiReadiness: s.scores?.aiReadiness || 0, adaptability: s.scores?.adaptability || 0 });
+async function _sbPost(table, data) {
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: _sbHeaders(), body: JSON.stringify(data) });
+  if (!resp.ok) throw new Error(await resp.text());
+  return resp.json();
 }
 
-// Merge two stats objects (remote + local)
-function _mergeStats(a, b) {
-  if (!a || !a.n) return b || _emptyStats();
-  if (!b || !b.n) return a;
-  const m = _emptyStats();
-  m.n = a.n + b.n;
-  _DIMS.forEach(d => { m.sumScores[d] = (a.sumScores[d] || 0) + (b.sumScores[d] || 0); });
-  m.sumExposure = a.sumExposure + b.sumExposure;
-  m.sumReadiness = a.sumReadiness + b.sumReadiness;
-  for (const k of new Set([...Object.keys(a.archetypeCounts || {}), ...Object.keys(b.archetypeCounts || {})])) {
-    m.archetypeCounts[k] = (a.archetypeCounts[k] || 0) + (b.archetypeCounts[k] || 0);
-  }
-  ['low', 'moderate', 'high'].forEach(k => { m.exposureBuckets[k] = (a.exposureBuckets[k] || 0) + (b.exposureBuckets[k] || 0); });
-  ['early', 'building', 'strong'].forEach(k => { m.readinessBuckets[k] = (a.readinessBuckets[k] || 0) + (b.readinessBuckets[k] || 0); });
-  m.toolUsers = (a.toolUsers || 0) + (b.toolUsers || 0);
-  for (const k of new Set([...Object.keys(a.toolCounts || {}), ...Object.keys(b.toolCounts || {})])) {
-    m.toolCounts[k] = (a.toolCounts[k] || 0) + (b.toolCounts[k] || 0);
-  }
-  for (const qId of new Set([...Object.keys(a.answerCounts || {}), ...Object.keys(b.answerCounts || {})])) {
-    m.answerCounts[qId] = {};
-    const aq = a.answerCounts?.[qId] || {}, bq = b.answerCounts?.[qId] || {};
-    for (const k of new Set([...Object.keys(aq), ...Object.keys(bq)])) {
-      m.answerCounts[qId][k] = (aq[k] || 0) + (bq[k] || 0);
-    }
-  }
-  m.scatterPoints = [...(a.scatterPoints || []), ...(b.scatterPoints || [])];
-  return m;
+async function _sbGet(table, query) {
+  const resp = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query || ''}`, { headers: _sbHeaders() });
+  if (!resp.ok) throw new Error(await resp.text());
+  return resp.json();
 }
 
 const Analytics = {
-  _data: null,
-  _localStats: null,
-  _remote: null,
+  _localSessions: null,
+  _communityStats: null,
 
-  _load() {
-    if (this._data) return this._data;
-    try { this._data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { sessions: {} }; } catch { this._data = { sessions: {} }; }
-    if (Array.isArray(this._data.sessions)) {
-      const map = {}; this._data.sessions.forEach(s => { map[s.id] = s; }); this._data.sessions = map; this._save();
+  // Local session storage (for URL-based report retrieval)
+  _loadLocal() {
+    if (this._localSessions) return this._localSessions;
+    try { this._localSessions = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {}; } catch { this._localSessions = {}; }
+    // Migrate from old format
+    if (Array.isArray(this._localSessions)) {
+      const map = {}; this._localSessions.forEach(s => { map[s.id] = s; }); this._localSessions = map;
     }
-    return this._data;
+    if (this._localSessions.sessions) { this._localSessions = this._localSessions.sessions; }
+    return this._localSessions;
   },
-  _save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(this._data)); },
+  _saveLocal() { localStorage.setItem(LOCAL_KEY, JSON.stringify(this._localSessions)); },
 
-  _loadLocalStats() {
-    if (this._localStats) return this._localStats;
-    try { this._localStats = JSON.parse(localStorage.getItem(LOCAL_STATS_KEY)); } catch {}
-    if (!this._localStats) {
-      this._localStats = _emptyStats();
-      Object.values(this._load().sessions).forEach(s => _addSessionToStats(this._localStats, s));
-      this._saveLocalStats();
-    }
-    return this._localStats;
-  },
-  _saveLocalStats() { localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify(this._localStats)); },
-
-  _getRemote() { return this._remote; },
-
-  // Fetch remote community data (call once on page load)
-  async fetchRemote() {
+  // Fetch community stats from Supabase (single row, fast)
+  async fetchCommunityStats() {
     try {
-      const cached = JSON.parse(localStorage.getItem(REMOTE_CACHE_KEY) || 'null');
-      // Use cache if less than 5 min old
-      if (cached && cached._fetchedAt && Date.now() - cached._fetchedAt < 300000) {
-        this._remote = cached;
-        return;
+      const rows = await _sbGet('community_stats', 'select=*&id=eq.1');
+      if (rows.length > 0) {
+        this._communityStats = rows[0];
+        localStorage.setItem(STATS_CACHE_KEY, JSON.stringify(this._communityStats));
       }
-      const resp = await fetch('community-data.json?t=' + Date.now());
-      if (resp.ok) {
-        this._remote = await resp.json();
-        this._remote._fetchedAt = Date.now();
-        localStorage.setItem(REMOTE_CACHE_KEY, JSON.stringify(this._remote));
-      }
-    } catch { /* offline — use cached or local only */ }
+    } catch {
+      // Offline — use cache
+      try { this._communityStats = JSON.parse(localStorage.getItem(STATS_CACHE_KEY)); } catch {}
+    }
   },
 
-  // Merged community stats (remote + local)
-  _merged() { return _mergeStats(this._remote, this._loadLocalStats()); },
-
-  recordSession(answers, tags, scores, archetype, exposure, readiness, toolSelections) {
-    const data = this._load();
+  // Submit session to Supabase + save locally
+  async recordSession(answers, tags, scores, archetype, exposure, readiness, toolSelections) {
     const serialized = {};
     for (const [k, v] of Object.entries(answers)) { serialized[k] = v instanceof Set ? [...v] : v; }
-    const id = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
-    const session = { id, ts: new Date().toISOString(), answers: serialized, tags, scores, archetype, exposure, readiness, toolSelections: toolSelections || [], feedback: null };
-    data.sessions[id] = session;
-    this._save();
-    const ls = this._loadLocalStats();
-    _addSessionToStats(ls, session);
-    this._saveLocalStats();
+
+    const session = {
+      scores, archetype, exposure, readiness,
+      tool_selections: toolSelections || [],
+      answers: serialized, tags
+    };
+
+    let id;
+    try {
+      const rows = await _sbPost('sessions', session);
+      id = rows[0].id;
+    } catch {
+      // Offline fallback — generate local ID
+      id = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+    }
+
+    // Save locally for report retrieval
+    const local = this._loadLocal();
+    local[id] = { id, ts: new Date().toISOString(), answers: serialized, tags, scores, archetype, exposure, readiness, toolSelections: toolSelections || [], feedback: null };
+    this._saveLocal();
+
+    // Refresh stats cache
+    this.fetchCommunityStats().catch(() => {});
+
     return id;
   },
 
-  getSession(id) { return this._load().sessions[id] || null; },
+  getSession(id) { return this._loadLocal()[id] || null; },
 
-  recordFeedback(sessionId, feedback) {
-    const data = this._load();
-    if (data.sessions[sessionId]) { data.sessions[sessionId].feedback = feedback; this._save(); }
-  },
-
-  getToolRankings() {
-    const stats = this._merged();
-    const ranked = Object.entries(stats.toolCounts || {})
-      .filter(([name]) => name !== "None of the above")
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count, pct: stats.toolUsers ? Math.round(count / stats.toolUsers * 100) : 0 }));
-    return { ranked, totalUsers: stats.toolUsers || 0 };
+  async recordFeedback(sessionId, feedback) {
+    const local = this._loadLocal();
+    if (local[sessionId]) { local[sessionId].feedback = feedback; this._saveLocal(); }
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/sessions?id=eq.${sessionId}`, {
+        method: 'PATCH', headers: _sbHeaders(), body: JSON.stringify({ feedback })
+      });
+    } catch {}
   },
 
   getCommunityStats() {
-    const stats = this._merged();
-    if (stats.n === 0) return null;
+    const s = this._communityStats;
+    if (!s || !s.n) return null;
     const avgScores = {};
-    _DIMS.forEach(d => { avgScores[d] = (stats.sumScores[d] || 0) / stats.n; });
+    _DIMS.forEach(d => { avgScores[d] = (s.sum_scores?.[d] || 0) / s.n; });
     return {
-      totalSessions: stats.n, avgScores, archetypeCounts: stats.archetypeCounts,
-      exposureBuckets: stats.exposureBuckets, readinessBuckets: stats.readinessBuckets,
-      avgExposure: Math.round(stats.sumExposure / stats.n),
-      avgReadiness: Math.round(stats.sumReadiness / stats.n)
+      totalSessions: s.n, avgScores,
+      archetypeCounts: s.archetype_counts || {},
+      exposureBuckets: s.exposure_buckets || { low: 0, moderate: 0, high: 0 },
+      readinessBuckets: s.readiness_buckets || { early: 0, building: 0, strong: 0 },
+      avgExposure: Math.round(s.sum_exposure / s.n),
+      avgReadiness: Math.round(s.sum_readiness / s.n)
     };
   },
 
-  getScatterData() {
-    const merged = this._merged();
-    return merged.scatterPoints || [];
+  getToolRankings() {
+    const s = this._communityStats;
+    if (!s) return { ranked: [], totalUsers: 0 };
+    const ranked = Object.entries(s.tool_counts || {})
+      .filter(([name]) => name !== "None of the above")
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count, pct: s.tool_users ? Math.round(count / s.tool_users * 100) : 0 }));
+    return { ranked, totalUsers: s.tool_users || 0 };
   },
 
   getAnswerDistribution(questionId, options) {
-    const stats = this._merged();
-    const qCounts = stats.answerCounts[questionId] || {};
-    const total = stats.n || 1;
+    const s = this._communityStats;
+    const qCounts = s?.answer_counts?.[questionId] || {};
+    const total = s?.n || 1;
     return options.map((opt, i) => ({
       label: typeof opt === 'string' ? opt : (opt.text || ''),
       count: qCounts[i] || 0, pct: Math.round((qCounts[i] || 0) / total * 100)
     }));
   },
 
-  // Export local sessions for you to aggregate into community-data.json
-  exportLocalStats() { return JSON.stringify(this._loadLocalStats(), null, 2); },
-  getLocalSessionCount() { return Object.keys(this._load().sessions).length; }
+  // Scatter data: fetch lightweight from Supabase (only exposure/readiness/scores)
+  async getScatterData() {
+    try {
+      const rows = await _sbGet('sessions', 'select=exposure,readiness,scores');
+      return rows.map(r => ({
+        exposure: r.exposure, readiness: r.readiness,
+        aiReadiness: r.scores?.aiReadiness || 0, adaptability: r.scores?.adaptability || 0
+      }));
+    } catch {
+      return []; // Offline — no scatter data
+    }
+  }
 };
