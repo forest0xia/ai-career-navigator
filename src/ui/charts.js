@@ -126,75 +126,27 @@ function drawScatterPlot(containerId, sessions, currentSession, xKey, yKey, xLab
   container.appendChild(svg);
 }
 
-// ─── Sentiment Bar Chart ───
-// Labels on left (multi-line wrapped), bars on right
+// ─── Sentiment Bar Chart (HTML labels + CSS bars) ───
 function drawSentimentChart(containerId, distribution, currentIdx) {
   const container = document.getElementById(containerId);
   if (!container) return;
-  container.innerHTML = '';
-
-  const labelW = 220;
-  const barMaxW = 150;
-  const rowH = 48;
-  const W = labelW + barMaxW + 70;
-  const H = distribution.length * rowH + 8;
   const maxCount = Math.max(...distribution.map(d => d.count), 1);
-  const maxCharsPerLine = 16;
 
-  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "display:block" });
-
-  distribution.forEach((d, i) => {
-    const y = i * rowH + 6;
-    const barW = Math.max(2, (d.count / maxCount) * barMaxW);
+  container.innerHTML = distribution.map((d, i) => {
     const isUser = i === currentIdx;
+    const barPct = Math.max(2, (d.count / maxCount) * 100);
+    const labelColor = isUser ? '#818cf8' : '#9ca3b8';
+    const barBg = isUser ? 'rgba(99,102,241,0.45)' : 'rgba(156,163,184,0.18)';
+    const barBorder = isUser ? '2px solid #818cf8' : '2px solid transparent';
+    const countColor = isUser ? '#e4e7ef' : '#9ca3b8';
+    const fontWeight = isUser ? '600' : '400';
 
-    // Wrap label into lines
-    const lines = [];
-    let remaining = d.label;
-    while (remaining.length > maxCharsPerLine) {
-      // Find a good break point
-      let breakAt = remaining.lastIndexOf('—', maxCharsPerLine);
-      if (breakAt < 4) breakAt = remaining.lastIndexOf('，', maxCharsPerLine);
-      if (breakAt < 4) breakAt = remaining.lastIndexOf(' ', maxCharsPerLine);
-      if (breakAt < 4) breakAt = maxCharsPerLine;
-      lines.push(remaining.slice(0, breakAt).trim());
-      remaining = remaining.slice(breakAt).replace(/^[—\s]/, '').trim();
-    }
-    if (remaining) lines.push(remaining);
-
-    // Multi-line label (right-aligned to labelW - 12)
-    const lineH = 15;
-    const totalTextH = lines.length * lineH;
-    const textStartY = y + (rowH - totalTextH) / 2 + 11;
-
-    const textEl = svgEl("text", {
-      x: labelW - 12, y: textStartY,
-      fill: isUser ? "#818cf8" : "#9ca3b8",
-      "font-family": "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif",
-      "font-size": "12", "text-anchor": "end",
-      "font-weight": isUser ? "600" : "400"
-    });
-    lines.forEach((line, li) => {
-      const tspan = svgEl("tspan", { x: labelW - 12, dy: li === 0 ? "0" : lineH + "" });
-      tspan.textContent = line;
-      textEl.appendChild(tspan);
-    });
-    svg.appendChild(textEl);
-
-    // Bar (vertically centered in row)
-    const barY = y + (rowH - 24) / 2;
-    svg.appendChild(svgEl("rect", {
-      x: labelW, y: barY, width: barW, height: 24, rx: 4,
-      fill: isUser ? "rgba(99,102,241,0.45)" : "rgba(156,163,184,0.18)",
-      stroke: isUser ? "#818cf8" : "none", "stroke-width": isUser ? "2" : "0"
-    }));
-
-    // Count
-    svg.appendChild(svgText(labelW + barW + 8, barY + 16, `${d.count} (${d.pct}%)`, {
-      "text-anchor": "start", "font-size": "12",
-      fill: isUser ? "#e4e7ef" : "#9ca3b8"
-    }));
-  });
-
-  container.appendChild(svg);
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="flex:0 0 45%;font-size:13px;color:${labelColor};font-weight:${fontWeight};text-align:right;line-height:1.4">${d.label}</div>
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <div style="width:${barPct}%;height:24px;background:${barBg};border:${barBorder};border-radius:4px;min-width:4px"></div>
+        <span style="font-size:12px;color:${countColor};white-space:nowrap">${d.count} (${d.pct}%)</span>
+      </div>
+    </div>`;
+  }).join('');
 }
