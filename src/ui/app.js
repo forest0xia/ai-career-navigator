@@ -1,19 +1,60 @@
-// App engine — navigation, scoring, multi-select, tool rankings, feedback
+// App engine — i18n-aware navigation, scoring, multi-select, results, feedback
 
 let currentQ = 0;
-let answers = {};       // questionId -> optionIndex (single) or Set of indices (multi)
+let answers = {};
 let userTags = [];
 let filteredQuestions = [];
 let currentSessionId = null;
 
 function $(id) { return document.getElementById(id); }
+function t(key) { return I18N.t(key); }
+function isCN() { return I18N.lang() === "cn"; }
+
+// Get localized question text
+function qText(q, field) {
+  if (isCN() && QUESTIONS_CN[q.id] && QUESTIONS_CN[q.id][field]) return QUESTIONS_CN[q.id][field];
+  return q[field] || '';
+}
+function qOption(q, idx) {
+  if (isCN() && QUESTIONS_CN[q.id] && QUESTIONS_CN[q.id].options && QUESTIONS_CN[q.id].options[idx] !== undefined)
+    return QUESTIONS_CN[q.id].options[idx];
+  return q.options[idx]?.text || '';
+}
+function sectionName(key) {
+  if (isCN() && SECTIONS_CN[key]) return SECTIONS_CN[key];
+  return SECTIONS[key] || key;
+}
+function archName(key) {
+  if (isCN() && ARCHETYPES_CN[key]) return ARCHETYPES_CN[key].emoji + ' ' + ARCHETYPES_CN[key].name;
+  const a = ARCHETYPES[key];
+  return a ? a.emoji + ' ' + a.name : key;
+}
+function archDesc(key) {
+  if (isCN() && ARCHETYPES_CN[key]) return ARCHETYPES_CN[key].desc;
+  return ARCHETYPES[key]?.desc || '';
+}
+function dimLabel(key) { return t('dim_' + key); }
+function exposureLabel(pct) {
+  if (isCN()) {
+    if (pct >= 75) return { label: EXPOSURE_LABELS_CN.high.label, color: "var(--warning)", detail: EXPOSURE_LABELS_CN.high.detail };
+    if (pct >= 45) return { label: EXPOSURE_LABELS_CN.moderate.label, color: "var(--accent2)", detail: EXPOSURE_LABELS_CN.moderate.detail };
+    return { label: EXPOSURE_LABELS_CN.low.label, color: "var(--success)", detail: EXPOSURE_LABELS_CN.low.detail };
+  }
+  return getExposureLabel(pct);
+}
+function readinessLabel(pct) {
+  if (isCN()) {
+    if (pct >= 70) return { label: READINESS_LABELS_CN.strong, color: "var(--success)" };
+    if (pct >= 40) return { label: READINESS_LABELS_CN.building, color: "var(--accent2)" };
+    return { label: READINESS_LABELS_CN.early, color: "var(--warning)" };
+  }
+  return getReadinessLabel(pct);
+}
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
-  $(id).style.animation = 'none';
-  $(id).offsetHeight;
-  $(id).style.animation = '';
+  $(id).style.animation = 'none'; $(id).offsetHeight; $(id).style.animation = '';
 }
 
 function updateProgress() {
@@ -29,6 +70,29 @@ function getFilteredQuestions() {
   });
 }
 
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  I18N.init();
+  // Highlight active lang button
+  $('langEn').classList.toggle('active', I18N.lang() === 'en');
+  $('langCn').classList.toggle('active', I18N.lang() === 'cn');
+  // Translate static welcome screen
+  $('logoText').textContent = t('logo');
+  renderWelcome();
+});
+
+function renderWelcome() {
+  document.querySelector('#welcome h1').textContent = t('welcome_title');
+  document.querySelector('#welcome .subtitle').textContent = t('welcome_subtitle');
+  const features = document.querySelectorAll('#welcome .feature');
+  if (features[0]) { features[0].querySelector('strong').textContent = t('feature_analysis'); features[0].childNodes[features[0].childNodes.length - 1].textContent = t('feature_analysis_desc'); }
+  if (features[1]) { features[1].querySelector('strong').textContent = t('feature_exposure'); features[1].childNodes[features[1].childNodes.length - 1].textContent = t('feature_exposure_desc'); }
+  if (features[2]) { features[2].querySelector('strong').textContent = t('feature_plan'); features[2].childNodes[features[2].childNodes.length - 1].textContent = t('feature_plan_desc'); }
+  document.querySelector('#welcome .data-note').innerHTML = `<strong>${t('research_note')}</strong> ${t('research_sources')}`;
+  document.querySelector('#welcome .time-note').textContent = t('time_note');
+  document.querySelector('#welcome .btn').textContent = t('btn_begin');
+}
+
 function startAssessment() {
   userTags = []; answers = {}; currentQ = 0;
   filteredQuestions = getFilteredQuestions();
@@ -41,10 +105,11 @@ function renderQuestion() {
   const q = filteredQuestions[currentQ];
   const isMulti = q.type === "multi";
 
-  $('sectionLabel').textContent = SECTIONS[q.section];
-  $('insightBox').innerHTML = q.insight || '';
-  $('questionTitle').textContent = q.title;
-  $('questionDesc').textContent = q.desc || '';
+  $('sectionLabel').textContent = sectionName(q.section);
+  // Insights stay in English (they contain citations) — hide in CN if no translation
+  $('insightBox').innerHTML = (!isCN() && q.insight) ? q.insight : '';
+  $('questionTitle').textContent = qText(q, 'title');
+  $('questionDesc').textContent = qText(q, 'desc');
 
   const optionsEl = $('options');
   optionsEl.innerHTML = '';
@@ -54,28 +119,33 @@ function renderQuestion() {
     return o.showIf.some(tag => userTags.includes(tag));
   });
 
+  // Build index map: visible index -> original index
+  const visibleIndices = [];
+  q.options.forEach((o, origIdx) => {
+    if (!o.showIf || o.showIf.some(tag => userTags.includes(tag))) visibleIndices.push(origIdx);
+  });
+
   if (isMulti) {
-    // Initialize multi-select set
-    if (!answers[q.id] || !(answers[q.id] instanceof Set)) {
-      answers[q.id] = new Set();
-    }
-    visibleOptions.forEach((opt, i) => {
+    if (!answers[q.id] || !(answers[q.id] instanceof Set)) answers[q.id] = new Set();
+    visibleIndices.forEach((origIdx, vi) => {
       const btn = document.createElement('button');
-      btn.className = 'option' + (answers[q.id].has(i) ? ' selected' : '');
-      btn.textContent = opt.text;
-      btn.onclick = () => toggleMulti(q.id, i, btn, visibleOptions);
+      btn.className = 'option' + (answers[q.id].has(origIdx) ? ' selected' : '');
+      // Tools keep English names (they're proper nouns)
+      btn.textContent = q.id === 'ai_tools' ? q.options[origIdx].text : qOption(q, origIdx);
+      btn.onclick = () => toggleMulti(q.id, origIdx, btn, q.options);
       optionsEl.appendChild(btn);
     });
   } else {
-    visibleOptions.forEach((opt, i) => {
+    visibleIndices.forEach((origIdx, vi) => {
       const btn = document.createElement('button');
-      btn.className = 'option' + (answers[q.id] === i ? ' selected' : '');
-      btn.textContent = opt.text;
-      btn.onclick = () => selectOption(q.id, i, opt, btn);
+      btn.className = 'option' + (answers[q.id] === origIdx ? ' selected' : '');
+      btn.textContent = qOption(q, origIdx);
+      btn.onclick = () => selectOption(q.id, origIdx, q.options[origIdx], btn);
       optionsEl.appendChild(btn);
     });
   }
 
+  $('backBtn').textContent = t('btn_back');
   $('backBtn').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
   updateNextButton(q);
   updateProgress();
@@ -83,69 +153,54 @@ function renderQuestion() {
 
 function updateNextButton(q) {
   const isMulti = q.type === "multi";
-  const hasAnswer = isMulti
-    ? (answers[q.id] instanceof Set && answers[q.id].size > 0)
-    : (answers[q.id] !== undefined);
+  const hasAnswer = isMulti ? (answers[q.id] instanceof Set && answers[q.id].size > 0) : (answers[q.id] !== undefined);
   $('nextBtn').disabled = !hasAnswer;
-  $('nextBtn').textContent = currentQ === filteredQuestions.length - 1 ? 'See Results →' : 'Next →';
+  $('nextBtn').textContent = currentQ === filteredQuestions.length - 1 ? t('btn_results') : t('btn_next');
 }
 
 function selectOption(qId, idx, opt, btn) {
   answers[qId] = idx;
-  if (qId === 'domain' && opt.tags) {
-    userTags = [...opt.tags];
-    filteredQuestions = getFilteredQuestions();
-  }
+  if (qId === 'domain' && opt.tags) { userTags = [...opt.tags]; filteredQuestions = getFilteredQuestions(); }
   document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   $('nextBtn').disabled = false;
 }
 
-function toggleMulti(qId, idx, btn, visibleOptions) {
+function toggleMulti(qId, idx, btn, allOptions) {
   const set = answers[qId];
-  // "None of the above" logic
-  const isNone = visibleOptions[idx].text === "None of the above";
-  if (isNone) {
-    set.clear();
-    set.add(idx);
-  } else {
-    // Remove "none" if selecting something else
-    visibleOptions.forEach((o, i) => { if (o.text === "None of the above") set.delete(i); });
+  const isNone = allOptions[idx].text === "None of the above";
+  if (isNone) { set.clear(); set.add(idx); }
+  else {
+    allOptions.forEach((o, i) => { if (o.text === "None of the above") set.delete(i); });
     if (set.has(idx)) set.delete(idx); else set.add(idx);
   }
-  // Update all button states
   document.querySelectorAll('.option').forEach((b, i) => {
-    b.classList.toggle('selected', set.has(i));
+    // Rebuild visible index mapping
+    const q = filteredQuestions[currentQ];
+    const visibleIndices = [];
+    q.options.forEach((o, origIdx) => {
+      if (!o.showIf || o.showIf.some(tag => userTags.includes(tag))) visibleIndices.push(origIdx);
+    });
+    b.classList.toggle('selected', set.has(visibleIndices[i]));
   });
   updateNextButton(filteredQuestions[currentQ]);
 }
 
 function goNext() {
-  if (currentQ < filteredQuestions.length - 1) {
-    currentQ++;
-    showScreen('questionScreen');
-    renderQuestion();
-  } else {
-    showResults();
-  }
+  if (currentQ < filteredQuestions.length - 1) { currentQ++; showScreen('questionScreen'); renderQuestion(); }
+  else showResults();
 }
-
-function goBack() {
-  if (currentQ > 0) { currentQ--; renderQuestion(); }
-}
+function goBack() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
 
 function computeScores() {
   const scores = { adaptability: 0, technical: 0, creative: 0, leadership: 0, aiReadiness: 0, humanEdge: 0 };
   for (const q of filteredQuestions) {
-    if (q.type === "multi") continue; // multi-select doesn't contribute to dimension scores
+    if (q.type === "multi") continue;
     const idx = answers[q.id];
     if (idx === undefined) continue;
-    const visibleOptions = q.options.filter(o => !o.showIf || o.showIf.some(t => userTags.includes(t)));
-    const opt = visibleOptions[idx];
+    const opt = q.options[idx];
     if (!opt || !opt.scores) continue;
-    for (const [dim, val] of Object.entries(opt.scores)) {
-      scores[dim] = (scores[dim] || 0) + val;
-    }
+    for (const [dim, val] of Object.entries(opt.scores)) scores[dim] = (scores[dim] || 0) + val;
   }
   return scores;
 }
@@ -158,8 +213,8 @@ function getToolSelections() {
 
 function renderActionItem(a, i) {
   let html = `<div class="action-item"><strong>${i + 1}.</strong> ${a.what}`;
-  html += `<div class="how">📋 <strong>How:</strong> ${a.how}`;
-  if (a.link) html += ` <a href="${a.link}" target="_blank" rel="noopener">→ Resource</a>`;
+  html += `<div class="how">📋 <strong>${t('how_label')}</strong> ${a.how}`;
+  if (a.link) html += ` <a href="${a.link}" target="_blank" rel="noopener">${t('resource_link')}</a>`;
   html += `</div></div>`;
   return html;
 }
@@ -168,23 +223,16 @@ function renderToolRankings(toolRankings, userTools) {
   if (!toolRankings || toolRankings.ranked.length === 0) return '';
   const top = toolRankings.ranked.slice(0, 12);
   const maxCount = top[0]?.count || 1;
-
   return `
   <div class="result-section">
-    <h3>🛠️ Most Popular AI Tools Across All Users</h3>
-    <p style="font-size:14px;color:var(--text2);margin-bottom:16px">
-      Based on ${toolRankings.totalUsers} users. Tools you selected are highlighted.
-    </p>
-    ${top.map((t, i) => {
-      const isYours = userTools.includes(t.name);
+    <h3>${t('tools_title')}</h3>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('tools_desc').replace('{n}', toolRankings.totalUsers)}</p>
+    ${top.map((ti, i) => {
+      const isYours = userTools.includes(ti.name);
       const barColor = isYours ? 'var(--accent2)' : 'rgba(156,163,184,0.3)';
       const labelStyle = isYours ? 'color:var(--accent2);font-weight:600' : 'color:var(--text2)';
-      return `
-        <div class="score-label">
-          <span style="${labelStyle}">${i + 1}. ${t.name}${isYours ? ' ✓' : ''}</span>
-          <span style="color:var(--text2)">${t.pct}% (${t.count})</span>
-        </div>
-        <div class="score-bar"><div class="score-fill" style="width:${(t.count / maxCount) * 100}%;background:${barColor}"></div></div>`;
+      return `<div class="score-label"><span style="${labelStyle}">${i + 1}. ${ti.name}${isYours ? ' ✓' : ''}</span><span style="color:var(--text2)">${ti.pct}% (${ti.count})</span></div>
+        <div class="score-bar"><div class="score-fill" style="width:${(ti.count / maxCount) * 100}%;background:${barColor}"></div></div>`;
     }).join('')}
   </div>`;
 }
@@ -196,161 +244,106 @@ function showResults() {
   const arch = ARCHETYPES[archetypeKey];
   const exposure = computeAIExposure(scores, userTags);
   const readiness = computeReadiness(scores);
-  const expInfo = getExposureLabel(exposure);
-  const readInfo = getReadinessLabel(readiness);
+  const expInfo = exposureLabel(exposure);
+  const readInfo = readinessLabel(readiness);
   const userTools = getToolSelections();
 
-  // Record to analytics
   currentSessionId = Analytics.recordSession(answers, userTags, scores, archetypeKey, exposure, readiness, userTools);
-
   const community = Analytics.getCommunityStats();
   const toolRankings = Analytics.getToolRankings();
 
   const dims = [
-    { key: 'adaptability', label: 'Adaptability', icon: '🔄' },
-    { key: 'technical', label: 'Technical Depth', icon: '⚙️' },
-    { key: 'creative', label: 'Creative Thinking', icon: '💡' },
-    { key: 'leadership', label: 'Leadership', icon: '🧭' },
-    { key: 'aiReadiness', label: 'AI Readiness', icon: '🤖' },
-    { key: 'humanEdge', label: 'Human Edge', icon: '💎' }
+    { key: 'adaptability', icon: '🔄' }, { key: 'technical', icon: '⚙️' },
+    { key: 'creative', icon: '💡' }, { key: 'leadership', icon: '🧭' },
+    { key: 'aiReadiness', icon: '🤖' }, { key: 'humanEdge', icon: '💎' }
   ];
-
   const maxDim = Math.max(...Object.values(scores).map(v => Math.abs(v)), 1);
 
-  // Community comparison section
   let communityHTML = '';
   if (community && community.totalSessions > 1) {
-    const archNames = {
-      aiArchitect: "🏗️ AI Architect", aiCollaborator: "🤝 AI Collaborator",
-      humanEdge: "💎 Human Edge", strategicLeader: "🧭 Strategic Leader",
-      creativeInnovator: "🎨 Creative Innovator", careerPivot: "🔄 Career Reinventor"
-    };
-    const topArchetype = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
-
+    const topArch = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
     communityHTML = `
     <div class="result-section">
-      <h3>👥 Community Comparison</h3>
-      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">
-        How your profile compares to ${community.totalSessions} other people who've taken this assessment.
-      </p>
+      <h3>${t('community_title')}</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('community_desc').replace('{n}', community.totalSessions)}</p>
       <div class="chart-container">
         <canvas id="radarChart" class="radar-canvas"></canvas>
         <div class="chart-legend">
-          <span><span class="legend-dot" style="background:#818cf8"></span>You</span>
-          <span><span class="legend-dot" style="background:rgba(156,163,184,0.5)"></span>Community Average</span>
+          <span><span class="legend-dot" style="background:#818cf8"></span>${t('legend_you')}</span>
+          <span><span class="legend-dot" style="background:rgba(156,163,184,0.5)"></span>${t('legend_community')}</span>
         </div>
       </div>
       <div class="community-stats">
-        <div class="stat-card">
-          <div class="stat-value">${community.totalSessions}</div>
-          <div class="stat-label">Total Assessments</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${community.avgExposure}%</div>
-          <div class="stat-label">Avg AI Exposure</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">${community.avgReadiness}%</div>
-          <div class="stat-label">Avg Readiness</div>
-        </div>
+        <div class="stat-card"><div class="stat-value">${community.totalSessions}</div><div class="stat-label">${t('stat_total')}</div></div>
+        <div class="stat-card"><div class="stat-value">${community.avgExposure}%</div><div class="stat-label">${t('stat_exposure')}</div></div>
+        <div class="stat-card"><div class="stat-value">${community.avgReadiness}%</div><div class="stat-label">${t('stat_readiness')}</div></div>
       </div>
       <div style="margin-top:16px">
-        <p style="font-size:13px;color:var(--text2)">
-          <strong style="color:var(--text)">Most common archetype:</strong> ${archNames[topArchetype[0]] || topArchetype[0]}
-          (${Math.round(topArchetype[1] / community.totalSessions * 100)}% of users)
-        </p>
-        <p style="font-size:13px;color:var(--text2);margin-top:4px">
-          <strong style="color:var(--text)">Readiness distribution:</strong>
-          ${community.readinessBuckets.strong} well-positioned ·
-          ${community.readinessBuckets.building} building ·
-          ${community.readinessBuckets.early} early stage
-        </p>
+        <p style="font-size:13px;color:var(--text2)"><strong style="color:var(--text)">${t('common_archetype')}</strong> ${archName(topArch[0])} (${Math.round(topArch[1] / community.totalSessions * 100)}%)</p>
+        <p style="font-size:13px;color:var(--text2);margin-top:4px"><strong style="color:var(--text)">${t('readiness_dist')}</strong> ${community.readinessBuckets.strong} ${t('readiness_strong')} · ${community.readinessBuckets.building} ${t('readiness_building')} · ${community.readinessBuckets.early} ${t('readiness_early')}</p>
       </div>
     </div>`;
   }
 
-  // Your tools section
   let yourToolsHTML = '';
   if (userTools.length > 0 && !userTools.includes("None of the above")) {
+    const advice = userTools.length >= 5 ? t('toolkit_many') : userTools.length >= 3 ? t('toolkit_mid') : t('toolkit_few');
     yourToolsHTML = `
     <div class="result-section">
-      <h3>🧰 Your AI Toolkit</h3>
-      <div>${userTools.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-      <p style="font-size:13px;color:var(--text2);margin-top:12px">
-        You're using ${userTools.length} AI tool${userTools.length > 1 ? 's' : ''}. 
-        ${userTools.length >= 5 ? 'That\'s a strong toolkit — focus on going deeper with your top 2–3 rather than adding more.' :
-          userTools.length >= 3 ? 'Good breadth. Consider mastering 1–2 domain-specific tools to differentiate yourself.' :
-          'Consider expanding your toolkit with domain-specific tools relevant to your field.'}
-      </p>
+      <h3>${t('toolkit_title')}</h3>
+      <div>${userTools.map(ti => `<span class="tag">${ti}</span>`).join('')}</div>
+      <p style="font-size:13px;color:var(--text2);margin-top:12px">${t('using_tools').replace('{n}', userTools.length)} ${advice}</p>
     </div>`;
   }
 
   $('resultsContent').innerHTML = `
     <div class="results-header">
-      <div class="archetype-badge">${arch.emoji} ${arch.name}</div>
-      <h1>Your AI Career Profile</h1>
-      <p class="subtitle" style="max-width:560px;margin:0 auto">${arch.desc}</p>
+      <div class="archetype-badge">${archName(archetypeKey)}</div>
+      <h1>${t('results_title')}</h1>
+      <p class="subtitle" style="max-width:560px;margin:0 auto">${archDesc(archetypeKey)}</p>
     </div>
-
     <div class="result-section">
-      <h3>📊 AI Impact Analysis</h3>
-      <div class="score-label"><span>AI Exposure — ${expInfo.label}</span><span>${exposure}%</span></div>
+      <h3>${t('impact_title')}</h3>
+      <div class="score-label"><span>${t('exposure_label')} — ${expInfo.label}</span><span>${exposure}%</span></div>
       <div class="score-bar"><div class="score-fill" style="width:${exposure}%;background:${expInfo.color}"></div></div>
       <p style="font-size:14px;color:var(--text2);margin:8px 0 16px">${expInfo.detail}</p>
-      <div class="score-label"><span>Your Readiness — ${readInfo.label}</span><span>${readiness}%</span></div>
+      <div class="score-label"><span>${t('readiness_label')} — ${readInfo.label}</span><span>${readiness}%</span></div>
       <div class="score-bar"><div class="score-fill" style="width:${readiness}%;background:${readInfo.color}"></div></div>
     </div>
-
     <div class="result-section">
-      <h3>🧬 Your Strength Profile</h3>
+      <h3>${t('strength_title')}</h3>
       ${dims.map(d => {
         const val = Math.max(0, scores[d.key]);
         const pct = Math.round((val / maxDim) * 100);
-        return `
-          <div class="score-label"><span>${d.icon} ${d.label}</span><span>${val}</span></div>
+        return `<div class="score-label"><span>${d.icon} ${dimLabel(d.key)}</span><span>${val}</span></div>
           <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:var(--accent2)"></div></div>`;
       }).join('')}
     </div>
-
     ${communityHTML}
     ${yourToolsHTML}
     ${renderToolRankings(toolRankings, userTools)}
-
     <div class="result-section">
-      <h3>🎯 Your Action Plan — With Specific How-To Steps</h3>
-      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">Each action includes concrete next steps and resources you can start with this week.</p>
+      <h3>${t('action_title')}</h3>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
       ${arch.actions.map((a, i) => renderActionItem(a, i)).join('')}
     </div>
-
     <div class="result-section">
-      <h3>📚 Skills to Develop</h3>
+      <h3>${t('skills_title')}</h3>
       <div>${arch.skills.map(s => `<span class="tag">${s}</span>`).join('')}</div>
     </div>
-
     <div class="result-section">
-      <h3>💼 Roles to Explore</h3>
+      <h3>${t('roles_title')}</h3>
       <div>${arch.roles.map(r => `<span class="tag">${r}</span>`).join('')}</div>
     </div>
-
     <div class="result-section">
-      <h3>💡 Key Insight</h3>
-      <p style="font-size:15px;color:var(--text2);line-height:1.7">
-        The AI era doesn't have a single "right answer." Your profile suggests you're best positioned as
-        <strong style="color:var(--accent2)">${arch.name}</strong> — but the most important thing is intentionality.
-        The WEF projects 170 million new roles by 2030. People who actively choose their path through the AI transition
-        consistently outperform those who wait and react. Start with action #1 above this week.
-        Small, consistent steps compound into transformative career moves.
-      </p>
-      <p style="font-size:12px;color:var(--text2);margin-top:12px;font-style:italic">
-        Sources: World Economic Forum Future of Jobs Report 2025, Forbes Career Strategy 2026,
-        Deloitte Human Capital Trends 2025, ManpowerGroup Global Talent Shortage Survey 2026.
-      </p>
+      <h3>${t('insight_title')}</h3>
+      <p style="font-size:15px;color:var(--text2);line-height:1.7">${t('insight_text').replace('{archetype}', isCN() ? ARCHETYPES_CN[archetypeKey]?.name : arch.name)}</p>
+      <p style="font-size:12px;color:var(--text2);margin-top:12px;font-style:italic">${t('insight_sources')}</p>
     </div>
-
     <div class="restart-btn">
-      <button class="btn primary" onclick="openFeedback()">📝 Rate This Assessment</button>
-      <button class="btn secondary" onclick="location.reload()">↺ Retake</button>
-      <button class="btn secondary" onclick="exportData()">📥 Export All Data</button>
+      <button class="btn primary" onclick="openFeedback()">${t('btn_feedback')}</button>
+      <button class="btn secondary" onclick="location.reload()">${t('btn_retake')}</button>
+      <button class="btn secondary" onclick="exportData()">${t('btn_export')}</button>
     </div>
   `;
 
@@ -362,16 +355,23 @@ function showResults() {
 
 // Feedback
 const FEEDBACK_DIMS = [
-  { key: "accuracy", label: "Accuracy of your archetype" },
-  { key: "actionability", label: "Actionability of the advice" },
-  { key: "insight", label: "Quality of insights & data" },
-  { key: "overall", label: "Overall usefulness" }
+  { key: "accuracy", tKey: "fb_accuracy" },
+  { key: "actionability", tKey: "fb_actionability" },
+  { key: "insight", tKey: "fb_insight" },
+  { key: "overall", tKey: "fb_overall" }
 ];
 
 function openFeedback() {
+  document.querySelector('#feedbackModal h3').textContent = t('fb_title');
+  document.querySelector('#feedbackModal .modal-desc').textContent = t('fb_desc');
+  document.querySelector('#feedbackModal label').textContent = t('fb_comment');
+  $('feedbackComment').placeholder = t('fb_placeholder');
+  document.querySelector('#feedbackModal .btn.secondary').textContent = t('fb_skip');
+  document.querySelector('#feedbackModal .btn.primary').textContent = t('fb_submit');
+
   $('feedbackGrid').innerHTML = FEEDBACK_DIMS.map(d => `
     <div class="star-row">
-      <span class="dim-label">${d.label}</span>
+      <span class="dim-label">${t(d.tKey)}</span>
       <div class="stars" data-dim="${d.key}">
         ${[1,2,3,4,5].map(n => `<button onclick="rateStar('${d.key}',${n})" data-n="${n}">★</button>`).join('')}
       </div>
@@ -385,9 +385,7 @@ function closeFeedback() { $('feedbackModal').style.display = 'none'; }
 
 function rateStar(dim, n) {
   const stars = document.querySelector(`.stars[data-dim="${dim}"]`);
-  stars.querySelectorAll('button').forEach(btn => {
-    btn.classList.toggle('active', parseInt(btn.dataset.n) <= n);
-  });
+  stars.querySelectorAll('button').forEach(btn => btn.classList.toggle('active', parseInt(btn.dataset.n) <= n));
   stars.dataset.rating = n;
 }
 
@@ -397,9 +395,7 @@ function submitFeedback() {
     const stars = document.querySelector(`.stars[data-dim="${d.key}"]`);
     ratings[d.key] = parseInt(stars.dataset.rating) || null;
   });
-  if (currentSessionId) {
-    Analytics.recordFeedback(currentSessionId, { ratings, comment: $('feedbackComment').value.trim() });
-  }
+  if (currentSessionId) Analytics.recordFeedback(currentSessionId, { ratings, comment: $('feedbackComment').value.trim() });
   closeFeedback();
 }
 

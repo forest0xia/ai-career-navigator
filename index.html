@@ -9,7 +9,11 @@
 <body>
 <div id="app">
   <header>
-    <div class="logo">AI Career Navigator</div>
+    <div class="logo" id="logoText">AI Career Navigator</div>
+    <div class="lang-switch">
+      <button onclick="I18N.setLang('en')" id="langEn">EN</button>
+      <button onclick="I18N.setLang('cn')" id="langCn">中文</button>
+    </div>
     <div class="progress-container" id="progressContainer" style="display:none">
       <div class="progress-bar" id="progressBar"></div>
       <span class="progress-text" id="progressText">0%</span>
@@ -73,6 +77,10 @@
     </div>
   </main>
 </div>
+
+<!-- i18n -->
+<script src="src/i18n/lang.js"></script>
+<script src="src/i18n/cn.js"></script>
 
 <!-- Data -->
 <script src="src/data/questions.js"></script>

@@ -35,6 +35,14 @@ header {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
+.lang-switch { display: flex; gap: 4px; margin-left: 16px; }
+.lang-switch button {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text2); font-size: 12px; font-weight: 600; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
+}
+.lang-switch button:hover { color: var(--text); border-color: var(--accent); }
+.lang-switch button.active { background: var(--accent-glow); color: var(--accent2); border-color: var(--accent); }
+
 .progress-container { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; margin-left: 32px; }
 .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }
 .progress-bar::after {

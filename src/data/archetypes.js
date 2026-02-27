@@ -8,12 +8,12 @@ const ARCHETYPES = {
     actions: [
       {
         what: "Build end-to-end AI projects — not just prompting, but training, fine-tuning, and deploying models",
-        how: 'Start with a weekend project: fine-tune a small open-source model (e.g., Llama or Mistral) on a domain-specific dataset using Hugging Face. Deploy it on a free-tier cloud instance. Document the process as a portfolio piece.',
+        how: 'Start with a weekend project: fine-tune a small open-source model on a domain-specific dataset using a popular model hub. Deploy it on a free-tier cloud instance. Document the process as a portfolio piece.',
         link: "https://huggingface.co/learn"
       },
       {
         what: "Learn MLOps and AI infrastructure (model serving, monitoring, evaluation pipelines)",
-        how: 'Take the free "Machine Learning Engineering for Production (MLOps)" specialization on Coursera by DeepLearning.AI. Apply concepts to your fine-tuning project — add monitoring, A/B testing, and automated retraining.',
+        how: 'Take a free MLOps specialization course online. Apply concepts to a personal project — add monitoring, A/B testing, and automated retraining. Hands-on experience with production ML pipelines is what hiring managers look for.',
         link: "https://www.coursera.org/specializations/machine-learning-engineering-for-production-mlops"
       },
       {
@@ -23,7 +23,7 @@ const ARCHETYPES = {
       },
       {
         what: "Contribute to open-source AI projects to build public credibility",
-        how: 'Find "good first issue" tags on GitHub repos like LangChain, vLLM, or Hugging Face Transformers. Even documentation PRs count. Aim for 1 contribution per month — consistency beats volume.',
+        how: 'Find "good first issue" tags on popular open-source AI repositories. Even documentation PRs count. Aim for 1 contribution per month — consistency beats volume.',
         link: "https://github.com/topics/artificial-intelligence"
       },
       {
@@ -41,7 +41,7 @@ const ARCHETYPES = {
     actions: [
       {
         what: "Become the AI champion in your team — learn tools deeply, then teach others",
-        how: 'Pick the top AI tool for your domain (e.g., GitHub Copilot for dev, Jasper for marketing, Midjourney for design). Spend 2 weeks using it intensively. Then run a 30-minute "lunch and learn" for your team showing 3 specific workflows it improved.'
+        how: 'Pick the top-rated AI tool for your specific domain. Spend 2 weeks using it intensively. Then run a 30-minute "lunch and learn" for your team showing 3 specific workflows it improved.'
       },
       {
         what: "Document AI workflows that save measurable time in your specific domain",
@@ -49,12 +49,12 @@ const ARCHETYPES = {
       },
       {
         what: "Learn prompt engineering patterns specific to your field",
-        how: 'Take Google\'s free "AI Essentials" course (6 hours, certificate included). Then build a personal prompt library organized by task type. Share it with your team as a living document.',
+        how: 'Take a free AI essentials course (many are available, 6–10 hours, with certificates). Then build a personal prompt library organized by task type. Share it with your team as a living document.',
         link: "https://grow.google/certificates/ai-essentials/"
       },
       {
         what: "Experiment with AI agents and automation for the repetitive parts of your workflow",
-        how: 'Start with a no-code tool like Zapier AI or Make.com. Automate one recurring task (e.g., weekly report generation, email triage, data formatting). Expand from there as you see results.'
+        how: 'Start with a no-code automation platform. Automate one recurring task (e.g., weekly report generation, email triage, data formatting). Expand from there as you see results.'
       },
       {
         what: "Build a portfolio of AI-augmented results to demonstrate your value",
@@ -75,7 +75,7 @@ const ARCHETYPES = {
       },
       {
         what: "Build AI literacy focused on limitations — you'll be the quality check",
-        how: 'Take Andrew Ng\'s free "AI For Everyone" course on Coursera (6 hours, no coding required). Focus specifically on understanding where AI fails — hallucinations, bias, context gaps. Your role is to catch what AI misses.',
+        how: 'Take a free introductory AI course designed for non-technical professionals (6 hours, no coding required). Focus specifically on understanding where AI fails — hallucinations, bias, context gaps. Your role is to catch what AI misses.',
         link: "https://www.coursera.org/learn/ai-for-everyone"
       },
       {
@@ -133,7 +133,7 @@ const ARCHETYPES = {
     actions: [
       {
         what: "Master AI creative tools in your specific medium",
-        how: 'Commit to one tool for 30 days: Midjourney/DALL-E for visual, Claude/GPT for writing, Runway for video, Suno for audio. Create one piece daily. By day 30, you\'ll have a portfolio and deep tool fluency that most creatives lack.'
+        how: 'Commit to one AI creative tool for 30 days — pick the best one for your medium (image, text, video, or audio). Create one piece daily. By day 30, you\'ll have a portfolio and deep tool fluency that most creatives lack.'
       },
       {
         what: "Develop a \"human + AI\" creative workflow that multiplies your output",
@@ -145,7 +145,7 @@ const ARCHETYPES = {
       },
       {
         what: "Explore new creative formats enabled by AI (interactive, generative, personalized)",
-        how: 'Build one experimental project: a generative art piece, an interactive story, or a personalized content experience. Use free tools (p5.js + AI, Twine + GPT API). Novel formats attract attention and demonstrate forward thinking.'
+        how: 'Build one experimental project: a generative art piece, an interactive story, or a personalized content experience. Use free creative coding tools combined with AI APIs. Novel formats attract attention and demonstrate forward thinking.'
       },
       {
         what: "Build a portfolio explicitly showcasing AI-augmented creative work",
@@ -162,7 +162,7 @@ const ARCHETYPES = {
     actions: [
       {
         what: "Take a structured AI foundations course to build credible baseline knowledge",
-        how: 'Start with Google\'s free "AI Essentials" certificate (self-paced, ~10 hours). Then take Andrew Ng\'s "AI For Everyone" on Coursera. These two give you vocabulary, concepts, and a certificate — enough to speak credibly about AI in interviews.',
+        how: 'Start with a free AI foundations certificate (self-paced, ~10 hours), then take an introductory AI course for non-technical learners. These two give you vocabulary, concepts, and a certificate — enough to speak credibly about AI in interviews.',
         link: "https://grow.google/certificates/ai-essentials/"
       },
       {
