@@ -100,9 +100,14 @@ function renderWelcome() {
   document.querySelector('#welcome h1').textContent = t('welcome_title');
   document.querySelector('#welcome .subtitle').textContent = t('welcome_subtitle');
   const features = document.querySelectorAll('#welcome .feature');
-  if (features[0]) { features[0].querySelector('strong').textContent = t('feature_analysis'); features[0].childNodes[features[0].childNodes.length - 1].textContent = t('feature_analysis_desc'); }
-  if (features[1]) { features[1].querySelector('strong').textContent = t('feature_exposure'); features[1].childNodes[features[1].childNodes.length - 1].textContent = t('feature_exposure_desc'); }
-  if (features[2]) { features[2].querySelector('strong').textContent = t('feature_plan'); features[2].childNodes[features[2].childNodes.length - 1].textContent = t('feature_plan_desc'); }
+  const fData = [
+    ['🎯', 'feature_analysis', 'feature_analysis_desc'],
+    ['📊', 'feature_exposure', 'feature_exposure_desc'],
+    ['🗺️', 'feature_plan', 'feature_plan_desc']
+  ];
+  features.forEach((el, i) => {
+    if (fData[i]) el.innerHTML = `<span class="icon">${fData[i][0]}</span><strong>${t(fData[i][1])}</strong><br>${t(fData[i][2])}`;
+  });
   document.querySelector('#welcome .data-note').innerHTML = `<strong>${t('research_note')}</strong> ${t('research_sources')}`;
   document.querySelector('#welcome .time-note').textContent = t('time_note');
   document.querySelector('#welcome .btn').textContent = t('btn_begin');
@@ -121,8 +126,9 @@ function renderQuestion() {
   const isMulti = q.type === "multi";
 
   $('sectionLabel').textContent = sectionName(q.section);
-  // Insights stay in English (they contain citations) — hide in CN if no translation
-  $('insightBox').innerHTML = (!isCN() && q.insight) ? q.insight : '';
+  // Insights: show CN translation if available, otherwise EN, hide if neither
+  const cnInsight = isCN() && QUESTIONS_CN[q.id]?.insight;
+  $('insightBox').innerHTML = cnInsight || (!isCN() && q.insight ? q.insight : '');
   $('questionTitle').textContent = qText(q, 'title');
   $('questionDesc').textContent = qText(q, 'desc');
 
@@ -232,11 +238,7 @@ function renderActionItem(a, i, archetypeKey) {
     what = ARCHETYPES_CN[archetypeKey].actions[i].what;
     how = ARCHETYPES_CN[archetypeKey].actions[i].how;
   }
-  let html = `<div class="action-item"><strong>${i + 1}.</strong> ${what}`;
-  html += `<div class="how">📋 <strong>${t('how_label')}</strong> ${how}`;
-  if (a.link) html += ` <a href="${a.link}" target="_blank" rel="noopener">${t('resource_link')}</a>`;
-  html += `</div></div>`;
-  return html;
+  return `<div class="action-item"><strong>${i + 1}.</strong> ${what}<div class="how">📋 <strong>${t('how_label')}</strong> ${how}</div></div>`;
 }
 
 function renderToolRankings(toolRankings, userTools) {
@@ -374,11 +376,11 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     </div>
     <div class="result-section">
       <h3>${t('skills_title')}</h3>
-      <div>${arch.skills.map(s => `<span class="tag">${s}</span>`).join('')}</div>
+      <div>${(isCN() && ARCHETYPES_CN[archetypeKey]?.skills || arch.skills).map(s => `<span class="tag">${s}</span>`).join('')}</div>
     </div>
     <div class="result-section">
       <h3>${t('roles_title')}</h3>
-      <div>${arch.roles.map(r => `<span class="tag">${r}</span>`).join('')}</div>
+      <div>${(isCN() && ARCHETYPES_CN[archetypeKey]?.roles || arch.roles).map(r => `<span class="tag">${r}</span>`).join('')}</div>
     </div>
     <div class="result-section">
       <h3>${t('insight_title')}</h3>

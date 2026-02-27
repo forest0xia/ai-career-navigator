@@ -31,11 +31,25 @@ const Analytics = {
   _loadLocal() {
     if (this._localSessions) return this._localSessions;
     try { this._localSessions = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {}; } catch { this._localSessions = {}; }
-    // Migrate from old format
+    // Migrate from old storage key
+    try {
+      const old = JSON.parse(localStorage.getItem('ai_career_nav_analytics'));
+      if (old) {
+        const oldSessions = old.sessions || old;
+        const map = Array.isArray(oldSessions) ? {} : oldSessions;
+        if (Array.isArray(oldSessions)) oldSessions.forEach(s => { map[s.id] = s; });
+        Object.assign(this._localSessions, map);
+        localStorage.removeItem('ai_career_nav_analytics');
+        this._saveLocal();
+      }
+    } catch {}
+    // Migrate from array or nested format
     if (Array.isArray(this._localSessions)) {
       const map = {}; this._localSessions.forEach(s => { map[s.id] = s; }); this._localSessions = map;
     }
-    if (this._localSessions.sessions) { this._localSessions = this._localSessions.sessions; }
+    if (this._localSessions.sessions && typeof this._localSessions.sessions === 'object') {
+      this._localSessions = this._localSessions.sessions;
+    }
     return this._localSessions;
   },
   _saveLocal() { localStorage.setItem(LOCAL_KEY, JSON.stringify(this._localSessions)); },
