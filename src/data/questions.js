@@ -74,7 +74,7 @@ const QUESTIONS = [
     id: "strongest_skill",
     section: "skills",
     title: "What is your strongest professional skill?",
-    insight: 'Durable skills — creativity, communication, adaptability, emotional intelligence — are stronger predictors of long-term performance than technical skills tied to specific tools. These "human" capabilities increasingly differentiate top performers as AI handles routine work.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
+    insight: 'McKinsey now operates with 20,000 AI agents alongside 40,000 humans. 30% of companies are planning AI-driven workforce reductions in 2026. Yet despite surging AI demand, communication, collaboration, and adaptability remain the most sought-after human attributes (cited by 39% of employers).<div class="source">— McKinsey, Jan 2026; ManpowerGroup 2026 Talent Shortage Survey</div>',
     options: [
       { text: "Analytical thinking and complex problem-solving", scores: { technical: 2, aiReadiness: 1 } },
       { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 3 } },
@@ -145,7 +145,7 @@ const QUESTIONS = [
     id: "ai_usage",
     section: "ai",
     title: "How do you currently use AI tools in your work?",
-    insight: 'Professionals with AI skills now command an average wage premium of 56%, and job growth in AI-exposed roles has surged 38% in recent years. The gap between casual users and strategic integrators is where the real career advantage lies.<div class="source">— BusinessWorld, "AI Upskilling: Career Insurance For Youth," Feb 2026</div>',
+    insight: 'Sanctioned access to AI tools is now available to roughly 60% of workers, up from under 40% a year ago. Professionals with AI skills command an average wage premium of 56%, and AI job postings are 134% above 2020 levels.<div class="source">— Deloitte State of AI in the Enterprise 2026; BusinessWorld, Feb 2026</div>',
     options: [
       { text: "Daily power user — AI is deeply embedded in my workflow", scores: { aiReadiness: 3, adaptability: 2 } },
       { text: "Regular user — I use AI tools several times a week", scores: { aiReadiness: 2, adaptability: 1 } },
@@ -158,7 +158,7 @@ const QUESTIONS = [
     id: "ai_perception",
     section: "ai",
     title: "Which statement best reflects your view of AI's role in work?",
-    insight: 'Organizations that invest in workforce development alongside AI adoption are 1.8x more likely to report better financial results. The key principle: technology should enhance human capability, not replace human purpose.<div class="source">— Deloitte Human Capital Trends 2025; WEF Workforce Transformation Framework</div>',
+    insight: 'Worker access to AI rose 50% in 2025, and companies with 40%+ AI projects in production are set to double in six months. Organizations investing in workforce development alongside AI are 1.8x more likely to report better financial results.<div class="source">— Deloitte State of AI in the Enterprise 2026; Deloitte Human Capital Trends</div>',
     options: [
       { text: "A powerful collaborator — it amplifies what I'm already good at", scores: { aiReadiness: 3, adaptability: 2 } },
       { text: "A useful tool for specific tasks, but with clear limitations", scores: { aiReadiness: 1, humanEdge: 1 } },
@@ -172,7 +172,7 @@ const QUESTIONS = [
     section: "ai",
     title: "How would you rate your understanding of how AI/ML systems work?",
     showIf: ["tech"],
-    insight: 'AI engineering and implementation is now the #1 most in-demand skill category globally. AI Model & Application Development (20%) and AI Literacy (19%) lead the global ranking of hard-to-find skills.<div class="source">— ManpowerGroup Global Talent Shortage Survey 2026; Forbes, Feb 2026</div>',
+    insight: 'AI skills have surpassed all others to become the most difficult for employers to find globally, with 72% of employers reporting hiring difficulty. AI Model &amp; Application Development (20%) and AI Literacy (19%) now lead the global ranking of hard-to-find skills.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey (39,000 employers, 41 countries)</div>',
     options: [
       { text: "Deep — I build/train models or work with ML infrastructure", scores: { technical: 3, aiReadiness: 3 } },
       { text: "Solid — I understand architectures, can fine-tune, use APIs effectively", scores: { technical: 2, aiReadiness: 2 } },
