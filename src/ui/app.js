@@ -267,7 +267,7 @@ function showResults() {
       <h3>${t('community_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('community_desc').replace('{n}', community.totalSessions)}</p>
       <div class="chart-container">
-        <canvas id="radarChart" class="radar-canvas"></canvas>
+        <div id="radarChart"></div>
         <div class="chart-legend">
           <span><span class="legend-dot" style="background:#818cf8"></span>${t('legend_you')}</span>
           <span><span class="legend-dot" style="background:rgba(156,163,184,0.5)"></span>${t('legend_community')}</span>
@@ -337,7 +337,7 @@ function showResults() {
     </div>
     <div class="result-section">
       <h3>${t('insight_title')}</h3>
-      <p style="font-size:15px;color:var(--text2);line-height:1.7">${t('insight_text').replace('{archetype}', isCN() ? ARCHETYPES_CN[archetypeKey]?.name : arch.name)}</p>
+      <p style="font-size:15px;color:var(--text2);line-height:1.7">${generateInsight(scores, exposure, readiness, archetypeKey, community)}</p>
       <p style="font-size:12px;color:var(--text2);margin-top:12px;font-style:italic">${t('insight_sources')}</p>
     </div>
     <div class="restart-btn">
@@ -376,17 +376,17 @@ function showResults() {
         <div class="chart-grid">
           <div class="chart-box">
             <h4>${t('scatter_exposure_readiness')}</h4>
-            <canvas id="scatterExposure"></canvas>
+            <div id="scatterExposure"></div>
           </div>
           <div class="chart-box">
             <h4>${t('scatter_adoption_adaptability')}</h4>
-            <canvas id="scatterAdoption"></canvas>
+            <div id="scatterAdoption"></div>
           </div>
         </div>
         <div style="margin-top:20px">
           <div class="chart-box">
             <h4>${t('sentiment_title')}</h4>
-            <canvas id="sentimentChart"></canvas>
+            <div id="sentimentChart"></div>
             <div class="chart-note">${t('sentiment_note')}</div>
           </div>
         </div>

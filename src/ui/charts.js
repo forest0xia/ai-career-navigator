@@ -1,200 +1,172 @@
-// Chart renderers (pure canvas, no dependencies)
+// SVG chart renderers — crisp text at any resolution, CJK-friendly
 
-function drawRadarChart(canvasId, userScores, communityAvg) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const W = 400, H = 400, cx = W / 2, cy = H / 2, R = 150;
-  canvas.width = W; canvas.height = H;
+function svgEl(tag, attrs) {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  return el;
+}
+
+function svgText(x, y, text, attrs) {
+  const el = svgEl("text", { x, y, fill: "#9ca3b8", "font-family": "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif", "font-size": "13", "text-anchor": "middle", ...attrs });
+  el.textContent = text;
+  return el;
+}
+
+// ─── Radar Chart ───
+function drawRadarChart(containerId, userScores, communityAvg) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const W = 400, H = 400, cx = W / 2, cy = H / 2, R = 140;
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "max-width:400px;display:block;margin:0 auto" });
 
   const dims = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
-  const labels = isCN()
-    ? ["适应力", "技术", "创造力", "领导力", "AI就绪", "人类优势"]
+  const labels = typeof isCN === 'function' && isCN()
+    ? ["适应力", "技术深度", "创造力", "领导力", "AI 就绪度", "人类优势"]
     : ["Adaptability", "Technical", "Creative", "Leadership", "AI Readiness", "Human Edge"];
   const n = dims.length;
-  const angleStep = (2 * Math.PI) / n;
-  const startAngle = -Math.PI / 2;
+  const step = (2 * Math.PI) / n;
+  const start = -Math.PI / 2;
+  const maxVal = Math.max(...dims.map(d => Math.max(Math.abs(userScores[d] || 0), Math.abs(communityAvg ? communityAvg[d] || 0 : 0))), 1);
 
-  const maxVal = Math.max(
-    ...dims.map(d => Math.max(Math.abs(userScores[d] || 0), Math.abs(communityAvg ? communityAvg[d] || 0 : 0))), 1
-  );
-
-  function getPoint(dimIdx, val) {
-    const angle = startAngle + dimIdx * angleStep;
+  function pt(i, val) {
+    const a = start + i * step;
     const r = (Math.max(0, val) / maxVal) * R;
-    return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   }
 
-  ctx.clearRect(0, 0, W, H);
-  ctx.strokeStyle = "#2e3345"; ctx.lineWidth = 1;
+  // Grid rings
   for (let ring = 1; ring <= 4; ring++) {
-    ctx.beginPath();
     const rr = (ring / 4) * R;
-    for (let i = 0; i <= n; i++) {
-      const angle = startAngle + i * angleStep;
-      const x = cx + rr * Math.cos(angle), y = cy + rr * Math.sin(angle);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.stroke();
+    const pts = Array.from({ length: n }, (_, i) => {
+      const a = start + i * step;
+      return `${cx + rr * Math.cos(a)},${cy + rr * Math.sin(a)}`;
+    }).join(' ');
+    svg.appendChild(svgEl("polygon", { points: pts, fill: "none", stroke: "#2e3345", "stroke-width": "1" }));
   }
+
+  // Axis lines
   for (let i = 0; i < n; i++) {
-    const angle = startAngle + i * angleStep;
-    ctx.beginPath(); ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + R * Math.cos(angle), cy + R * Math.sin(angle)); ctx.stroke();
+    const a = start + i * step;
+    svg.appendChild(svgEl("line", { x1: cx, y1: cy, x2: cx + R * Math.cos(a), y2: cy + R * Math.sin(a), stroke: "#2e3345", "stroke-width": "1" }));
   }
-  ctx.fillStyle = "#9ca3b8"; ctx.font = "12px -apple-system, sans-serif"; ctx.textAlign = "center";
+
+  // Labels
   for (let i = 0; i < n; i++) {
-    const angle = startAngle + i * angleStep;
-    ctx.fillText(labels[i], cx + (R + 24) * Math.cos(angle), cy + (R + 24) * Math.sin(angle) + 4);
+    const a = start + i * step;
+    const lx = cx + (R + 28) * Math.cos(a);
+    const ly = cy + (R + 28) * Math.sin(a);
+    svg.appendChild(svgText(lx, ly + 5, labels[i], { "font-size": "13", "font-weight": "500" }));
   }
 
-  function drawPoly(scores, fillColor, strokeColor) {
-    ctx.beginPath();
-    for (let i = 0; i <= n; i++) {
-      const [x, y] = getPoint(i % n, scores[dims[i % n]] || 0);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    }
-    ctx.closePath();
-    ctx.fillStyle = fillColor; ctx.fill();
-    ctx.strokeStyle = strokeColor; ctx.lineWidth = 2; ctx.stroke();
+  // Polygon helper
+  function addPoly(scores, fillColor, strokeColor) {
+    const pts = dims.map((d, i) => pt(i, scores[d] || 0).join(',')).join(' ');
+    svg.appendChild(svgEl("polygon", { points: pts, fill: fillColor, stroke: strokeColor, "stroke-width": "2" }));
   }
 
-  if (communityAvg) drawPoly(communityAvg, "rgba(156,163,184,0.12)", "rgba(156,163,184,0.4)");
-  drawPoly(userScores, "rgba(99,102,241,0.2)", "#818cf8");
+  if (communityAvg) addPoly(communityAvg, "rgba(156,163,184,0.12)", "rgba(156,163,184,0.4)");
+  addPoly(userScores, "rgba(99,102,241,0.2)", "#818cf8");
 
-  ctx.fillStyle = "#818cf8";
-  for (let i = 0; i < n; i++) {
-    const [x, y] = getPoint(i, userScores[dims[i]] || 0);
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI); ctx.fill();
-  }
-}
-
-// Scatter plot: each session is a dot, current user highlighted
-// xKey/yKey are fields on session objects (e.g. "exposure", "readiness")
-function drawScatterPlot(canvasId, sessions, currentSession, xKey, yKey, xLabel, yLabel) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const W = 400, H = 300;
-  canvas.width = W; canvas.height = H;
-
-  const pad = { top: 20, right: 20, bottom: 40, left: 50 };
-  const plotW = W - pad.left - pad.right;
-  const plotH = H - pad.top - pad.bottom;
-
-  // Axis ranges 0-100 for exposure/readiness
-  const xMin = 0, xMax = 100, yMin = 0, yMax = 100;
-
-  function toX(v) { return pad.left + ((v - xMin) / (xMax - xMin)) * plotW; }
-  function toY(v) { return pad.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH; }
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Grid lines
-  ctx.strokeStyle = "#2e3345"; ctx.lineWidth = 1;
-  for (let v = 0; v <= 100; v += 25) {
-    // Horizontal
-    ctx.beginPath(); ctx.moveTo(pad.left, toY(v)); ctx.lineTo(W - pad.right, toY(v)); ctx.stroke();
-    // Vertical
-    ctx.beginPath(); ctx.moveTo(toX(v), pad.top); ctx.lineTo(toX(v), pad.top + plotH); ctx.stroke();
-  }
-
-  // Axis labels
-  ctx.fillStyle = "#9ca3b8"; ctx.font = "11px -apple-system, sans-serif";
-  ctx.textAlign = "center";
-  for (let v = 0; v <= 100; v += 25) {
-    ctx.fillText(v + '%', toX(v), H - pad.bottom + 16);
-  }
-  ctx.textAlign = "right";
-  for (let v = 0; v <= 100; v += 25) {
-    ctx.fillText(v + '%', pad.left - 8, toY(v) + 4);
-  }
-
-  // Axis titles
-  ctx.fillStyle = "#9ca3b8"; ctx.font = "12px -apple-system, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(xLabel, pad.left + plotW / 2, H - 4);
-  ctx.save();
-  ctx.translate(14, pad.top + plotH / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText(yLabel, 0, 0);
-  ctx.restore();
-
-  // Quadrant labels (subtle)
-  ctx.fillStyle = "rgba(156,163,184,0.25)"; ctx.font = "10px -apple-system, sans-serif";
-  ctx.textAlign = "center";
-  const qLabels = isCN()
-    ? [["低影响 · 高准备", 25, 75], ["高影响 · 高准备", 75, 75], ["低影响 · 低准备", 25, 25], ["高影响 · 低准备", 75, 25]]
-    : [["Low Exposure · High Readiness", 25, 75], ["High Exposure · High Readiness", 75, 75], ["Low Exposure · Low Readiness", 25, 25], ["High Exposure · Low Readiness", 75, 25]];
-  qLabels.forEach(([label, x, y]) => ctx.fillText(label, toX(x), toY(y)));
-
-  // Quadrant divider lines
-  ctx.strokeStyle = "rgba(99,102,241,0.2)"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
-  ctx.beginPath(); ctx.moveTo(toX(50), pad.top); ctx.lineTo(toX(50), pad.top + plotH); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pad.left, toY(50)); ctx.lineTo(W - pad.right, toY(50)); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // All session dots
-  sessions.forEach(s => {
-    const x = toX(s[xKey] || 0);
-    const y = toY(s[yKey] || 0);
-    ctx.beginPath(); ctx.arc(x, y, 4, 0, 2 * Math.PI);
-    ctx.fillStyle = "rgba(156,163,184,0.35)"; ctx.fill();
+  // Dots
+  dims.forEach((d, i) => {
+    const [x, y] = pt(i, userScores[d] || 0);
+    svg.appendChild(svgEl("circle", { cx: x, cy: y, r: "4", fill: "#818cf8" }));
   });
 
-  // Current user dot (larger, highlighted)
-  if (currentSession) {
-    const x = toX(currentSession[xKey] || 0);
-    const y = toY(currentSession[yKey] || 0);
-    // Glow
-    ctx.beginPath(); ctx.arc(x, y, 12, 0, 2 * Math.PI);
-    ctx.fillStyle = "rgba(99,102,241,0.2)"; ctx.fill();
-    // Dot
-    ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = "#818cf8"; ctx.fill();
-    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
-  }
+  container.appendChild(svg);
 }
 
-// Horizontal bar chart for sentiment/perception distribution
-function drawSentimentChart(canvasId, distribution, currentIdx) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const W = 400, H = distribution.length * 40 + 10;
-  canvas.width = W; canvas.height = H;
+// ─── Scatter Plot ───
+function drawScatterPlot(containerId, sessions, currentSession, xKey, yKey, xLabel, yLabel) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
 
+  const W = 420, H = 320;
+  const pad = { top: 20, right: 20, bottom: 48, left: 56 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "display:block" });
+
+  function toX(v) { return pad.left + (v / 100) * plotW; }
+  function toY(v) { return pad.top + plotH - (v / 100) * plotH; }
+
+  // Grid
+  for (let v = 0; v <= 100; v += 25) {
+    svg.appendChild(svgEl("line", { x1: pad.left, y1: toY(v), x2: W - pad.right, y2: toY(v), stroke: "#2e3345", "stroke-width": "1" }));
+    svg.appendChild(svgEl("line", { x1: toX(v), y1: pad.top, x2: toX(v), y2: pad.top + plotH, stroke: "#2e3345", "stroke-width": "1" }));
+    svg.appendChild(svgText(toX(v), H - pad.bottom + 18, v + '%', { "font-size": "12" }));
+    svg.appendChild(svgText(pad.left - 10, toY(v) + 4, v + '%', { "font-size": "12", "text-anchor": "end" }));
+  }
+
+  // Quadrant dividers
+  svg.appendChild(svgEl("line", { x1: toX(50), y1: pad.top, x2: toX(50), y2: pad.top + plotH, stroke: "rgba(99,102,241,0.2)", "stroke-width": "1", "stroke-dasharray": "4,4" }));
+  svg.appendChild(svgEl("line", { x1: pad.left, y1: toY(50), x2: W - pad.right, y2: toY(50), stroke: "rgba(99,102,241,0.2)", "stroke-width": "1", "stroke-dasharray": "4,4" }));
+
+  // Axis labels
+  svg.appendChild(svgText(pad.left + plotW / 2, H - 4, xLabel, { "font-size": "13", "font-weight": "500" }));
+  const yLbl = svgText(0, 0, yLabel, { "font-size": "13", "font-weight": "500" });
+  yLbl.setAttribute("transform", `translate(14,${pad.top + plotH / 2}) rotate(-90)`);
+  svg.appendChild(yLbl);
+
+  // Session dots
+  sessions.forEach(s => {
+    svg.appendChild(svgEl("circle", { cx: toX(s[xKey] || 0), cy: toY(s[yKey] || 0), r: "4", fill: "rgba(156,163,184,0.35)" }));
+  });
+
+  // Current user
+  if (currentSession) {
+    const x = toX(currentSession[xKey] || 0), y = toY(currentSession[yKey] || 0);
+    svg.appendChild(svgEl("circle", { cx: x, cy: y, r: "14", fill: "rgba(99,102,241,0.15)" }));
+    svg.appendChild(svgEl("circle", { cx: x, cy: y, r: "7", fill: "#818cf8", stroke: "#fff", "stroke-width": "2" }));
+  }
+
+  container.appendChild(svg);
+}
+
+// ─── Sentiment Bar Chart ───
+function drawSentimentChart(containerId, distribution, currentIdx) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const rowH = 44;
+  const labelW = 200;
+  const barMaxW = 180;
+  const W = labelW + barMaxW + 80;
+  const H = distribution.length * rowH + 8;
   const maxCount = Math.max(...distribution.map(d => d.count), 1);
-  const barMaxW = W - 160;
 
-  ctx.clearRect(0, 0, W, H);
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "display:block" });
 
   distribution.forEach((d, i) => {
-    const y = i * 40 + 8;
-    const barW = (d.count / maxCount) * barMaxW;
+    const y = i * rowH + 8;
+    const barW = Math.max(2, (d.count / maxCount) * barMaxW);
     const isUser = i === currentIdx;
 
     // Bar
-    ctx.fillStyle = isUser ? "rgba(99,102,241,0.5)" : "rgba(156,163,184,0.2)";
-    ctx.beginPath();
-    ctx.roundRect(150, y, barW, 24, 4);
-    ctx.fill();
-
-    if (isUser) {
-      ctx.strokeStyle = "#818cf8"; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.roundRect(150, y, barW, 24, 4); ctx.stroke();
-    }
+    svg.appendChild(svgEl("rect", {
+      x: labelW, y: y, width: barW, height: 28, rx: 4,
+      fill: isUser ? "rgba(99,102,241,0.45)" : "rgba(156,163,184,0.18)",
+      stroke: isUser ? "#818cf8" : "none", "stroke-width": isUser ? "2" : "0"
+    }));
 
     // Label
-    ctx.fillStyle = isUser ? "#818cf8" : "#9ca3b8";
-    ctx.font = (isUser ? "bold " : "") + "11px -apple-system, sans-serif";
-    ctx.textAlign = "right";
-    ctx.fillText(d.label, 142, y + 16);
+    const label = svgText(labelW - 10, y + 18, d.label, {
+      "text-anchor": "end", "font-size": "13",
+      fill: isUser ? "#818cf8" : "#9ca3b8",
+      "font-weight": isUser ? "600" : "400"
+    });
+    svg.appendChild(label);
 
     // Count
-    ctx.fillStyle = isUser ? "#e4e7ef" : "#9ca3b8";
-    ctx.font = "11px -apple-system, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(`${d.count} (${d.pct}%)`, 150 + barW + 6, y + 16);
+    svg.appendChild(svgText(labelW + barW + 8, y + 18, `${d.count} (${d.pct}%)`, {
+      "text-anchor": "start", "font-size": "12",
+      fill: isUser ? "#e4e7ef" : "#9ca3b8"
+    }));
   });
+
+  container.appendChild(svg);
 }
