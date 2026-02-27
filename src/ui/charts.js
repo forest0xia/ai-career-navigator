@@ -132,37 +132,37 @@ function drawSentimentChart(containerId, distribution, currentIdx) {
   if (!container) return;
   container.innerHTML = '';
 
-  const rowH = 44;
-  const labelW = 200;
-  const barMaxW = 180;
-  const W = labelW + barMaxW + 80;
+  const rowH = 52;
+  const barMaxW = 140;
+  const barLeft = 10;
+  const W = barLeft + barMaxW + 80;
   const H = distribution.length * rowH + 8;
   const maxCount = Math.max(...distribution.map(d => d.count), 1);
 
   const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "display:block" });
 
   distribution.forEach((d, i) => {
-    const y = i * rowH + 8;
+    const y = i * rowH + 4;
     const barW = Math.max(2, (d.count / maxCount) * barMaxW);
     const isUser = i === currentIdx;
 
-    // Bar
-    svg.appendChild(svgEl("rect", {
-      x: labelW, y: y, width: barW, height: 28, rx: 4,
-      fill: isUser ? "rgba(99,102,241,0.45)" : "rgba(156,163,184,0.18)",
-      stroke: isUser ? "#818cf8" : "none", "stroke-width": isUser ? "2" : "0"
-    }));
-
-    // Label
-    const label = svgText(labelW - 10, y + 18, d.label, {
-      "text-anchor": "end", "font-size": "13",
+    // Label above bar (full width, left-aligned, no truncation)
+    const label = svgText(barLeft, y + 14, d.label, {
+      "text-anchor": "start", "font-size": "13",
       fill: isUser ? "#818cf8" : "#9ca3b8",
       "font-weight": isUser ? "600" : "400"
     });
     svg.appendChild(label);
 
-    // Count
-    svg.appendChild(svgText(labelW + barW + 8, y + 18, `${d.count} (${d.pct}%)`, {
+    // Bar below label
+    svg.appendChild(svgEl("rect", {
+      x: barLeft, y: y + 20, width: barW, height: 22, rx: 4,
+      fill: isUser ? "rgba(99,102,241,0.45)" : "rgba(156,163,184,0.18)",
+      stroke: isUser ? "#818cf8" : "none", "stroke-width": isUser ? "2" : "0"
+    }));
+
+    // Count next to bar
+    svg.appendChild(svgText(barLeft + barW + 8, y + 36, `${d.count} (${d.pct}%)`, {
       "text-anchor": "start", "font-size": "12",
       fill: isUser ? "#e4e7ef" : "#9ca3b8"
     }));

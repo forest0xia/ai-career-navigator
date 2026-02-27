@@ -371,7 +371,7 @@ function showResults() {
         ? QUESTIONS_CN.ai_perception.options.map((text, i) => ({ text, origIdx: i }))
         : perceptionOpts.map((o, i) => ({ text: o.text, origIdx: i }));
       const sentDist = Analytics.getAnswerDistribution('ai_perception', perceptionOpts);
-      const sentData = sentLabels.map((sl, i) => ({ label: sl.text.length > 30 ? sl.text.slice(0, 28) + '…' : sl.text, count: sentDist[i].count, pct: sentDist[i].pct }));
+      const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i].count, pct: sentDist[i].pct }));
       const userPerceptionIdx = answers.ai_perception;
 
       const dashEl = $('dashboardSection');
