@@ -211,9 +211,14 @@ function getToolSelections() {
   return [...answers.ai_tools].map(i => toolQ.options[i]?.text).filter(Boolean);
 }
 
-function renderActionItem(a, i) {
-  let html = `<div class="action-item"><strong>${i + 1}.</strong> ${a.what}`;
-  html += `<div class="how">📋 <strong>${t('how_label')}</strong> ${a.how}`;
+function renderActionItem(a, i, archetypeKey) {
+  let what = a.what, how = a.how;
+  if (isCN() && ARCHETYPES_CN[archetypeKey] && ARCHETYPES_CN[archetypeKey].actions && ARCHETYPES_CN[archetypeKey].actions[i]) {
+    what = ARCHETYPES_CN[archetypeKey].actions[i].what;
+    how = ARCHETYPES_CN[archetypeKey].actions[i].how;
+  }
+  let html = `<div class="action-item"><strong>${i + 1}.</strong> ${what}`;
+  html += `<div class="how">📋 <strong>${t('how_label')}</strong> ${how}`;
   if (a.link) html += ` <a href="${a.link}" target="_blank" rel="noopener">${t('resource_link')}</a>`;
   html += `</div></div>`;
   return html;
@@ -325,7 +330,7 @@ function showResults() {
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
-      ${arch.actions.map((a, i) => renderActionItem(a, i)).join('')}
+      ${arch.actions.map((a, i) => renderActionItem(a, i, archetypeKey)).join('')}
     </div>
     <div class="result-section">
       <h3>${t('skills_title')}</h3>
