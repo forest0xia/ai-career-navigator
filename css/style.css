@@ -176,6 +176,18 @@ h3 { font-size: 18px; font-weight: 600; }
 
 .restart-btn { margin-top: 32px; text-align: center; display: flex; gap: 12px; justify-content: center; }
 
+.share-note {
+  margin-top: 20px; padding: 20px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); font-size: 14px; color: var(--text2); line-height: 1.5;
+}
+.share-note code { background: var(--surface2); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: var(--accent2); user-select: all; }
+.share-url-row { display: flex; gap: 8px; margin-top: 10px; }
+.share-url-row input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 12px; color: var(--text); font-size: 13px; font-family: monospace;
+}
+.share-url-row .btn { padding: 8px 16px; font-size: 13px; white-space: nowrap; }
+
 /* Dashboard charts */
 .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .chart-grid canvas { width: 100%; height: auto; }

@@ -73,11 +73,23 @@ function getFilteredQuestions() {
 // Initialize on load
 window.addEventListener('DOMContentLoaded', () => {
   I18N.init();
-  // Highlight active lang button
   $('langEn').classList.toggle('active', I18N.lang() === 'en');
   $('langCn').classList.toggle('active', I18N.lang() === 'cn');
-  // Translate static welcome screen
   $('logoText').textContent = t('logo');
+
+  // Check for saved session in URL
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('id');
+  if (sessionId) {
+    const saved = Analytics.getSession(sessionId);
+    if (saved) {
+      currentSessionId = sessionId;
+      answers = saved.answers || {};
+      userTags = saved.tags || [];
+      showSavedResults(saved);
+      return;
+    }
+  }
   renderWelcome();
 });
 
@@ -242,18 +254,33 @@ function renderToolRankings(toolRankings, userTools) {
   </div>`;
 }
 
+// Render results from a saved session (URL ?id=UUID)
+function showSavedResults(saved) {
+  renderResultsPage(saved.scores, saved.archetype, saved.exposure, saved.readiness, saved.toolSelections || [], saved.answers);
+}
+
 function showResults() {
   $('progressContainer').style.display = 'none';
   const scores = computeScores();
   const archetypeKey = determineArchetype(scores, userTags);
-  const arch = ARCHETYPES[archetypeKey];
   const exposure = computeAIExposure(scores, userTags);
   const readiness = computeReadiness(scores);
-  const expInfo = exposureLabel(exposure);
-  const readInfo = readinessLabel(readiness);
   const userTools = getToolSelections();
 
   currentSessionId = Analytics.recordSession(answers, userTags, scores, archetypeKey, exposure, readiness, userTools);
+
+  // Push session ID to URL for sharing
+  const url = new URL(window.location);
+  url.searchParams.set('id', currentSessionId);
+  history.replaceState(null, '', url);
+
+  renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, answers);
+}
+
+function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, sessionAnswers) {
+  const arch = ARCHETYPES[archetypeKey];
+  const expInfo = exposureLabel(exposure);
+  const readInfo = readinessLabel(readiness);
   const community = Analytics.getCommunityStats();
   const toolRankings = Analytics.getToolRankings();
 
@@ -357,11 +384,27 @@ function showResults() {
     </div>
     <div class="restart-btn">
       <button class="btn primary" onclick="openFeedback()">${t('btn_feedback')}</button>
-      <button class="btn secondary" onclick="location.reload()">${t('btn_retake')}</button>
+      <button class="btn secondary" onclick="retakeAssessment()">${t('btn_retake')}</button>
+    </div>
+    <div class="share-note" id="shareNote">
+      <p>🔗 ${t('share_note')}</p>
+      <div class="share-url-row">
+        <input type="text" id="shareUrl" readonly value="" onclick="this.select()">
+        <button class="btn secondary" onclick="copyShareUrl()">${t('share_copy')}</button>
+      </div>
+      <p style="font-size:12px;color:var(--text2);margin-top:6px">${t('share_id')}: <code id="shareId"></code></p>
     </div>
   `;
 
   showScreen('results');
+
+  // Populate share URL
+  if (currentSessionId) {
+    const shareUrl = new URL(window.location);
+    shareUrl.searchParams.set('id', currentSessionId);
+    if ($('shareUrl')) $('shareUrl').value = shareUrl.toString();
+    if ($('shareId')) $('shareId').textContent = currentSessionId;
+  }
 
   // Render charts after DOM is ready
   setTimeout(() => {
@@ -382,7 +425,7 @@ function showResults() {
         : perceptionOpts.map((o, i) => ({ text: o.text, origIdx: i }));
       const sentDist = Analytics.getAnswerDistribution('ai_perception', perceptionOpts);
       const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i].count, pct: sentDist[i].pct }));
-      const userPerceptionIdx = answers.ai_perception;
+      const userPerceptionIdx = sessionAnswers.ai_perception;
 
       const dashEl = $('dashboardSection');
       dashEl.innerHTML = `
@@ -428,6 +471,23 @@ function showResults() {
       $('dashboardSection').style.display = 'none';
     }
   }, 100);
+}
+
+function retakeAssessment() {
+  const url = new URL(window.location);
+  url.searchParams.delete('id');
+  window.location = url.toString();
+}
+
+function copyShareUrl() {
+  const input = $('shareUrl');
+  if (!input) return;
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btn = input.nextElementSibling;
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
 }
 
 // Feedback
