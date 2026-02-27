@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Career Navigator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">AI Career Navigator</div>
+    <div class="progress-container" id="progressContainer" style="display:none">
+      <div class="progress-bar" id="progressBar"></div>
+      <span class="progress-text" id="progressText">0%</span>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Welcome Screen -->
+    <section class="screen active" id="welcome">
+      <div class="card welcome-card">
+        <h1>Discover Your Path in the AI Era</h1>
+        <p class="subtitle">A research-backed assessment to help you understand how AI reshapes your career — and concrete steps you can take starting this week.</p>
+        <div class="welcome-features">
+          <div class="feature"><span class="icon">🎯</span><strong>Personalized Analysis</strong><br>Tailored to your role, skills, and goals</div>
+          <div class="feature"><span class="icon">📊</span><strong>AI Exposure Score</strong><br>How AI impacts your specific work</div>
+          <div class="feature"><span class="icon">🗺️</span><strong>Action Plan</strong><br>Concrete how-to steps with resources</div>
+        </div>
+        <div class="data-note">
+          <strong>Built on research from:</strong> World Economic Forum Future of Jobs Report 2025, Forbes Career Strategy, Deloitte Human Capital Trends 2025, and current labor market data.
+        </div>
+        <p class="time-note">⏱ Takes about 5–8 minutes · Your results include community comparison data</p>
+        <button class="btn primary" onclick="startAssessment()">Begin Assessment</button>
+      </div>
+    </section>
+
+    <!-- Question Screen -->
+    <section class="screen" id="questionScreen">
+      <div class="card question-card">
+        <div class="section-label" id="sectionLabel"></div>
+        <div class="insight-box" id="insightBox"></div>
+        <h2 id="questionTitle"></h2>
+        <p class="question-desc" id="questionDesc"></p>
+        <div id="options"></div>
+        <div class="nav-buttons">
+          <button class="btn secondary" id="backBtn" onclick="goBack()">← Back</button>
+          <button class="btn primary" id="nextBtn" onclick="goNext()" disabled>Next →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Screen -->
+    <section class="screen" id="results">
+      <div id="resultsContent"></div>
+    </section>
+
+    <!-- Feedback Modal -->
+    <div class="modal-overlay" id="feedbackModal" style="display:none">
+      <div class="modal">
+        <h3>How useful was this assessment?</h3>
+        <p class="modal-desc">Your feedback helps us improve. Rate each dimension:</p>
+        <div class="feedback-grid" id="feedbackGrid"></div>
+        <div class="feedback-row">
+          <label>Overall comments (optional):</label>
+          <textarea id="feedbackComment" rows="3" placeholder="What was most/least helpful?"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" onclick="closeFeedback()">Skip</button>
+          <button class="btn primary" onclick="submitFeedback()">Submit Feedback</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="questions.js"></script>
+<script src="archetypes.js"></script>
+<script src="analytics.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
