@@ -320,8 +320,8 @@ function showResults() {
       }).join('')}
     </div>
     ${communityHTML}
-    ${yourToolsHTML}
     ${renderToolRankings(toolRankings, userTools)}
+    <div class="result-section" id="dashboardSection"></div>
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
@@ -343,14 +343,76 @@ function showResults() {
     <div class="restart-btn">
       <button class="btn primary" onclick="openFeedback()">${t('btn_feedback')}</button>
       <button class="btn secondary" onclick="location.reload()">${t('btn_retake')}</button>
-      <button class="btn secondary" onclick="exportData()">${t('btn_export')}</button>
     </div>
   `;
 
   showScreen('results');
-  if (community && community.totalSessions > 1) {
-    setTimeout(() => drawRadarChart('radarChart', scores, community.avgScores), 100);
-  }
+
+  // Render charts after DOM is ready
+  setTimeout(() => {
+    if (community && community.totalSessions > 1) {
+      drawRadarChart('radarChart', scores, community.avgScores);
+    }
+
+    // Dashboard: scatter plots + sentiment chart (need 2+ sessions)
+    const allSessions = Analytics.getScatterData();
+    if (allSessions.length > 1) {
+      const currentPt = { exposure, readiness, aiReadiness: scores.aiReadiness || 0, adaptability: scores.adaptability || 0 };
+
+      // Sentiment distribution for ai_perception question
+      const perceptionQ = QUESTIONS.find(q => q.id === 'ai_perception');
+      const perceptionOpts = perceptionQ ? perceptionQ.options : [];
+      const sentLabels = isCN() && QUESTIONS_CN.ai_perception
+        ? QUESTIONS_CN.ai_perception.options.map((text, i) => ({ text, origIdx: i }))
+        : perceptionOpts.map((o, i) => ({ text: o.text, origIdx: i }));
+      const sentDist = Analytics.getAnswerDistribution('ai_perception', perceptionOpts);
+      const sentData = sentLabels.map((sl, i) => ({ label: sl.text.length > 30 ? sl.text.slice(0, 28) + '…' : sl.text, count: sentDist[i].count, pct: sentDist[i].pct }));
+      const userPerceptionIdx = answers.ai_perception;
+
+      const dashEl = $('dashboardSection');
+      dashEl.innerHTML = `
+        <h3>${t('dashboard_title')}</h3>
+        <p style="font-size:14px;color:var(--text2);margin-bottom:20px">${t('dashboard_desc')}</p>
+        <div class="chart-grid">
+          <div class="chart-box">
+            <h4>${t('scatter_exposure_readiness')}</h4>
+            <canvas id="scatterExposure"></canvas>
+          </div>
+          <div class="chart-box">
+            <h4>${t('scatter_adoption_adaptability')}</h4>
+            <canvas id="scatterAdoption"></canvas>
+          </div>
+        </div>
+        <div style="margin-top:20px">
+          <div class="chart-box">
+            <h4>${t('sentiment_title')}</h4>
+            <canvas id="sentimentChart"></canvas>
+            <div class="chart-note">${t('sentiment_note')}</div>
+          </div>
+        </div>
+      `;
+
+      // Normalize AI readiness and adaptability to 0-100 for scatter
+      const maxAI = Math.max(...allSessions.map(s => s.aiReadiness), currentPt.aiReadiness, 1);
+      const maxAdapt = Math.max(...allSessions.map(s => s.adaptability), currentPt.adaptability, 1);
+      const normalizedSessions = allSessions.map(s => ({
+        ...s,
+        aiReadinessNorm: Math.round((s.aiReadiness / maxAI) * 100),
+        adaptabilityNorm: Math.round((s.adaptability / maxAdapt) * 100)
+      }));
+      const normalizedCurrent = {
+        ...currentPt,
+        aiReadinessNorm: Math.round((currentPt.aiReadiness / maxAI) * 100),
+        adaptabilityNorm: Math.round((currentPt.adaptability / maxAdapt) * 100)
+      };
+
+      drawScatterPlot('scatterExposure', allSessions, currentPt, 'exposure', 'readiness', t('scatter_exposure_label'), t('scatter_readiness_label'));
+      drawScatterPlot('scatterAdoption', normalizedSessions, normalizedCurrent, 'aiReadinessNorm', 'adaptabilityNorm', t('scatter_adoption_label'), t('scatter_adaptability_label'));
+      drawSentimentChart('sentimentChart', sentData, userPerceptionIdx);
+    } else {
+      $('dashboardSection').style.display = 'none';
+    }
+  }, 100);
 }
 
 // Feedback
@@ -397,12 +459,4 @@ function submitFeedback() {
   });
   if (currentSessionId) Analytics.recordFeedback(currentSessionId, { ratings, comment: $('feedbackComment').value.trim() });
   closeFeedback();
-}
-
-function exportData() {
-  const blob = new Blob([Analytics.exportData()], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `ai-career-navigator-data-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
 }

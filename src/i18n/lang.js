@@ -107,6 +107,17 @@ const LANGS = {
     how_label: "How:",
     resource_link: "→ Resource",
     using_tools: "You're using {n} AI tool(s).",
+    // Dashboard
+    dashboard_title: "📈 Where You Stand — Community Dashboard",
+    dashboard_desc: "Each dot represents a person who took this assessment. Your position is highlighted.",
+    scatter_exposure_readiness: "AI Exposure vs. Readiness",
+    scatter_exposure_label: "AI Exposure",
+    scatter_readiness_label: "Readiness",
+    scatter_adoption_adaptability: "AI Adoption vs. Adaptability",
+    scatter_adoption_label: "AI Readiness Score",
+    scatter_adaptability_label: "Adaptability Score",
+    sentiment_title: "AI Sentiment Distribution",
+    sentiment_note: "How all users view AI's role in work. Your answer is highlighted.",
   },
 
   cn: {
@@ -178,5 +189,15 @@ const LANGS = {
     how_label: "怎么做：",
     resource_link: "→ 资源",
     using_tools: "你正在使用 {n} 个 AI 工具。",
+    dashboard_title: "📈 你的位置——社区仪表盘",
+    dashboard_desc: "每个点代表一位参与评估的用户。你的位置已高亮显示。",
+    scatter_exposure_readiness: "AI 影响度 vs. 准备度",
+    scatter_exposure_label: "AI 影响度",
+    scatter_readiness_label: "准备度",
+    scatter_adoption_adaptability: "AI 采用度 vs. 适应力",
+    scatter_adoption_label: "AI 就绪分数",
+    scatter_adaptability_label: "适应力分数",
+    sentiment_title: "AI 态度分布",
+    sentiment_note: "所有用户对 AI 在工作中角色的看法。你的回答已高亮。",
   }
 };

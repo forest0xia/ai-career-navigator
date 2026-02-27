@@ -104,5 +104,34 @@ const Analytics = {
   },
 
   exportData() { return JSON.stringify(this._load(), null, 2); },
-  getSessions() { return this._load().sessions; }
+  getSessions() { return this._load().sessions; },
+
+  // Get all sessions as scatter plot data points
+  getScatterData() {
+    return this._load().sessions.map(s => ({
+      exposure: s.exposure, readiness: s.readiness,
+      aiReadiness: s.scores?.aiReadiness || 0,
+      adaptability: s.scores?.adaptability || 0,
+      archetype: s.archetype, id: s.id
+    }));
+  },
+
+  // Get distribution of answers for a specific question across all sessions
+  getAnswerDistribution(questionId, options) {
+    const sessions = this._load().sessions;
+    const counts = new Array(options.length).fill(0);
+    sessions.forEach(s => {
+      const ans = s.answers[questionId];
+      if (ans !== undefined && ans !== null) {
+        if (Array.isArray(ans)) ans.forEach(i => { if (counts[i] !== undefined) counts[i]++; });
+        else if (counts[ans] !== undefined) counts[ans]++;
+      }
+    });
+    const total = sessions.length || 1;
+    return options.map((opt, i) => ({
+      label: typeof opt === 'string' ? opt : (opt.text || ''),
+      count: counts[i],
+      pct: Math.round(counts[i] / total * 100)
+    }));
+  }
 };
