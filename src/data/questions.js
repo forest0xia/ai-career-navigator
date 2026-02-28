@@ -215,6 +215,20 @@ const QUESTIONS = [
 
   // === AI TOOLS (2 questions, including multi-select) ===
   {
+    id: "ai_interest",
+    section: "tools",
+    title: "What interests you most about AI?",
+    insight: 'How you want to engage with AI matters more than your current skill level. Some people want to build AI products, others want to use AI to be better at their existing job, and others want to lead AI adoption in their organization.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    options: [
+      { text: "Building AI-powered products, tools, or automations", scores: { technical: 3, aiReadiness: 2 } },
+      { text: "Using AI to be dramatically better at my current job", scores: { adaptability: 2, aiReadiness: 1 } },
+      { text: "Leading AI adoption and strategy in my organization", scores: { leadership: 3, aiReadiness: 1 } },
+      { text: "Understanding AI's creative possibilities", scores: { creative: 3, aiReadiness: 1 } },
+      { text: "Making sure AI is used responsibly and ethically", scores: { humanEdge: 3 } },
+      { text: "Figuring out how AI changes my career options", scores: { adaptability: 2 } }
+    ]
+  },
+  {
     id: "ai_tools",
     section: "tools",
     type: "multi",

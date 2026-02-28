@@ -397,6 +397,22 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       <h3>${t('roles_title')}</h3>
       <div>${(isCN() && ARCHETYPES_CN[archetypeKey]?.roles || arch.roles).map(r => `<span class="tag">${r}</span>`).join('')}</div>
     </div>
+    ${arch.resources ? `
+    <div class="result-section">
+      <h3>${t('resources_title')}</h3>
+      <div style="margin-bottom:14px">
+        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_people')}</h4>
+        ${arch.resources.people.map(p => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${p}</div>`).join('')}
+      </div>
+      <div style="margin-bottom:14px">
+        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_books')}</h4>
+        ${arch.resources.books.map(b => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${b}</div>`).join('')}
+      </div>
+      <div>
+        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_articles')}</h4>
+        ${arch.resources.articles.map(a => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${a}</div>`).join('')}
+      </div>
+    </div>` : ''}
     <div class="result-section">
       <h3>${t('insight_title')}</h3>
       <p style="font-size:15px;color:var(--text2);line-height:1.7">${generateInsight(scores, exposure, readiness, archetypeKey, community)}</p>

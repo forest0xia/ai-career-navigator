@@ -1,188 +1,118 @@
-// Archetypes with actionable HOW-TO guidance and specific resources
+// Archetypes with practical guidance, resources, and recommended voices
 
 const ARCHETYPES = {
   aiArchitect: {
-    name: "The AI Architect",
+    name: "The AI Builder",
     emoji: "🏗️",
-    desc: "You combine deep technical skills with high AI readiness. You're positioned to build the AI-powered systems that others will use. Your path is about going deeper — mastering AI infrastructure, model deployment, and system design.",
+    desc: "You're technically strong and excited about building with AI — not necessarily building AI itself. You want to create AI-powered products, automate complex workflows, and push the boundaries of what's possible with agents and tools.",
     actions: [
-      {
-        what: "Build end-to-end AI projects — not just prompting, but training, fine-tuning, and deploying models",
-        how: 'Start with a weekend project: fine-tune a small open-source model on a domain-specific dataset using a popular model hub. Deploy it on a free-tier cloud instance. Document the process as a portfolio piece.',
-        link: "https://huggingface.co/learn"
-      },
-      {
-        what: "Learn MLOps and AI infrastructure (model serving, monitoring, evaluation pipelines)",
-        how: 'Take a free MLOps specialization course online. Apply concepts to a personal project — add monitoring, A/B testing, and automated retraining. Hands-on experience with production ML pipelines is what hiring managers look for.',
-        link: "https://www.coursera.org/specializations/machine-learning-engineering-for-production-mlops"
-      },
-      {
-        what: "Develop expertise in AI safety, evaluation, or responsible AI — high-demand niches with less competition",
-        how: 'Study the NIST AI Risk Management Framework. Build an evaluation harness for an LLM (test for hallucinations, bias, safety). This is a rare skill that commands premium compensation.',
-        link: "https://www.nist.gov/artificial-intelligence"
-      },
-      {
-        what: "Contribute to open-source AI projects to build public credibility",
-        how: 'Find "good first issue" tags on popular open-source AI repositories. Even documentation PRs count. Aim for 1 contribution per month — consistency beats volume.',
-        link: "https://github.com/topics/artificial-intelligence"
-      },
-      {
-        what: "Position yourself as the bridge between AI research and production engineering",
-        how: 'Write technical blog posts translating recent AI papers into practical implementations. Post on your personal blog or Medium. Share on LinkedIn and relevant subreddits. This builds thought leadership faster than certifications.'
-      }
+      { what: "Build AI-powered applications and automations that solve real problems", how: "Pick a pain point in your work or life. Build a solution using AI APIs and agent frameworks — a smart assistant, an automated pipeline, a data analysis tool. Ship it to real users, even if it's just your team." },
+      { what: "Master AI agent orchestration — the hottest skill in tech right now", how: "Learn to chain AI calls, connect tools, handle errors, and build reliable multi-step workflows. Build one agent that does something useful end-to-end. This is what companies are hiring for." },
+      { what: "Develop your AI evaluation skills — knowing when AI output is good enough", how: "Build systematic ways to test AI output quality. Create rubrics, test suites, or comparison frameworks. The ability to evaluate AI reliably is rare and extremely valuable." },
+      { what: "Share what you build — visibility compounds faster than skill alone", how: "Write about your projects, demo them publicly, or open-source them. Even short posts about what worked and what didn't attract opportunities. Aim for one share per month." },
+      { what: "Stay current with the AI tool landscape — it changes monthly", how: "Follow AI news sources and try new tools as they launch. Dedicate 1-2 hours per week to experimentation. The best builders are the ones who know what's possible right now." }
     ],
-    skills: ["MLOps & Model Deployment", "AI System Design", "Advanced Prompt Engineering", "AI Safety & Evaluation", "Data Pipeline Architecture", "LLM Application Development"],
-    roles: ["ML Engineer", "AI Platform Engineer", "AI Solutions Architect", "LLM Application Developer", "AI Technical Lead", "AI Safety Engineer"]
+    skills: ["AI Agent Development", "Prompt Engineering & Design", "API Integration & Automation", "AI Output Evaluation", "Product Thinking with AI", "Rapid Prototyping"],
+    roles: ["AI Application Developer", "AI Solutions Engineer", "AI Automation Specialist", "AI Product Builder", "Technical AI Consultant", "AI Agent Developer"],
+    resources: {
+      people: ["Andrej Karpathy (YouTube — AI concepts explained clearly)", "Simon Willison (blog — practical AI tools & agents)", "Swyx (Latent Space podcast — AI engineering)", "Riley Brown (YouTube — AI agents & automation)", "Matt Shumer (X/Twitter — AI product building)"],
+      books: ["Co-Intelligence by Ethan Mollick — how to think alongside AI", "The AI-First Company by Ash Fontana — building with AI practically", "Prompt Engineering Guide (free online) — master the craft of talking to AI"],
+      articles: ["What I Think About When I Think About AI Agents — Simon Willison", "Building Effective Agents — Anthropic's guide to agent design"]
+    }
   },
   aiCollaborator: {
     name: "The AI Collaborator",
     emoji: "🤝",
-    desc: "You have solid adaptability and growing AI readiness. You're not building AI — you're mastering how to work with it. This is the largest and fastest-growing career archetype. Your edge comes from combining domain expertise with AI fluency.",
+    desc: "You're not building AI — you're mastering how to work with it to amplify your existing expertise. This is the largest and fastest-growing career profile. Your edge comes from combining deep domain knowledge with AI fluency.",
     actions: [
-      {
-        what: "Become the AI champion in your team — learn tools deeply, then teach others",
-        how: 'Pick the top-rated AI tool for your specific domain. Spend 2 weeks using it intensively. Then run a 30-minute "lunch and learn" for your team showing 3 specific workflows it improved.'
-      },
-      {
-        what: "Document AI workflows that save measurable time in your specific domain",
-        how: 'Create a simple before/after log: track a task you do weekly, measure time without AI, then with AI. After 4 weeks, write up the results. This becomes both a portfolio piece and an internal case study your manager can share upward.'
-      },
-      {
-        what: "Learn prompt engineering patterns specific to your field",
-        how: 'Take a free AI essentials course (many are available, 6–10 hours, with certificates). Then build a personal prompt library organized by task type. Share it with your team as a living document.',
-        link: "https://grow.google/certificates/ai-essentials/"
-      },
-      {
-        what: "Experiment with AI agents and automation for the repetitive parts of your workflow",
-        how: 'Start with a no-code automation platform. Automate one recurring task (e.g., weekly report generation, email triage, data formatting). Expand from there as you see results.'
-      },
-      {
-        what: "Build a portfolio of AI-augmented results to demonstrate your value",
-        how: 'Keep a running document of "AI wins" — specific examples where AI helped you deliver faster, better, or more creatively. Update it monthly. Use it in performance reviews and interviews.'
-      }
+      { what: "Become the AI go-to person in your team", how: "Pick the best AI tool for your specific work. Use it intensively for 2 weeks. Then show your team 3 workflows it improved. Being the person who helps others adopt AI is a career accelerator." },
+      { what: "Build a personal AI workflow library for your domain", how: "Document your best prompts, templates, and AI-assisted processes. Organize by task type. Share with your team. This becomes your competitive advantage and makes you indispensable." },
+      { what: "Track and quantify your AI-augmented results", how: "Keep a simple log: task, time without AI, time with AI, quality difference. After a month, you'll have concrete data for performance reviews and interviews." },
+      { what: "Automate the repetitive parts of your work", how: "Identify one task you do weekly that's tedious. Use an AI automation tool to handle it. Start simple, expand as you see results. Even saving 2 hours/week compounds to 100+ hours/year." },
+      { what: "Develop your AI judgment — knowing when to trust AI and when not to", how: "Pay attention to where AI helps and where it fails in your domain. Document the patterns. This 'AI taste' is what separates effective users from everyone else." }
     ],
-    skills: ["Prompt Engineering", "AI Workflow Design", "Domain-Specific AI Application", "Change Management", "AI Output Evaluation & Quality Control"],
-    roles: ["AI-Augmented [Your Current Role]", "AI Workflow Specialist", "AI Adoption Lead", "Prompt Engineer", "AI-Powered Consultant"]
+    skills: ["Prompt Engineering", "AI Workflow Design", "Domain-Specific AI Application", "AI Output Quality Judgment", "Change Management & AI Adoption"],
+    roles: ["AI-Enhanced [Your Current Role]", "AI Workflow Specialist", "AI Adoption Champion", "AI-Powered Consultant", "Digital Transformation Lead"],
+    resources: {
+      people: ["Ethan Mollick (Wharton — practical AI for professionals)", "Lenny Rachitsky (Lenny's Podcast — AI in product/business)", "Dan Shipper (Every — AI for knowledge workers)", "Tina Huang (YouTube — AI productivity for professionals)", "Sahil Lavingia (X/Twitter — AI for entrepreneurs)"],
+      books: ["Co-Intelligence by Ethan Mollick — the essential guide to working with AI", "Impromptu by Reid Hoffman — conversations about AI's impact on work", "The Algorithmic Leader by Mike Walsh — leading in an AI world"],
+      articles: ["Why AI Will Save the World — Marc Andreessen (perspective on AI opportunity)", "How to Use AI to Do Stuff — Ethan Mollick's practical guide"]
+    }
   },
   humanEdge: {
     name: "The Human Edge Specialist",
     emoji: "💎",
-    desc: "Your greatest strengths are distinctly human — empathy, relationships, judgment, and nuanced communication. These skills are becoming more valuable, not less, as AI handles routine work. Your path is about doubling down on what makes you irreplaceable while building enough AI literacy to stay effective.",
+    desc: "Your greatest strengths are distinctly human — empathy, relationships, judgment, and nuanced communication. As AI handles routine work, these skills become more valuable, not less. Your path is about doubling down on what makes you irreplaceable while building enough AI literacy to stay effective.",
     actions: [
-      {
-        what: "Deepen expertise in areas requiring trust, ethics, and human judgment",
-        how: 'Identify the 2–3 decisions in your role that require the most nuanced human judgment. Document your decision-making framework for each. This makes your expertise transferable and positions you as the go-to person for complex cases.'
-      },
-      {
-        what: "Build AI literacy focused on limitations — you'll be the quality check",
-        how: 'Take a free introductory AI course designed for non-technical professionals (6 hours, no coding required). Focus specifically on understanding where AI fails — hallucinations, bias, context gaps. Your role is to catch what AI misses.',
-        link: "https://www.coursera.org/learn/ai-for-everyone"
-      },
-      {
-        what: "Position yourself at the human-AI interface: reviewing AI output, handling edge cases, managing exceptions",
-        how: 'Volunteer to be the person who reviews AI-generated content, decisions, or recommendations in your team. Build a checklist of common AI errors in your domain. This "AI quality assurance" role is emerging and high-value.'
-      },
-      {
-        what: "Develop skills in AI ethics, bias detection, and responsible AI governance",
-        how: 'Study your industry\'s emerging AI regulations (EU AI Act, sector-specific guidelines). Take a free course on AI ethics from MIT OpenCourseWare or edX. Position yourself as the person who ensures AI is used responsibly.',
-        link: "https://www.edx.org/learn/artificial-intelligence"
-      },
-      {
-        what: "Build your personal brand around the human skills AI can't replicate",
-        how: 'Write LinkedIn posts sharing real examples of where human judgment outperformed AI in your field. Speak at team meetings or local meetups about the human side of AI adoption. Authentic stories resonate more than credentials.'
-      }
+      { what: "Deepen your expertise in areas that require trust and human judgment", how: "Identify the 2-3 decisions in your role that need the most nuanced judgment. Document your decision-making framework. This makes your expertise visible and transferable." },
+      { what: "Learn AI well enough to know its limits — you'll be the quality check", how: "Take a free introductory AI course (6 hours, no coding). Focus on understanding where AI fails — hallucinations, bias, missing context. Your role is to catch what AI misses." },
+      { what: "Position yourself at the human-AI boundary", how: "Volunteer to review AI-generated content or decisions in your team. Build a checklist of common AI errors in your domain. This 'AI quality assurance' role is emerging and high-value." },
+      { what: "Build your personal brand around human skills", how: "Share real examples of where human judgment mattered more than AI in your field. Speak at team meetings or write about the human side of AI adoption. Authentic stories resonate." },
+      { what: "Don't ignore AI — use it to amplify your human strengths", how: "Use AI for research, drafting, and preparation so you can spend more time on the high-judgment, high-relationship work that only you can do." }
     ],
-    skills: ["Emotional Intelligence", "Ethical Reasoning & AI Governance", "AI Literacy (for oversight)", "Complex Negotiation", "Trust Building & Stakeholder Management"],
-    roles: ["AI Ethics Advisor", "Human-AI Interaction Designer", "Client Relationship Lead", "AI Output Reviewer / Quality Analyst", "Change Management Consultant"]
+    skills: ["Emotional Intelligence", "Ethical Reasoning & AI Oversight", "AI Literacy (for quality control)", "Complex Negotiation & Persuasion", "Trust Building & Relationship Management"],
+    roles: ["AI Ethics Advisor", "Human-AI Interaction Designer", "Client Relationship Lead", "AI Quality Reviewer", "Change Management Consultant"],
+    resources: {
+      people: ["Brené Brown (leadership & human connection)", "Adam Grant (WorkLife podcast — future of work)", "Lex Fridman (podcast — deep conversations on AI & humanity)", "Joanna Maciejewska (X/Twitter — human creativity vs AI)", "Cal Newport (Deep Work — focus in an AI world)"],
+      books: ["Deep Work by Cal Newport — focus as a superpower in the AI age", "Emotional Intelligence 2.0 by Bradberry & Greaves — the skills AI can't replicate", "Human Compatible by Stuart Russell — understanding AI's limits"],
+      articles: ["The Ones Who Walk Away from AI — on choosing the human path", "Why Soft Skills Are the New Hard Skills — LinkedIn Economic Graph"]
+    }
   },
   strategicLeader: {
     name: "The Strategic Leader",
     emoji: "🧭",
-    desc: "You combine leadership instincts with a forward-looking mindset. The AI era needs people who can see the big picture, make decisions under uncertainty, and guide organizations through transformation. Your path is about leading the change, not just adapting to it.",
+    desc: "You combine leadership instincts with a forward-looking mindset. The AI era needs people who can see the big picture, make decisions under uncertainty, and guide teams through transformation. Your path is about leading the change, not just adapting to it.",
     actions: [
-      {
-        what: "Develop an AI strategy for your team or organization — even informally",
-        how: 'Use the WEF\'s 5-pillar framework: Vision → Skills → Technology → Process → Culture. Draft a 1-page AI adoption plan for your team covering each pillar. Share it with your manager. Even an informal plan positions you as a strategic thinker.',
-        link: "https://www.weforum.org/stories/2026/02/workforce-transformation-ai-jobs/"
-      },
-      {
-        what: "Learn to evaluate AI ROI and make build-vs-buy decisions",
-        how: 'For your next project involving AI, create a simple cost-benefit analysis: implementation cost, time saved, quality improvement, risk. Present it to leadership. This financial framing is what gets AI initiatives funded.'
-      },
-      {
-        what: "Build cross-functional AI literacy programs for your teams",
-        how: 'Organize a monthly "AI Hour" where team members demo how they\'re using AI. Rotate presenters. Create a shared Slack channel or doc for AI tips. Start small — even 3 people sharing is enough to build momentum.'
-      },
-      {
-        what: "Study AI governance frameworks and responsible AI principles",
-        how: 'Read the NIST AI Risk Management Framework and your industry\'s specific AI guidelines. Draft a lightweight AI use policy for your team (what\'s OK to put into AI tools, what isn\'t). This proactive governance builds trust.',
-        link: "https://www.nist.gov/artificial-intelligence"
-      },
-      {
-        what: "Network with AI leaders in your industry",
-        how: 'Join 2 AI-focused communities (LinkedIn groups, Discord servers, or local meetups). Attend one AI conference or virtual summit per quarter. Set a goal of 2 meaningful conversations per month with people working on AI in your field.'
-      }
+      { what: "Develop an AI strategy for your team — even informally", how: "Draft a 1-page plan: what AI tools your team should adopt, what skills to build, what to automate first. Share it with your manager. Even an informal plan positions you as a strategic thinker." },
+      { what: "Build AI literacy across your team", how: "Organize a monthly 'AI Hour' where team members demo how they use AI. Rotate presenters. Create a shared channel for AI tips. Start small — even 3 people sharing builds momentum." },
+      { what: "Learn to evaluate AI investments — the ROI conversation", how: "For your next AI-related project, create a simple cost-benefit analysis. Present it to leadership. This financial framing is what gets AI initiatives funded and gets you noticed." },
+      { what: "Study AI governance and responsible AI principles", how: "Read your industry's AI guidelines. Draft a lightweight AI use policy for your team. Proactive governance builds trust and positions you as a thoughtful leader." },
+      { what: "Build your network of AI-savvy leaders", how: "Join 2 AI-focused communities. Attend one AI event per quarter. Have 2 meaningful conversations per month with people working on AI in your field." }
     ],
-    skills: ["AI Strategy & Governance", "Organizational Change Leadership", "AI ROI Evaluation", "Cross-Functional Team Building", "Stakeholder Communication"],
-    roles: ["Head of AI Transformation", "VP/Director of AI Strategy", "Chief AI Officer", "AI Program Manager", "Innovation Lead"]
+    skills: ["AI Strategy & Vision", "Organizational Change Leadership", "AI ROI & Business Case Development", "Cross-Functional Team Building", "AI Governance & Policy"],
+    roles: ["Head of AI Transformation", "AI Strategy Director", "Chief AI Officer", "AI Program Manager", "Innovation Lead"],
+    resources: {
+      people: ["Satya Nadella (Microsoft CEO — AI transformation leadership)", "Andrew Ng (DeepLearning.AI — AI strategy for leaders)", "Cassie Kozyrkov (Google — decision intelligence & AI leadership)", "Amy Webb (futurist — AI trends & strategy)", "Sam Altman (OpenAI — where AI is heading)"],
+      books: ["The AI-Powered Organization by Seth Earley — leading AI adoption", "Competing in the Age of AI by Iansiti & Lakhani — strategy in the AI era", "Team of Teams by McChrystal — adaptive leadership for fast-changing environments"],
+      articles: ["AI Strategy for Leaders — Harvard Business Review collection", "The CEO's Guide to AI — McKinsey quarterly"]
+    }
   },
   creativeInnovator: {
     name: "The Creative Innovator",
     emoji: "🎨",
-    desc: "You bring creative thinking and originality to your work. AI is a powerful creative amplifier — it can generate variations, handle production work, and expand your creative range. Your edge is taste, vision, and the ability to direct AI as a creative tool.",
+    desc: "You bring creative thinking and originality to your work. AI is a powerful creative amplifier — it generates variations, handles production work, and expands your range. Your edge is taste, vision, and the ability to direct AI as a creative tool.",
     actions: [
-      {
-        what: "Master AI creative tools in your specific medium",
-        how: 'Commit to one AI creative tool for 30 days — pick the best one for your medium (image, text, video, or audio). Create one piece daily. By day 30, you\'ll have a portfolio and deep tool fluency that most creatives lack.'
-      },
-      {
-        what: "Develop a \"human + AI\" creative workflow that multiplies your output",
-        how: 'Map your creative process (ideation → drafting → refinement → production). Identify which stages AI can handle (usually drafting and variation). Keep ideation and final curation human. Document this workflow — it\'s your competitive advantage.'
-      },
-      {
-        what: "Focus on creative direction, curation, and quality judgment — not just production",
-        how: 'Practice giving AI detailed creative briefs. The skill of articulating vision clearly enough for AI to execute is essentially "creative direction" — and it\'s the role that survives automation. Build a portfolio of AI-directed work with your creative commentary.'
-      },
-      {
-        what: "Explore new creative formats enabled by AI (interactive, generative, personalized)",
-        how: 'Build one experimental project: a generative art piece, an interactive story, or a personalized content experience. Use free creative coding tools combined with AI APIs. Novel formats attract attention and demonstrate forward thinking.'
-      },
-      {
-        what: "Build a portfolio explicitly showcasing AI-augmented creative work",
-        how: 'Create a dedicated section on your portfolio site: "AI-Augmented Work." For each piece, explain your creative process, what AI contributed, and what you contributed. Transparency about AI use builds trust and demonstrates sophistication.'
-      }
+      { what: "Master one AI creative tool deeply — go beyond casual use", how: "Pick the best AI tool for your medium. Use it daily for 30 days. Push its limits. By day 30, you'll have a portfolio and fluency that most creatives lack." },
+      { what: "Develop a 'human + AI' creative workflow", how: "Map your creative process. Identify which stages AI can handle (usually drafting and variations). Keep ideation and final curation human. Document this workflow — it's your competitive advantage." },
+      { what: "Focus on creative direction — the role that survives automation", how: "Practice giving AI detailed creative briefs. The skill of articulating vision clearly enough for AI to execute is essentially 'creative direction' — and it's the most valuable creative skill now." },
+      { what: "Explore new formats that AI makes possible", how: "Build one experimental project: interactive content, personalized experiences, or generative art. Novel formats attract attention and demonstrate forward thinking." },
+      { what: "Build a portfolio that showcases your AI-augmented process", how: "For each piece, explain your creative process, what AI contributed, and what you contributed. Transparency about AI use builds trust and demonstrates sophistication." }
     ],
-    skills: ["AI Creative Tools Mastery", "Creative Direction & Curation", "Generative Design", "AI-Augmented Storytelling", "Taste & Quality Judgment"],
-    roles: ["AI Creative Director", "Generative Designer", "AI-Augmented Content Strategist", "Creative Technologist", "AI Art Director"]
+    skills: ["AI Creative Tool Mastery", "Creative Direction & Curation", "AI-Augmented Storytelling", "Generative Design Thinking", "Taste & Quality Judgment"],
+    roles: ["AI Creative Director", "Generative Designer", "AI Content Strategist", "Creative Technologist", "AI-Augmented Art Director"],
+    resources: {
+      people: ["Chase Reeves (YouTube — creativity & AI tools)", "Joanna Maciejewska (X/Twitter — AI & creative work)", "Matt Wolfe (YouTube — AI tools for creators)", "Karen X. Cheng (Instagram — AI-augmented creative work)", "Refik Anadol (AI artist — pushing creative boundaries)"],
+      books: ["The Creative Act by Rick Rubin — creativity principles that transcend tools", "Steal Like an Artist by Austin Kleon — creative process in any era", "AI Art by Lev Manovich — understanding AI's role in creative work"],
+      articles: ["The AI-Augmented Creative — how top creatives use AI today", "Why Taste Is the Last Moat — on human curation in the AI age"]
+    }
   },
   careerPivot: {
     name: "The Career Reinventor",
     emoji: "🔄",
-    desc: "You're at an inflection point — high adaptability signals readiness for change, and the AI era is creating entirely new career paths that didn't exist two years ago. This is actually an advantage: you can build AI-native skills from the ground up without legacy habits holding you back.",
+    desc: "You're at an inflection point — high adaptability signals readiness for change, and the AI era is creating entirely new career paths that didn't exist two years ago. This is an advantage: you can build AI-native skills from the ground up without legacy habits.",
     actions: [
-      {
-        what: "Take a structured AI foundations course to build credible baseline knowledge",
-        how: 'Start with a free AI foundations certificate (self-paced, ~10 hours), then take an introductory AI course for non-technical learners. These two give you vocabulary, concepts, and a certificate — enough to speak credibly about AI in interviews.',
-        link: "https://grow.google/certificates/ai-essentials/"
-      },
-      {
-        what: "Build 2–3 small AI projects to demonstrate capability",
-        how: 'Project ideas: (1) Build a chatbot for a topic you know well using a free API. (2) Create an AI-powered workflow automation for a real task. (3) Fine-tune a model on data from your domain. Even simple projects show initiative and practical skill.'
-      },
-      {
-        what: "Map your transferable skills to AI-adjacent roles",
-        how: 'List your top 5 skills. For each, search LinkedIn Jobs for roles that combine that skill with "AI" (e.g., "project management + AI" → AI Program Manager). Identify 3 target roles. Note the skill gaps and create a 90-day learning plan to close them.'
-      },
-      {
-        what: "Join AI communities in your target field for networking and learning",
-        how: 'Join 2–3 communities: r/MachineLearning or r/artificial on Reddit, relevant Discord servers, and one LinkedIn group. Contribute by asking thoughtful questions and sharing your learning journey. Aim for 2 meaningful connections per week.'
-      },
-      {
-        what: "Consider \"bridge roles\" that combine your existing expertise with AI",
-        how: 'Bridge roles are the fastest path: domain expert → AI trainer/evaluator, teacher → AI curriculum designer, writer → AI content strategist, analyst → AI-augmented analyst. These roles value your existing knowledge while building AI skills on the job.'
-      }
+      { what: "Take a structured AI foundations course", how: "Start with a free AI essentials certificate (self-paced, ~10 hours). This gives you vocabulary, concepts, and a credential — enough to speak credibly about AI in interviews." },
+      { what: "Build 2-3 small AI projects to show capability", how: "Ideas: (1) A chatbot for a topic you know well. (2) An automated workflow for a real task. (3) An AI-enhanced analysis of data you care about. Simple projects show initiative." },
+      { what: "Map your existing skills to AI-adjacent roles", how: "List your top 5 skills. Search job boards for roles combining each skill with 'AI'. Identify 3 target roles. Note the gaps and create a 90-day plan to close them." },
+      { what: "Join AI communities for networking and learning", how: "Join 2-3 communities: Reddit, Discord, LinkedIn groups in your target field. Ask thoughtful questions and share your learning journey. Aim for 2 meaningful connections per week." },
+      { what: "Consider 'bridge roles' that combine your expertise with AI", how: "Bridge roles are the fastest path: domain expert → AI trainer, teacher → AI curriculum designer, writer → AI content strategist, analyst → AI-augmented analyst. These value your existing knowledge." }
     ],
     skills: ["AI Fundamentals & Literacy", "Rapid Prototyping", "Transferable Skill Mapping", "Networking & Community Building", "Portfolio Development"],
-    roles: ["AI Trainer / Data Evaluator (entry)", "AI Product Manager", "AI-Augmented [Target Role]", "AI Consultant (leveraging domain expertise)", "Prompt Engineer"]
+    roles: ["AI Trainer / Evaluator", "AI Product Manager", "AI-Enhanced [Target Role]", "AI Consultant (domain expertise)", "AI Content Strategist"],
+    resources: {
+      people: ["Andrew Ng (DeepLearning.AI — best AI educator)", "Ali Abdaal (YouTube — productivity & career change)", "Tina Huang (YouTube — tech career transitions)", "Greg Brockman (OpenAI — AI vision & opportunity)", "Cassie Kozyrkov (Google — making AI accessible)"],
+      books: ["AI For Everyone — Andrew Ng's course companion", "Range by David Epstein — why generalists thrive in a specialized world", "Designing Your Life by Burnett & Evans — career pivoting framework"],
+      articles: ["How to Transition Into AI — practical career change roadmap", "The 100-Hour AI Upskilling Plan — structured learning path for career changers"]
+    }
   }
 };
