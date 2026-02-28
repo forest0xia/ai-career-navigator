@@ -73,6 +73,7 @@ function getFilteredQuestions() {
 // Initialize on load
 window.addEventListener('DOMContentLoaded', async () => {
   I18N.init();
+  document.addEventListener('click', e => { if (!e.target.closest('.has-detail')) hideTagDetail(); });
   $('langEn').classList.toggle('active', I18N.lang() === 'en');
   $('langCn').classList.toggle('active', I18N.lang() === 'cn');
   $('logoText').textContent = t('logo');
@@ -515,13 +516,30 @@ function getItems(field, key, arch) {
 
 function renderExpandTag(item) {
   if (typeof item === 'string') return `<span class="tag">${item}</span>`;
-  const id = 'tag_' + Math.random().toString(36).slice(2, 8);
-  return `<div class="expand-tag" onclick="this.classList.toggle('open')">
-    <span class="tag" style="cursor:pointer">${item.name} <span class="tag-arrow">▸</span></span>
-    <div class="tag-detail">${item.detail}</div>
-  </div>`;
+  const parts = item.detail.split('⚡');
+  const html = parts.length > 1
+    ? `${parts[0]}<br><span style="color:var(--accent2)">⚡${parts[1]}</span>`
+    : item.detail;
+  return `<span class="tag has-detail" onclick="showTagDetail(this)" onmouseenter="showTagDetail(this)" onmouseleave="hideTagDetail()">${item.name}<div class="tag-popover">${html}</div></span>`;
 }
 
+function showTagDetail(el) {
+  hideTagDetail();
+  const pop = el.querySelector('.tag-popover');
+  if (!pop) return;
+  pop.classList.add('visible');
+  const r = pop.getBoundingClientRect();
+  if (r.left < 8) pop.style.left = '0';
+  if (r.right > window.innerWidth - 8) { pop.style.left = 'auto'; pop.style.right = '0'; }
+  if (r.top < 8) { pop.style.bottom = 'auto'; pop.style.top = 'calc(100% + 8px)'; }
+}
+
+function hideTagDetail() {
+  document.querySelectorAll('.tag-popover.visible').forEach(p => {
+    p.classList.remove('visible');
+    p.style.cssText = '';
+  });
+}
 function renderResources(res) {
   return `
     <div style="margin-bottom:14px">
