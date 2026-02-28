@@ -286,6 +286,7 @@ async function showResults() {
   userTags = getDomainTags(answers);
   const sentiment = calculateSentiment(answers);
   const sentProfile = getSentimentProfile(sentiment);
+  scores.normalized.mindset = sentiment.mindset;
 
   currentSessionId = await Analytics.recordSession(answers, userTags, scores.normalized, archetypeKey, exposure, readiness, userTools);
 
@@ -317,7 +318,7 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   const dims = [
     { key: 'usage_depth', icon: '📊' }, { key: 'workflow', icon: '⚙️' },
     { key: 'system', icon: '🧠' }, { key: 'adaptability', icon: '🔄' },
-    { key: 'builder', icon: '🏗️' }
+    { key: 'builder', icon: '🏗️' }, { key: 'mindset', icon: '💡' }
   ];
   const norm = scores.normalized || scores;
   const maxDim = Math.max(...dims.map(d => norm[d.key] || 0), 1);

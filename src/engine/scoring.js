@@ -152,6 +152,9 @@ function calculateSentiment(answers) {
     if (!opt?.sent) continue;
     for (const [k, v] of Object.entries(opt.sent)) sent[k] = (sent[k] || 0) + v;
   }
+  // Derive mindset score (0-10 scale) for radar chart
+  // Raw range: confidence(-2..9) - anxiety(0..4) + motivation(0..10) → roughly -6..19
+  sent.mindset = Math.max(0, Math.min(10, ((sent.confidence - sent.anxiety + sent.motivation) + 6) / 25 * 10));
   return sent;
 }
 
