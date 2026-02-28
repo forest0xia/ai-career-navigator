@@ -232,7 +232,19 @@ function getToolSelections() {
   return [...answers.ai_tools].map(i => toolQ.options[i]?.text).filter(Boolean);
 }
 
-function renderActionItem(a, i, archetypeKey) {
+function generateActionContext(scores, archetypeKey) {
+  const cn = isCN();
+  const dims = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
+  const sorted = dims.slice().sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+  const top = sorted[0], weak = sorted[sorted.length - 1];
+  const dimNames = cn
+    ? { adaptability: "适应力", technical: "技术深度", creative: "创造力", leadership: "领导力", aiReadiness: "AI就绪度", humanEdge: "人类优势" }
+    : { adaptability: "adaptability", technical: "technical depth", creative: "creative thinking", leadership: "leadership", aiReadiness: "AI readiness", humanEdge: "human edge" };
+  if (cn) return `基于你在「${dimNames[top]}」方面的优势和「${dimNames[weak]}」方面的成长空间，以下建议专为你定制：`;
+  return `Based on your strength in ${dimNames[top]} and growth opportunity in ${dimNames[weak]}, these recommendations are tailored for you:`;
+}
+
+function renderActionItem(a, i, archetypeKey, scores) {
   let what = a.what, how = a.how;
   if (isCN() && ARCHETYPES_CN[archetypeKey] && ARCHETYPES_CN[archetypeKey].actions && ARCHETYPES_CN[archetypeKey].actions[i]) {
     what = ARCHETYPES_CN[archetypeKey].actions[i].what;
@@ -296,8 +308,9 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   ];
   const maxDim = Math.max(...Object.values(scores).map(v => Math.abs(v)), 1);
 
+  const MIN_COMMUNITY = 10;
   let communityHTML = '';
-  if (community && community.totalSessions > 1) {
+  if (community && community.totalSessions >= MIN_COMMUNITY) {
     const topArch = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
     const topArchPct = Math.round(topArch[1] / community.totalSessions * 100);
     const archetypeLine = topArchPct < 100
@@ -306,7 +319,7 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     communityHTML = `
     <div class="result-section">
       <h3>${t('community_title')}</h3>
-      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('community_desc').replace('{n}', community.totalSessions)}</p>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('community_desc').replace('{n}', community.totalSessions)}${community.totalSessions < 50 ? ' ' + t('community_early_note') : ''}</p>
       <div class="chart-container">
         <div id="radarChart"></div>
         <div class="chart-legend">
@@ -373,7 +386,8 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
-      ${arch.actions.map((a, i) => renderActionItem(a, i, archetypeKey)).join('')}
+      <p style="font-size:13px;color:var(--accent2);margin-bottom:16px;font-style:italic">${generateActionContext(scores, archetypeKey)}</p>
+      ${arch.actions.map((a, i) => renderActionItem(a, i, archetypeKey, scores)).join('')}
     </div>
     <div class="result-section">
       <h3>${t('skills_title')}</h3>
@@ -414,13 +428,13 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
 
   // Render charts after DOM is ready
   setTimeout(async () => {
-    if (community && community.totalSessions > 1) {
+    if (community && community.totalSessions >= MIN_COMMUNITY) {
       drawRadarChart('radarChart', scores, community.avgScores);
     }
 
-    // Dashboard: scatter plots + sentiment chart (need 2+ sessions)
+    // Dashboard: scatter plots + sentiment chart
     const allSessions = await Analytics.getScatterData();
-    if (allSessions.length > 1) {
+    if (allSessions.length >= MIN_COMMUNITY) {
       const currentPt = { exposure, readiness, aiReadiness: scores.aiReadiness || 0, adaptability: scores.adaptability || 0 };
 
       // Sentiment distribution for ai_perception question

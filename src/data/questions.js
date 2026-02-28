@@ -45,7 +45,7 @@ const QUESTIONS = [
     section: "role",
     title: "What takes up most of your working hours?",
     desc: "Select the activity that dominates your typical day.",
-    insight: 'An estimated 25% of all work hours globally are now considered automatable — up from 18% just two years ago. Tasks involving routine data processing face the highest risk; tasks requiring judgment and relationships are more resilient.<div class="source">— SQ Magazine, AI Job Loss Statistics, 2026</div>',
+    insight: 'An estimated 25% of all work hours globally are now considered automatable — up from 18% two years ago.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
     options: [
       { text: "Writing code, debugging, system design", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
       { text: "Analyzing data, building models, research", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
@@ -133,10 +133,10 @@ const QUESTIONS = [
     title: "In the past 6 months, have you learned a significant new skill or tool?",
     insight: 'Continuous learning is the strongest signal of career resilience. Professionals who set aside dedicated weekly time for skill development report higher confidence, composure, and creativity — traits that become more valuable as AI handles routine work.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
-      { text: "Yes — I've picked up multiple new skills or tools", scores: { adaptability: 3, aiReadiness: 1 } },
+      { text: "Yes — multiple new skills or tools", scores: { adaptability: 3, aiReadiness: 1 } },
       { text: "Yes — one meaningful new skill or tool", scores: { adaptability: 2 } },
-      { text: "I've dabbled but nothing substantial", scores: { adaptability: 1 } },
-      { text: "No — I've been focused on executing with existing skills", scores: {} }
+      { text: "Explored a bit but nothing I use regularly", scores: { adaptability: 1 } },
+      { text: "No — focused on executing with current skills", scores: { technical: 1 } }
     ]
   },
 
@@ -147,11 +147,11 @@ const QUESTIONS = [
     title: "How do you currently use AI tools in your work?",
     insight: 'Sanctioned access to AI tools is now available to roughly 60% of workers, up from under 40% a year ago. Professionals with AI skills command an average wage premium of 56%, and AI job postings are 134% above 2020 levels.<div class="source">— Deloitte State of AI in the Enterprise 2026; BusinessWorld, Feb 2026</div>',
     options: [
-      { text: "Daily power user — AI is deeply embedded in my workflow", scores: { aiReadiness: 3, adaptability: 2 } },
-      { text: "Regular user — I use AI tools several times a week", scores: { aiReadiness: 2, adaptability: 1 } },
-      { text: "Occasional — I've tried AI tools but they're not habitual", scores: { aiReadiness: 1 } },
-      { text: "Minimal — I've barely explored AI tools", scores: {} },
-      { text: "Skeptical — I've tried them and remain unconvinced", scores: { humanEdge: 1 } }
+      { text: "Daily — AI is a core part of my workflow", scores: { aiReadiness: 3, adaptability: 2 } },
+      { text: "Several times a week for specific tasks", scores: { aiReadiness: 2, adaptability: 1 } },
+      { text: "Occasionally — I've tried a few tools", scores: { aiReadiness: 1 } },
+      { text: "Rarely — haven't explored much yet", scores: {} },
+      { text: "Tried them but prefer my current methods", scores: { humanEdge: 1 } }
     ]
   },
   {
@@ -160,11 +160,11 @@ const QUESTIONS = [
     title: "Which statement best reflects your view of AI's role in work?",
     insight: 'Worker access to AI rose 50% in 2025, and companies with 40%+ AI projects in production are set to double in six months. Organizations investing in workforce development alongside AI are 1.8x more likely to report better financial results.<div class="source">— Deloitte State of AI in the Enterprise 2026; Deloitte Human Capital Trends</div>',
     options: [
-      { text: "A powerful collaborator — it amplifies what I'm already good at", scores: { aiReadiness: 3, adaptability: 2 } },
-      { text: "A useful tool for specific tasks, but with clear limitations", scores: { aiReadiness: 1, humanEdge: 1 } },
-      { text: "Impressive but overhyped — fundamentals still matter most", scores: { humanEdge: 2 } },
-      { text: "A serious disruption — many jobs will be eliminated", scores: { adaptability: 1 } },
-      { text: "I'm still forming my opinion and watching how it develops", scores: { adaptability: 1 } }
+      { text: "It amplifies what I'm already good at", scores: { aiReadiness: 3, adaptability: 2 } },
+      { text: "Useful for specific tasks, but has clear limits", scores: { aiReadiness: 1, humanEdge: 1 } },
+      { text: "Interesting technology, but fundamentals matter more", scores: { humanEdge: 2 } },
+      { text: "A major shift — many roles will change significantly", scores: { adaptability: 1 } },
+      { text: "Still forming my view — watching how it develops", scores: { adaptability: 1 } }
     ]
   },
   {
@@ -201,7 +201,7 @@ const QUESTIONS = [
     type: "multi",
     title: "Which AI tools and agents do you actively use?",
     desc: "Select all that apply. This helps us show you what tools others in similar roles are using.",
-    insight: 'The most impactful AI adoption isn\'t about using generic chatbots — it\'s about mastering domain-specific AI tools. Specialized knowledge of the right tools for your field makes you inherently more valuable.<div class="source">— Canadian Immigrant, "How to Prepare for the AI-Driven Workplace in 2026"</div>',
+    insight: 'The most impactful AI adoption comes from mastering domain-specific tools, not generic chatbots. Specialized AI knowledge in your field makes you significantly more valuable to employers.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
     options: [
       { text: "ChatGPT (OpenAI)", toolCategory: "general" },
       { text: "Claude (Anthropic)", toolCategory: "general" },
@@ -236,7 +236,7 @@ const QUESTIONS = [
     id: "ai_application",
     section: "tools",
     title: "Which AI capability would be most valuable in your current role?",
-    insight: 'Employers now value judgment and output quality over mere effort. The professionals who thrive are those who use AI to eliminate drudgery and free themselves for higher-value work they actually enjoy.<div class="source">— Economic Times, "How to get hired in an AI-first world," 2026</div>',
+    insight: 'Employers now value judgment and output quality over effort alone. Professionals who use AI to focus on higher-value work report greater job satisfaction and career growth.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
       { text: "Automating repetitive tasks so I can focus on higher-value work", scores: { adaptability: 2, aiReadiness: 1 } },
       { text: "Generating first drafts of content, code, or analysis", scores: { creative: 2, aiReadiness: 2 } },
@@ -268,10 +268,10 @@ const QUESTIONS = [
     title: "When your industry undergoes major disruption, you typically…",
     insight: 'Reskilling isn\'t a last resort — it\'s a strategic move. The professionals who treat learning as an ongoing process stay ahead of change instead of scrambling to catch up. Adaptability is the #1 predictor of career resilience.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
-      { text: "Jump in early — I want to be ahead of the curve", scores: { adaptability: 3, aiReadiness: 1 } },
-      { text: "Watch carefully, then move decisively when the path is clear", scores: { adaptability: 2, leadership: 1 } },
-      { text: "Adapt when it becomes necessary for my role", scores: { adaptability: 1 } },
-      { text: "Focus on what I know works — trends come and go", scores: { humanEdge: 1, adaptability: -1 } }
+      { text: "Move early — I prefer to be ahead of changes", scores: { adaptability: 3, aiReadiness: 1 } },
+      { text: "Observe first, then act decisively", scores: { adaptability: 2, leadership: 1 } },
+      { text: "Adapt when my role requires it", scores: { adaptability: 1 } },
+      { text: "Stay with proven approaches — I value consistency", scores: { humanEdge: 1, adaptability: -1 } }
     ]
   },
   {
@@ -330,19 +330,19 @@ const QUESTIONS = [
     id: "risk_tolerance",
     section: "future",
     title: "How do you feel about career risk?",
-    insight: 'Paradoxically, the "safe" choice of staying still is becoming the riskiest strategy. Calculated career moves — even lateral ones — build the adaptability muscle that the AI era demands. Employers now value judgment and output quality over mere effort.<div class="source">— Economic Times, "How to get hired in an AI-first world," 2026</div>',
+    insight: 'Calculated career moves — even lateral ones — build the adaptability that the AI era demands. The WEF reports that 40% of job skills will change by 2030, making intentional career planning more important than ever.<div class="source">— WEF Future of Jobs Report; Forbes Career Strategy, 2026</div>',
     options: [
-      { text: "I actively seek bold moves — high risk, high reward", scores: { adaptability: 3, leadership: 1 } },
+      { text: "I seek out bold career moves", scores: { adaptability: 3, leadership: 1 } },
       { text: "I take calculated risks when the upside is clear", scores: { adaptability: 2 } },
-      { text: "I prefer incremental, low-risk progression", scores: { humanEdge: 1 } },
-      { text: "I avoid risk — stability is paramount for me right now", scores: { adaptability: -1 } }
+      { text: "I prefer steady, incremental progression", scores: { humanEdge: 1 } },
+      { text: "Stability is my top priority right now", scores: { adaptability: -1 } }
     ]
   },
   {
     id: "biggest_concern",
     section: "future",
     title: "What's your biggest concern about AI and your career?",
-    insight: 'AI anxiety is real and widespread — but research consistently shows that people who channel concern into action (learning, experimenting, networking) outperform those who either ignore AI or become paralyzed by fear. Your concern is a signal to act, not a reason to freeze.<div class="source">— The Guardian, "How AI anxiety is upending career ambitions," Feb 2026</div>',
+    insight: 'Research shows that people who channel AI-related concern into action — learning, experimenting, networking — consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
     options: [
       { text: "My current skills becoming obsolete", scores: { adaptability: 1 } },
       { text: "Not knowing which AI skills to invest in", scores: { aiReadiness: 1 } },
