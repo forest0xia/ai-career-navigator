@@ -181,14 +181,14 @@ const Analytics = {
   async getFeedbacks(page, perPage) {
     const offset = (page - 1) * perPage;
     try {
-      const rows = await _sbGet('sessions',
-        `select=id,created_at,archetype,feedback&feedback=not.is.null&order=created_at.desc&offset=${offset}&limit=${perPage}`,
+      const resp = await fetch(
+        `${SUPABASE_URL}/rest/v1/sessions?select=id,created_at,archetype,feedback&feedback=not.is.null&order=created_at.desc&offset=${offset}&limit=${perPage}`,
+        { headers: { ..._sbHeaders(), 'Prefer': 'count=exact' } }
       );
-      // Get total count via a separate head request
-      const resp = await fetch(`${SUPABASE_URL}/rest/v1/sessions?feedback=not.is.null&select=id`, {
-        method: 'HEAD', headers: { ..._sbHeaders(), 'Prefer': 'count=exact' }
-      });
-      const total = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0');
+      if (!resp.ok) return { rows: [], total: 0 };
+      const rows = await resp.json();
+      const range = resp.headers.get('content-range') || '';
+      const total = parseInt(range.split('/')[1]) || rows.length;
       return { rows, total };
     } catch {
       return { rows: [], total: 0 };
