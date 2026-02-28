@@ -284,6 +284,8 @@ async function showResults() {
   const readiness = computeReadiness(scores.normalized);
   const userTools = getToolSelections(answers);
   userTags = getDomainTags(answers);
+  const sentiment = calculateSentiment(answers);
+  const sentProfile = getSentimentProfile(sentiment);
 
   currentSessionId = await Analytics.recordSession(answers, userTags, scores.normalized, archetypeKey, exposure, readiness, userTools);
 
@@ -291,10 +293,10 @@ async function showResults() {
   url.searchParams.set('id', currentSessionId);
   history.replaceState(null, '', url);
 
-  renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, answers);
+  renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, answers, sentProfile);
 }
 
-function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, sessionAnswers) {
+function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, sessionAnswers, sentProfile) {
   const arch = ARCHETYPES[archetypeKey];
   const expInfo = exposureLabel(exposure);
   const readInfo = readinessLabel(readiness);
@@ -354,9 +356,15 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     `<span style="padding:6px 12px;border-radius:6px;font-size:13px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
   ).join('<span style="color:var(--text2);opacity:0.3;margin:0 2px">→</span>');
 
+  const sp = SENTIMENT_PROFILES[sentProfile] || SENTIMENT_PROFILES.pragmatic_adopter;
+  const sentName = isCN() ? sp.cn : sp.en;
+  const sentDesc = isCN() ? sp.desc_cn : sp.desc_en;
+
   $('resultsContent').innerHTML = `
     <div class="results-header">
       <div class="archetype-badge">${archName(archetypeKey)}</div>
+      <p style="font-size:14px;color:var(--accent2);margin:8px 0 4px">— ${sentName}</p>
+      <p style="font-size:13px;color:var(--text2);margin:0 0 12px">${sentDesc}</p>
       <h1>${t('results_title')}</h1>
       <p class="subtitle" style="max-width:560px;margin:0 auto">${archDesc(archetypeKey)}</p>
     </div>
@@ -437,15 +445,15 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     if (allSessions.length >= MIN_COMMUNITY) {
       const currentPt = { exposure, readiness, usage_depth: norm.usage_depth || 0, adaptability: norm.adaptability || 0 };
 
-      // Sentiment distribution for biggest_concern
-      const concernQ = QUESTIONS.find(q => q.id === 'biggest_concern');
-      const concernOpts = concernQ ? concernQ.options : [];
-      const sentLabels = isCN() && QUESTIONS_CN.biggest_concern
-        ? QUESTIONS_CN.biggest_concern.options.map((text, i) => ({ text, origIdx: i }))
-        : concernOpts.map((o, i) => ({ text: o.text, origIdx: i }));
-      const sentDist = Analytics.getAnswerDistribution('biggest_concern', concernOpts);
+      // Sentiment distribution for sent_emotion question
+      const sentQ = QUESTIONS.find(q => q.id === 'sent_emotion');
+      const sentOpts = sentQ ? sentQ.options : [];
+      const sentLabels = isCN() && QUESTIONS_CN.sent_emotion
+        ? QUESTIONS_CN.sent_emotion.options.map((text, i) => ({ text, origIdx: i }))
+        : sentOpts.map((o, i) => ({ text: o.text, origIdx: i }));
+      const sentDist = Analytics.getAnswerDistribution('sent_emotion', sentOpts);
       const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i]?.count || 0, pct: sentDist[i]?.pct || 0 }));
-      const userConcernIdx = sessionAnswers.biggest_concern;
+      const userSentIdx = sessionAnswers.sent_emotion;
 
       const dashEl = $('dashboardSection');
       dashEl.innerHTML = `
@@ -486,7 +494,7 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
 
       drawScatterPlot('scatterExposure', allSessions, currentPt, 'exposure', 'readiness', t('scatter_exposure_label'), t('scatter_readiness_label'));
       drawScatterPlot('scatterAdoption', normalizedSessions, normalizedCurrent, 'aiReadinessNorm', 'adaptabilityNorm', t('scatter_adoption_label'), t('scatter_adaptability_label'));
-      drawSentimentChart('sentimentChart', sentData, userConcernIdx);
+      drawSentimentChart('sentimentChart', sentData, userSentIdx);
     } else {
       $('dashboardSection').style.display = 'none';
     }

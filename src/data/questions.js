@@ -388,18 +388,44 @@ const QUESTIONS = [
       { text: "Other", toolCategory: "other" }
     ]
   },
+  // === SENTIMENT (3 questions — spread across flow, modify narrative not level) ===
   {
-    id: "biggest_concern",
-    section: "future",
-    title: "What's your biggest concern about AI and your career?",
-    insight: 'Research shows that people who channel AI-related concern into action — learning, experimenting, networking — consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
+    id: "sent_emotion",
+    section: "calibration",
+    title: "When you hear about rapid AI progress, you mostly feel:",
+    sentiment: true,
     options: [
-      { text: "My current skills becoming obsolete", scores: { adaptability: 1 }, level: 2, sentiment: "skills_obsolete" },
-      { text: "Not knowing which AI skills to invest in", scores: { adaptability: 1 }, level: 2, sentiment: "direction_unclear" },
-      { text: "AI replacing my specific role or function", scores: {}, level: 1, sentiment: "role_replaced" },
-      { text: "Falling behind peers who adopt AI faster", scores: { adaptability: 1, usage_depth: 1 }, level: 3, sentiment: "falling_behind" },
-      { text: "Ethical concerns about AI in my industry", scores: {}, level: 3, sentiment: "ethics" },
-      { text: "I'm not particularly concerned — I see mostly opportunity", scores: { adaptability: 1, usage_depth: 1 }, level: 4, sentiment: "optimistic" }
+      { text: "It doesn't affect me much", scores: {}, level: 1, sent: { confidence: 0, anxiety: 0, motivation: 0 } },
+      { text: "Curious but distant", scores: {}, level: 2, sent: { confidence: 0, anxiety: 0, motivation: 1 } },
+      { text: "Interested and optimistic", scores: { adaptability: 1 }, level: 3, sent: { confidence: 1, anxiety: 0, motivation: 2 } },
+      { text: "Slightly worried about keeping up", scores: {}, level: 2, sent: { confidence: -1, anxiety: 2, motivation: 1 } },
+      { text: "Energized — feels like opportunity", scores: { adaptability: 1 }, level: 4, sent: { confidence: 2, anxiety: 0, motivation: 3 } }
+    ]
+  },
+  {
+    id: "sent_confidence",
+    section: "workflow",
+    title: "When using AI, you usually feel:",
+    sentiment: true,
+    options: [
+      { text: "Unsure where to start", scores: {}, level: 1, sent: { confidence: -1, anxiety: 1, motivation: 0 } },
+      { text: "I can get basic help from it", scores: {}, level: 2, sent: { confidence: 1, anxiety: 0, motivation: 1 } },
+      { text: "Comfortable experimenting", scores: { usage_depth: 1 }, level: 3, sent: { confidence: 2, anxiety: 0, motivation: 2 } },
+      { text: "Confident I can improve results", scores: { workflow: 1 }, level: 4, sent: { confidence: 3, anxiety: 0, motivation: 2 } },
+      { text: "In control of how AI behaves", scores: { system: 1 }, level: 5, sent: { confidence: 4, anxiety: 0, motivation: 3 } }
+    ]
+  },
+  {
+    id: "sent_future",
+    section: "future",
+    title: "Which feels closest to your AI motivation?",
+    sentiment: true,
+    options: [
+      { text: "I'm still deciding if AI matters for me", scores: {}, level: 1, sent: { confidence: 0, anxiety: 1, motivation: 0 } },
+      { text: "I'll use it when needed", scores: {}, level: 2, sent: { confidence: 1, anxiety: 0, motivation: 1 } },
+      { text: "I want to get better at it", scores: { adaptability: 1 }, level: 3, sent: { confidence: 1, anxiety: 0, motivation: 2 } },
+      { text: "I want AI deeply integrated into my work", scores: { workflow: 1 }, level: 4, sent: { confidence: 2, anxiety: 0, motivation: 3 } },
+      { text: "I want to build with AI", scores: { builder: 1 }, level: 5, sent: { confidence: 3, anxiety: 0, motivation: 4 } }
     ]
   }
 ];

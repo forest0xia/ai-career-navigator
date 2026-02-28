@@ -28,10 +28,9 @@ function getAdaptiveQuestions(track) {
   const trackQs = QUESTIONS.filter(q => q.track === track);
   const future = QUESTIONS.filter(q => q.section === 'future' && !q.track && !q.crossCheck);
   const crossCheck = QUESTIONS.filter(q => q.crossCheck);
-  // Explorer also gets some usage questions
+  const sentimentQs = QUESTIONS.filter(q => q.sentiment && q.section !== 'calibration');
   const usage = track === 'explorer' ? QUESTIONS.filter(q => q.track === 'explorer') : [];
-  const pool = [...calibration, ...(track === 'explorer' ? usage : trackQs), ...future, ...crossCheck];
-  // Deduplicate
+  const pool = [...calibration, ...(track === 'explorer' ? usage : trackQs), ...sentimentQs, ...future, ...crossCheck];
   const seen = new Set();
   return pool.filter(q => { if (seen.has(q.id)) return false; seen.add(q.id); return true; });
 }
@@ -142,6 +141,37 @@ function getDomainTags(answers) {
   const domainQ = QUESTIONS.find(q => q.id === 'domain');
   return domainQ?.options[answers['domain']]?.tags || [];
 }
+
+// Calculate sentiment from sentiment questions
+function calculateSentiment(answers) {
+  const sent = { confidence: 0, anxiety: 0, motivation: 0 };
+  for (const [qid, ans] of Object.entries(answers)) {
+    const q = QUESTIONS.find(q => q.id === qid);
+    if (!q?.sentiment) continue;
+    const opt = q.options[ans];
+    if (!opt?.sent) continue;
+    for (const [k, v] of Object.entries(opt.sent)) sent[k] = (sent[k] || 0) + v;
+  }
+  return sent;
+}
+
+// Get sentiment profile label
+function getSentimentProfile(sent) {
+  if (sent.anxiety >= 3) return sent.motivation >= 2 ? 'anxious_achiever' : 'cautious_observer';
+  if (sent.confidence >= 5 && sent.motivation >= 6) return 'confident_builder';
+  if (sent.confidence >= 3) return 'steady_optimizer';
+  if (sent.motivation >= 4) return 'curious_explorer';
+  return 'pragmatic_adopter';
+}
+
+const SENTIMENT_PROFILES = {
+  anxious_achiever: { en: "Anxious Achiever", cn: "焦虑型行动者", desc_en: "You feel the pressure but channel it into action.", desc_cn: "你感受到压力，但把它转化为行动力。" },
+  cautious_observer: { en: "Cautious Observer", cn: "谨慎观察者", desc_en: "You prefer to watch and learn before committing.", desc_cn: "你更喜欢先观察学习，再做决定。" },
+  confident_builder: { en: "Confident Builder", cn: "自信构建者", desc_en: "You see AI as opportunity and you're building with it.", desc_cn: "你把 AI 视为机会，正在用它构建。" },
+  steady_optimizer: { en: "Steady Optimizer", cn: "稳健优化者", desc_en: "You adopt AI methodically and improve continuously.", desc_cn: "你有条不紊地采用 AI，持续改进。" },
+  curious_explorer: { en: "Curious Explorer", cn: "好奇探索者", desc_en: "High motivation drives your AI journey forward.", desc_cn: "强烈的好奇心驱动你的 AI 旅程。" },
+  pragmatic_adopter: { en: "Pragmatic Adopter", cn: "务实采用者", desc_en: "You use AI when it clearly helps, no hype needed.", desc_cn: "AI 有明确帮助时你才用，不追风口。" }
+};
 
 // Exposure/readiness labels
 const EXPOSURE_LABELS = {
