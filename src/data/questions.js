@@ -11,7 +11,23 @@ const SECTIONS = {
 };
 
 const QUESTIONS = [
-  // === CALIBRATION (3 questions — everyone sees these) ===
+  // === CALIBRATION (4 questions — everyone sees these) ===
+  {
+    id: "domain",
+    section: "calibration",
+    title: "Which best describes your professional domain?",
+    insight: 'The WEF Future of Jobs Report 2025 projects 170 million new roles created by 2030, but 92 million eliminated. The impact varies dramatically by sector.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
+    options: [
+      { text: "Software Engineering / IT / DevOps", scores: { usage_depth: 1 }, level: 3, tags: ["tech"], exposure: 85 },
+      { text: "Data Science / Analytics / Research", scores: { usage_depth: 1 }, level: 3, tags: ["tech"], exposure: 80 },
+      { text: "Design / Creative / Content / Marketing", scores: {}, level: 2, tags: ["creative"], exposure: 70 },
+      { text: "Business / Management / Operations / Finance", scores: {}, level: 2, tags: ["business"], exposure: 65 },
+      { text: "Healthcare / Education / Legal / Government", scores: {}, level: 2, tags: ["regulated"], exposure: 50 },
+      { text: "Trades / Manufacturing / Logistics / Retail", scores: {}, level: 1, tags: ["physical"], exposure: 35 },
+      { text: "Student / Career Changer / Between roles", scores: { adaptability: 1 }, level: 2, tags: ["early"], exposure: 60 },
+      { text: "Other", scores: {}, level: 2, tags: ["business"], exposure: 55 }
+    ]
+  },
   {
     id: "cal_usage",
     section: "calibration",
@@ -337,6 +353,53 @@ const QUESTIONS = [
       { text: "Reuse my existing workflows", scores: { workflow: 2 }, level: 3 },
       { text: "Automate the urgent parts quickly", scores: { system: 2 }, level: 4 },
       { text: "Rely on systems I've already built", scores: { builder: 2, system: 1 }, level: 5 }
+    ]
+  },
+
+  // === TOOLS & SENTIMENT (everyone sees these) ===
+  {
+    id: "ai_tools",
+    section: "future",
+    type: "multi",
+    title: "Which AI tools do you actively use?",
+    insight: 'The most impactful AI adoption comes from mastering domain-specific tools, not generic chatbots. Specialized AI knowledge in your field makes you significantly more valuable.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
+    options: [
+      { text: "ChatGPT (OpenAI)", toolCategory: "general" },
+      { text: "Claude (Anthropic)", toolCategory: "general" },
+      { text: "Google Gemini", toolCategory: "general" },
+      { text: "Perplexity", toolCategory: "research" },
+      { text: "Microsoft Copilot", toolCategory: "productivity" },
+      { text: "GitHub Copilot", toolCategory: "coding" },
+      { text: "Cursor", toolCategory: "coding" },
+      { text: "Windsurf", toolCategory: "coding" },
+      { text: "Kiro (prev. Amazon Q Developer)", toolCategory: "coding" },
+      { text: "Claude Code", toolCategory: "coding" },
+      { text: "Midjourney", toolCategory: "creative" },
+      { text: "DALL·E / ChatGPT Images", toolCategory: "creative" },
+      { text: "Stable Diffusion / FLUX", toolCategory: "creative" },
+      { text: "Adobe Firefly", toolCategory: "creative" },
+      { text: "Canva AI", toolCategory: "creative" },
+      { text: "Suno / Udio (music)", toolCategory: "creative" },
+      { text: "ElevenLabs (voice)", toolCategory: "creative" },
+      { text: "Notion AI", toolCategory: "productivity" },
+      { text: "Grammarly AI", toolCategory: "productivity" },
+      { text: "LangChain / LlamaIndex / AI frameworks", toolCategory: "advanced" },
+      { text: "Hugging Face / open-source models", toolCategory: "advanced" },
+      { text: "Other", toolCategory: "other" }
+    ]
+  },
+  {
+    id: "biggest_concern",
+    section: "future",
+    title: "What's your biggest concern about AI and your career?",
+    insight: 'Research shows that people who channel AI-related concern into action — learning, experimenting, networking — consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
+    options: [
+      { text: "My current skills becoming obsolete", scores: { adaptability: 1 }, level: 2, sentiment: "skills_obsolete" },
+      { text: "Not knowing which AI skills to invest in", scores: { adaptability: 1 }, level: 2, sentiment: "direction_unclear" },
+      { text: "AI replacing my specific role or function", scores: {}, level: 1, sentiment: "role_replaced" },
+      { text: "Falling behind peers who adopt AI faster", scores: { adaptability: 1, usage_depth: 1 }, level: 3, sentiment: "falling_behind" },
+      { text: "Ethical concerns about AI in my industry", scores: {}, level: 3, sentiment: "ethics" },
+      { text: "I'm not particularly concerned — I see mostly opportunity", scores: { adaptability: 1, usage_depth: 1 }, level: 4, sentiment: "optimistic" }
     ]
   }
 ];

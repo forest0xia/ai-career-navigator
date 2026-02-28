@@ -180,6 +180,7 @@ function updateNextButton(q) {
 
 function selectOption(qId, idx, opt, btn) {
   answers[qId] = idx;
+  if (qId === 'domain' && opt.tags) userTags = [...opt.tags];
   document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   $('nextBtn').disabled = false;
@@ -208,8 +209,8 @@ function toggleMulti(qId, idx, btn, allOptions) {
 function goNext() {
   if (currentQ < filteredQuestions.length - 1) {
     currentQ++;
-    // After calibration (3 questions), determine track and expand question set
-    if (!currentTrack && currentQ >= 3) {
+    // After calibration (4 questions), determine track and expand question set
+    if (!currentTrack && currentQ >= 4) {
       currentTrack = determineTrack(answers);
       const newQs = getFilteredQuestions();
       currentQ = newQs.findIndex(q => !answers.hasOwnProperty(q.id));
@@ -279,9 +280,10 @@ async function showResults() {
   $('progressContainer').style.display = 'none';
   const scores = computeScores();
   const archetypeKey = determineArchetype(scores);
-  const exposure = Math.round(scores.avgLevel / 5 * 100);
-  const readiness = Math.round(((scores.normalized.usage_depth + scores.normalized.workflow + scores.normalized.system) / 30) * 100);
-  const userTools = [];
+  const exposure = computeAIExposure(answers);
+  const readiness = computeReadiness(scores.normalized);
+  const userTools = getToolSelections(answers);
+  userTags = getDomainTags(answers);
 
   currentSessionId = await Analytics.recordSession(answers, userTags, scores.normalized, archetypeKey, exposure, readiness, userTools);
 
@@ -297,6 +299,18 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   const expInfo = exposureLabel(exposure);
   const readInfo = readinessLabel(readiness);
   const community = Analytics.getCommunityStats();
+  const toolRankings = Analytics.getToolRankings();
+
+  let yourToolsHTML = '';
+  if (userTools.length > 0) {
+    const advice = userTools.length >= 5 ? t('toolkit_many') : userTools.length >= 3 ? t('toolkit_mid') : t('toolkit_few');
+    yourToolsHTML = `
+    <div class="result-section">
+      <h3>${t('toolkit_title')}</h3>
+      <div>${userTools.map(ti => `<span class="tag">${ti}</span>`).join('')}</div>
+      <p style="font-size:13px;color:var(--text2);margin-top:12px">${t('using_tools').replace('{n}', userTools.length)} ${advice}</p>
+    </div>`;
+  }
 
   const dims = [
     { key: 'usage_depth', icon: '📊' }, { key: 'workflow', icon: '⚙️' },
@@ -366,6 +380,9 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       }).join('')}
     </div>
     ${communityHTML}
+    ${yourToolsHTML}
+    ${renderToolRankings(toolRankings, userTools)}
+    <div class="result-section" id="dashboardSection"></div>
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
@@ -415,17 +432,20 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     if (community && community.totalSessions >= MIN_COMMUNITY) {
       drawRadarChart('radarChart', norm, community.avgScores);
     }
-  }, 100);
 
-      // Sentiment distribution for ai_perception question
-      const perceptionQ = QUESTIONS.find(q => q.id === 'ai_perception');
-      const perceptionOpts = perceptionQ ? perceptionQ.options : [];
-      const sentLabels = isCN() && QUESTIONS_CN.ai_perception
-        ? QUESTIONS_CN.ai_perception.options.map((text, i) => ({ text, origIdx: i }))
-        : perceptionOpts.map((o, i) => ({ text: o.text, origIdx: i }));
-      const sentDist = Analytics.getAnswerDistribution('ai_perception', perceptionOpts);
-      const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i].count, pct: sentDist[i].pct }));
-      const userPerceptionIdx = sessionAnswers.ai_perception;
+    const allSessions = await Analytics.getScatterData();
+    if (allSessions.length >= MIN_COMMUNITY) {
+      const currentPt = { exposure, readiness, usage_depth: norm.usage_depth || 0, adaptability: norm.adaptability || 0 };
+
+      // Sentiment distribution for biggest_concern
+      const concernQ = QUESTIONS.find(q => q.id === 'biggest_concern');
+      const concernOpts = concernQ ? concernQ.options : [];
+      const sentLabels = isCN() && QUESTIONS_CN.biggest_concern
+        ? QUESTIONS_CN.biggest_concern.options.map((text, i) => ({ text, origIdx: i }))
+        : concernOpts.map((o, i) => ({ text: o.text, origIdx: i }));
+      const sentDist = Analytics.getAnswerDistribution('biggest_concern', concernOpts);
+      const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i]?.count || 0, pct: sentDist[i]?.pct || 0 }));
+      const userConcernIdx = sessionAnswers.biggest_concern;
 
       const dashEl = $('dashboardSection');
       dashEl.innerHTML = `
@@ -450,23 +470,23 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
         </div>
       `;
 
-      // Normalize AI readiness and adaptability to 0-100 for scatter
-      const maxAI = Math.max(...allSessions.map(s => s.aiReadiness), currentPt.aiReadiness, 1);
-      const maxAdapt = Math.max(...allSessions.map(s => s.adaptability), currentPt.adaptability, 1);
+      // Normalize usage_depth and adaptability to 0-100 for scatter
+      const maxUD = Math.max(...allSessions.map(s => s.aiReadiness || s.usage_depth || 0), currentPt.usage_depth, 1);
+      const maxAdapt = Math.max(...allSessions.map(s => s.adaptability || 0), currentPt.adaptability, 1);
       const normalizedSessions = allSessions.map(s => ({
         ...s,
-        aiReadinessNorm: Math.round((s.aiReadiness / maxAI) * 100),
-        adaptabilityNorm: Math.round((s.adaptability / maxAdapt) * 100)
+        aiReadinessNorm: Math.round(((s.aiReadiness || s.usage_depth || 0) / maxUD) * 100),
+        adaptabilityNorm: Math.round(((s.adaptability || 0) / maxAdapt) * 100)
       }));
       const normalizedCurrent = {
         ...currentPt,
-        aiReadinessNorm: Math.round((currentPt.aiReadiness / maxAI) * 100),
+        aiReadinessNorm: Math.round((currentPt.usage_depth / maxUD) * 100),
         adaptabilityNorm: Math.round((currentPt.adaptability / maxAdapt) * 100)
       };
 
       drawScatterPlot('scatterExposure', allSessions, currentPt, 'exposure', 'readiness', t('scatter_exposure_label'), t('scatter_readiness_label'));
       drawScatterPlot('scatterAdoption', normalizedSessions, normalizedCurrent, 'aiReadinessNorm', 'adaptabilityNorm', t('scatter_adoption_label'), t('scatter_adaptability_label'));
-      drawSentimentChart('sentimentChart', sentData, userPerceptionIdx);
+      drawSentimentChart('sentimentChart', sentData, userConcernIdx);
     } else {
       $('dashboardSection').style.display = 'none';
     }

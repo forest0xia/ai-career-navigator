@@ -113,7 +113,37 @@ function generateInsight(archetypeKey, scores) {
   return `Your strongest signal is ${names[strongest]}. Your biggest growth opportunity is ${names[weakest]}. ${arch.blindSpot}`;
 }
 
-// Exposure/readiness labels (kept for compatibility)
+// Compute AI exposure based on domain + usage level
+function computeAIExposure(answers) {
+  const domainQ = QUESTIONS.find(q => q.id === 'domain');
+  const domainIdx = answers['domain'];
+  const domainExposure = domainQ?.options[domainIdx]?.exposure || 55;
+  // Blend domain exposure with usage depth
+  const usageQ = QUESTIONS.find(q => q.id === 'cal_usage');
+  const usageLevel = usageQ?.options[answers['cal_usage']]?.level || 1;
+  const usageBoost = (usageLevel - 1) * 5; // 0-20 boost
+  return Math.min(100, Math.round(domainExposure + usageBoost));
+}
+
+// Compute readiness from normalized scores
+function computeReadiness(normalized) {
+  return Math.min(100, Math.round(((normalized.usage_depth + normalized.workflow + normalized.system + normalized.builder) / 40) * 100));
+}
+
+// Get tool selections for tool rankings
+function getToolSelections(answers) {
+  const toolQ = QUESTIONS.find(q => q.id === 'ai_tools');
+  if (!toolQ || !answers.ai_tools || !(answers.ai_tools instanceof Set)) return [];
+  return [...answers.ai_tools].map(i => toolQ.options[i]?.text).filter(Boolean);
+}
+
+// Get domain tags
+function getDomainTags(answers) {
+  const domainQ = QUESTIONS.find(q => q.id === 'domain');
+  return domainQ?.options[answers['domain']]?.tags || [];
+}
+
+// Exposure/readiness labels
 const EXPOSURE_LABELS = {
   high: { label: "High Transformation Zone", detail: "AI will significantly reshape your work within 2–3 years." },
   moderate: { label: "Moderate Evolution Zone", detail: "AI will augment parts of your work. Starting now gives you an edge." },
