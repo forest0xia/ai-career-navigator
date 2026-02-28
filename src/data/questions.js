@@ -45,7 +45,7 @@ const QUESTIONS = [
     id: "daily_tasks",
     section: "role",
     title: "What takes up most of your working hours?",
-    desc: "Select the activity that dominates your typical day.",
+    type: "multi",
     insight: 'An estimated 25% of all work hours globally are now considered automatable — up from 18% two years ago.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
     options: [
       { text: "Writing code, debugging, system design", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
@@ -55,7 +55,7 @@ const QUESTIONS = [
       { text: "Client/patient/student interaction, advising", scores: { humanEdge: 4 } },
       { text: "Hands-on physical or operational work", scores: { humanEdge: 3, adaptability: 1 } },
       { text: "Administrative tasks, data entry, processing", scores: { adaptability: -1 } },
-      { text: "A mix of the above / Other", scores: { adaptability: 1 } }
+      { text: "Other", scores: { adaptability: 1 } }
     ]
   },
   {
@@ -75,45 +75,33 @@ const QUESTIONS = [
   {
     id: "strongest_skill",
     section: "skills",
-    title: "What is your strongest professional skill?",
+    title: "What are your strongest professional skills?",
+    type: "multi",
     insight: 'McKinsey now operates with 20,000 AI agents alongside 40,000 humans. 30% of companies are planning AI-driven workforce reductions in 2026. Yet despite surging AI demand, communication, collaboration, and adaptability remain the most sought-after human attributes (cited by 39% of employers).<div class="source">— McKinsey, Jan 2026; ManpowerGroup 2026 Talent Shortage Survey</div>',
     options: [
       { text: "Analytical thinking and complex problem-solving", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 4 } },
-      { text: "Creative ideation and design thinking", scores: { creative: 4 } },
-      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 4 } },
+      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 3 } },
+      { text: "Creative ideation and design thinking", scores: { creative: 3 } },
+      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 3 } },
       { text: "Deep technical expertise in a specialized area", scores: { technical: 3 } },
       { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 3 } },
-      { text: "Adaptability and rapid learning", scores: { adaptability: 3 } }
-    ]
-  },
-  {
-    id: "secondary_skill",
-    section: "skills",
-    title: "What's your second strongest skill?",
-    desc: "Your skill combination matters — people with complementary strengths are harder to replace.",
-    insight: 'Cross-functional skill combinations are increasingly valuable. A developer who communicates well, a designer who understands data, a manager who can code — these "T-shaped" professionals command premium compensation because AI can\'t replicate their cross-domain synthesis.<div class="source">— Deloitte Human Capital Trends 2025</div>',
-    options: [
-      { text: "Analytical thinking and complex problem-solving", scores: { technical: 2 } },
-      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 2 } },
-      { text: "Creative ideation and design thinking", scores: { creative: 2 } },
-      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 2 } },
-      { text: "Deep technical expertise in a specialized area", scores: { technical: 2 } },
-      { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 2 } },
-      { text: "Adaptability and rapid learning", scores: { adaptability: 2 } }
+      { text: "Adaptability and rapid learning", scores: { adaptability: 3 } },
+      { text: "Other", scores: { adaptability: 1 } }
     ]
   },
   {
     id: "learning_approach",
     section: "skills",
     title: "How do you approach learning new professional skills?",
+    type: "multi",
     insight: 'The WEF reports that 59% of workers globally will need reskilling by 2030. But how you learn matters as much as what you learn. Professionals who combine hands-on experimentation with structured learning adopt AI tools 2–3x faster.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
     options: [
       { text: "I experiment first, then formalize — learning by doing", scores: { adaptability: 3, aiReadiness: 1 } },
       { text: "I take structured courses and earn certifications", scores: { adaptability: 1, technical: 1 } },
       { text: "I learn from peers, mentors, and communities", scores: { humanEdge: 1, leadership: 1 } },
       { text: "I read documentation, papers, and deep-dive independently", scores: { technical: 2 } },
-      { text: "I learn best under pressure — on-the-job, real stakes", scores: { adaptability: 2 } }
+      { text: "I learn best under pressure — on-the-job, real stakes", scores: { adaptability: 2 } },
+      { text: "Other", scores: { adaptability: 1 } }
     ]
   },
   {
@@ -198,7 +186,7 @@ const QUESTIONS = [
   {
     id: "ai_depth",
     section: "ai",
-    title: "Which of these have you actually done? (Select all that apply)",
+    title: "Which of these have you actually done?",
     desc: "Be honest — this helps us calibrate your recommendations accurately.",
     type: "multi",
     insight: 'There is a wide gap between knowing about AI and applying it. This question helps distinguish awareness from hands-on experience, which matters for career positioning.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
@@ -218,6 +206,7 @@ const QUESTIONS = [
     id: "ai_interest",
     section: "tools",
     title: "What interests you most about AI?",
+    type: "multi",
     insight: 'How you want to engage with AI matters more than your current skill level. Some people want to build AI products, others want to use AI to be better at their existing job, and others want to lead AI adoption in their organization.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
       { text: "Building AI-powered products, tools, or automations", scores: { technical: 3, aiReadiness: 2 } },
@@ -251,24 +240,20 @@ const QUESTIONS = [
       { text: "Stable Diffusion / FLUX", toolCategory: "creative" },
       { text: "Adobe Firefly", toolCategory: "creative" },
       { text: "Canva AI (Magic Studio)", toolCategory: "creative" },
-      { text: "Runway (video)", toolCategory: "creative" },
       { text: "Suno / Udio (music)", toolCategory: "creative" },
       { text: "ElevenLabs (voice / audio)", toolCategory: "creative" },
-      { text: "Jasper", toolCategory: "writing" },
-      { text: "Copy.ai", toolCategory: "writing" },
       { text: "Notion AI", toolCategory: "productivity" },
       { text: "Grammarly AI", toolCategory: "productivity" },
-      { text: "Zapier AI / Make.com (automation)", toolCategory: "automation" },
-      { text: "Custom GPTs / AI agents I've built", toolCategory: "advanced" },
       { text: "LangChain / LlamaIndex / AI frameworks", toolCategory: "advanced" },
       { text: "Hugging Face / open-source models", toolCategory: "advanced" },
-      { text: "None of the above", toolCategory: "none" }
+      { text: "Other", toolCategory: "other" }
     ]
   },
   {
     id: "ai_application",
     section: "tools",
-    title: "Which AI capability would be most valuable in your current role?",
+    title: "Which AI capabilities would be most valuable in your current role?",
+    type: "multi",
     insight: 'Employers now value judgment and output quality over effort alone. Professionals who use AI to focus on higher-value work report greater job satisfaction and career growth.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
       { text: "Automating repetitive tasks so I can focus on higher-value work", scores: { adaptability: 2, aiReadiness: 1 } },
@@ -285,6 +270,7 @@ const QUESTIONS = [
     id: "work_value",
     section: "work",
     title: "What do you value most in your work?",
+    type: "multi",
     insight: 'As AI absorbs routine tasks, it shifts human work toward judgment, strategy, and complex problem-solving. Roles centered on meaning, relationships, and creative expression are more resilient than those centered purely on efficiency and output volume.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
       { text: "Solving complex, novel problems nobody else can crack", scores: { technical: 2, creative: 1 } },

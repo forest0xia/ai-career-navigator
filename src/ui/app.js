@@ -130,7 +130,7 @@ function renderQuestion() {
   // Insights: show CN translation if available, otherwise EN, hide if neither
   const cnInsight = isCN() && QUESTIONS_CN[q.id]?.insight;
   $('insightBox').innerHTML = cnInsight || (!isCN() && q.insight ? q.insight : '');
-  $('questionTitle').textContent = qText(q, 'title');
+  $('questionTitle').innerHTML = (q.type === 'multi' ? `<span class="multi-label">${t('multi_label')}</span> ` : '') + qText(q, 'title');
   $('questionDesc').textContent = qText(q, 'desc');
 
   const optionsEl = $('options');
@@ -393,12 +393,12 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     <div class="result-section">
       <h3>${t('skills_title')}</h3>
       <p style="font-size:13px;color:var(--text2);margin:-4px 0 6px;line-height:1.5;font-style:italic;opacity:0.55">${t('skills_mindset')}</p>
-      <p style="font-size:11px;color:var(--text2);margin:0 0 10px;opacity:0.4">${t('tap_tag_hint')}</p>
+      <p style="font-size:11px;color:var(--text2);margin:0 0 10px;opacity:0.55">${t('tap_tag_hint')}</p>
       <div>${getItems('skills', archetypeKey, arch).map(s => renderExpandTag(s)).join('')}</div>
     </div>
     <div class="result-section">
       <h3>${t('roles_title')}</h3>
-      <p style="font-size:11px;color:var(--text2);margin:-4px 0 10px;opacity:0.4">${t('tap_tag_hint')}</p>
+      <p style="font-size:11px;color:var(--text2);margin:-4px 0 10px;opacity:0.55">${t('tap_tag_hint')}</p>
       <div>${getItems('roles', archetypeKey, arch).map(r => renderExpandTag(r)).join('')}</div>
     </div>
     ${arch.resources ? `

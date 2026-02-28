@@ -3,10 +3,11 @@
 // Normalize raw scores: each dimension gets different max opportunities,
 // so we normalize to 0-10 scale before archetype comparison
 function _normalizeScores(raw) {
-  // Approximate realistic max per dimension (top ~2 answers per question that feeds it)
+  // Approximate realistic max per dimension
+  // Adjusted for multi-select questions allowing multiple selections
   const maxExpected = {
-    adaptability: 14, technical: 10, creative: 8,
-    leadership: 10, aiReadiness: 12, humanEdge: 10
+    adaptability: 20, technical: 14, creative: 12,
+    leadership: 16, aiReadiness: 16, humanEdge: 16
   };
   const norm = {};
   for (const d of Object.keys(maxExpected)) {
