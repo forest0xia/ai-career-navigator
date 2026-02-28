@@ -255,7 +255,7 @@ function renderActionItem(a, i, archetypeKey, scores) {
 
 function renderToolRankings(toolRankings, userTools) {
   if (!toolRankings || toolRankings.ranked.length === 0) return '';
-  const top = toolRankings.ranked.slice(0, 12);
+  const top = toolRankings.ranked.slice(0, 8);
   const maxCount = top[0]?.count || 1;
   return `
   <div class="result-section">
