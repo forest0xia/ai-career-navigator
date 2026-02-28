@@ -528,16 +528,18 @@ function showTagDetail(el) {
   const pop = el.querySelector('.tag-popover');
   if (!pop) return;
   pop.classList.add('visible');
-  const r = pop.getBoundingClientRect();
-  if (r.left < 8) pop.style.left = '0';
-  if (r.right > window.innerWidth - 8) { pop.style.left = 'auto'; pop.style.right = '0'; }
-  if (r.top < 8) { pop.style.bottom = 'auto'; pop.style.top = 'calc(100% + 8px)'; }
+  const tr = el.getBoundingClientRect();
+  pop.style.bottom = (window.innerHeight - tr.top + 6) + 'px';
+  if (tr.top < pop.offsetHeight + 16) {
+    pop.style.bottom = 'auto';
+    pop.style.top = (tr.bottom + 6) + 'px';
+  }
 }
 
 function hideTagDetail() {
   document.querySelectorAll('.tag-popover.visible').forEach(p => {
     p.classList.remove('visible');
-    p.style.cssText = '';
+    p.style.bottom = ''; p.style.top = '';
   });
 }
 function renderResources(res) {
