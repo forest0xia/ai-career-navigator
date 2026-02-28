@@ -300,27 +300,27 @@ function generateMissions(axisScores, archetypeKey, answers) {
   const MISSION_BANK = {
     craft: {
       en: { title: "🎯 Template Pack", why: "Repeatable quality beats one-off brilliance.", metric: "Create 2 templates, use each 3+ times in 2 weeks.", upgrade: "Convert one template into a shared team playbook." },
-      cn: { title: "🎯 模板工具包", why: "可重复的质量胜过一次性的灵感。", metric: "创建 2 个模板，2 周内各使用 3 次以上。", upgrade: "将一个模板转化为团队共享的操作手册。" }
+      cn: { title: "🎯 存好你的「万能提示词」", why: "能反复用的好方法，比每次灵光一现更有价值。", metric: "存 2 个好用的提示词模板，2 周内各复用 3 次以上。", upgrade: "把一个模板整理成同事也能直接用的版本。" }
     },
     reliability: {
       en: { title: "🛡️ Eval Lite", why: "You can't improve what you can't measure.", metric: "Build a 15-example eval set with a 1–5 rubric.", upgrade: "Add an eval gate to your workflow." },
-      cn: { title: "🛡️ 轻量评估", why: "无法衡量就无法改进。", metric: "构建 15 个示例的评估集和 1-5 分评分标准。", upgrade: "在工作流中加入评估关卡。" }
+      cn: { title: "🛡️ 建一个「质量对照表」", why: "不能衡量的东西就无法改进。", metric: "准备 15 个你知道正确答案的例子，给 AI 回答打 1-5 分。", upgrade: "每次改提示词后都跑一遍对照表，确保没变差。" }
     },
     tech_depth: {
       en: { title: "⚡ Automation Wedge", why: "One automated step changes your relationship with AI.", metric: "Automate 1 step so a task becomes push-button.", upgrade: "Add cost/latency routing by difficulty." },
-      cn: { title: "⚡ 自动化楔子", why: "一个自动化步骤改变你与 AI 的关系。", metric: "自动化 1 个步骤，让任务变成一键完成。", upgrade: "按难度添加成本/延迟路由。" }
+      cn: { title: "⚡ 自动化一个小步骤", why: "哪怕只自动化一步，你和 AI 的关系就会改变。", metric: "找到最枯燥的一步，让它变成一键完成。", upgrade: "尝试让多个步骤自动衔接。" }
     },
     agents: {
       en: { title: "🤖 Checklist → Chain", why: "Manual coordination is your current bottleneck.", metric: "Convert one multi-step checklist into a semi-automated chain.", upgrade: "Add state tracking and retry logic." },
-      cn: { title: "🤖 清单 → 链条", why: "手动协调是你当前的瓶颈。", metric: "将一个多步骤清单转化为半自动化链条。", upgrade: "添加状态跟踪和重试逻辑。" }
+      cn: { title: "🤖 把手动步骤串起来", why: "每次都手动协调多个步骤，是你当前最大的效率瓶颈。", metric: "选一个多步骤任务，让 AI 自动串联起来。", upgrade: "加入出错自动重试的机制。" }
     },
     adoption: {
       en: { title: "🚀 3 Reps Challenge", why: "Consistency beats intensity for building AI habits.", metric: "Use AI for 3 different real tasks this week.", upgrade: "Expand to a new domain you haven't tried AI in." },
-      cn: { title: "🚀 三次挑战", why: "持续性比强度更能建立 AI 习惯。", metric: "本周用 AI 完成 3 个不同的真实任务。", upgrade: "扩展到一个你还没尝试过 AI 的新领域。" }
+      cn: { title: "🚀 这周用 AI 做 3 件真事", why: "养成习惯靠的是持续，不是一次猛冲。", metric: "本周用 AI 完成 3 个不同的真实任务。", upgrade: "扩展到一个你还没试过 AI 的新场景。" }
     },
     mindset: {
       en: { title: "💡 Low-Risk Wins", why: "Confidence comes from small successes, not big leaps.", metric: "Find 3 low-stakes tasks where AI saves you 10+ minutes each.", upgrade: "Share one win with a colleague." },
-      cn: { title: "💡 低风险小胜", why: "信心来自小成功，而非大跳跃。", metric: "找到 3 个低风险任务，AI 每个能帮你节省 10 分钟以上。", upgrade: "与同事分享一个成功案例。" }
+      cn: { title: "💡 从不怕出错的事开始", why: "信心来自小成功，不是大冒险。", metric: "找 3 个出错也没关系的任务，用 AI 各省 10 分钟以上。", upgrade: "把一个成功案例分享给同事。" }
     }
   };
 
@@ -373,54 +373,54 @@ function getConfidence(scores) {
 const SKILLS_BANK = {
   adoption: {
     en: { name: "One-Use-Case Embed", detail: "Pick one recurring task and make AI part of it. Use AI 3x/week with the same template and track time saved. Start small — one task, one tool, one week." },
-    cn: { name: "单场景嵌入", detail: "选一个你经常重复的任务，让 AI 成为其中一环。每周用同一个模板做 3 次，记录省了多少时间。从小处开始 —— 一个任务、一个工具、一周时间。" }
+    cn: { name: "让 AI 融入一件事", detail: "选一个你经常重复做的事（比如写周报、整理笔记、回邮件），让 AI 帮你做。每周用同样的方式做 3 次，记录省了多少时间。" }
   },
   craft: {
     en: { name: "Template Pack", detail: "Turn your best prompts into reusable templates with 3 fields: Context / Constraints / Output format. Create 2 templates and reuse each at least 5 times. You'll stop reinventing the wheel." },
-    cn: { name: "模板工具包", detail: "把你最好的提示词变成可复用模板，包含 3 个字段：背景 / 约束 / 输出格式。创建 2 个模板，每个至少复用 5 次。你会告别每次从零开始。" }
+    cn: { name: "把好用的提示词存成「模板」(Template)", detail: "模板就是一段写好的提示词，每次只需要换几个关键词就能复用。比如：「请帮我把以下会议记录整理成要点，格式为……」。存 2 个这样的模板，各复用 5 次以上，你就不用每次从零开始了。" }
   },
   tech_depth: {
     en: { name: "Automation Wedge", detail: "Automate one step in your most repeated workflow — batching, scheduling, or connecting tools. Pick the most tedious step and make it push-button. No-code tools count." },
-    cn: { name: "自动化楔子", detail: "在你最重复的工作流中自动化一个步骤 —— 批处理、定时运行或连接工具。选最枯燥的那一步，让它一键完成。用无代码工具也算。" }
+    cn: { name: "自动化一个小步骤", detail: "在你最重复的工作里，找到最枯燥的那一步，让它自动运行。比如用 Zapier、快捷指令或浏览器插件，把「复制→粘贴→格式化」变成一键完成。不需要写代码。" }
   },
   reliability: {
     en: { name: "Eval Lite", detail: "Build a small evaluation set: 15 examples with a 1-5 rubric. Use it to compare before/after when you change prompts. This one habit prevents silent quality drops." },
-    cn: { name: "轻量评估", detail: "建一个小评估集：15 个示例配 1-5 分评分标准。每次改提示词时用它对比前后效果。这一个习惯就能防止质量悄悄下滑。" }
+    cn: { name: "建一个简单的「质量对照表」(Eval Set)", detail: "准备 15 个你知道正确答案的例子，给 AI 的回答打 1-5 分。每次改提示词后重新跑一遍，看分数有没有变差。这个习惯能防止 AI 输出质量悄悄下滑。" }
   },
   agents: {
     en: { name: "Checklist → Chain", detail: "Take a multi-step task you do manually and convert it into a structured chain: define steps, inputs/outputs, and state. Start with semi-automation — you stay in the loop but stop doing the boring parts." },
-    cn: { name: "清单变链条", detail: "把一个你手动做的多步骤任务转化为结构化链条：定义步骤、输入/输出和状态。先做半自动化 —— 你还在环里，但不用再做无聊的部分。" }
+    cn: { name: "把手动步骤串成自动链条", detail: "你有没有一件事需要好几步才能完成？比如「搜索→总结→发邮件」。把每一步写清楚，然后让 AI 自动串起来。你还是负责检查，但不用再手动做每一步了。" }
   },
   mindset: {
     en: { name: "Low-Risk Wins", detail: "Find 3 tasks where mistakes don't matter and use AI for all of them this week. Track your successes. Confidence comes from small wins, not big leaps." },
-    cn: { name: "低风险小胜", detail: "找 3 个出错也没关系的任务，这周全部用 AI 来做。记录你的成功。信心来自小胜利，不是大跳跃。" }
+    cn: { name: "从不怕出错的事开始", detail: "找 3 个就算 AI 搞错了也没关系的任务（比如头脑风暴、草稿、个人笔记），这周全部用 AI 来做。记录成功次数，信心是从小胜利里长出来的。" }
   }
 };
 
 const ROLES_BANK = {
   adoption: {
     en: { name: "AI-in-Your-Function User", detail: "Someone who uses AI consistently for one specific domain — writing, research, analysis, or coding. Standardize one workflow and reuse it until it's second nature." },
-    cn: { name: "领域 AI 用户", detail: "在一个具体领域持续使用 AI 的人 —— 写作、研究、分析或编程。标准化一个工作流，反复使用直到成为本能。" }
+    cn: { name: "在自己的领域用好 AI 的人", detail: "在一个你熟悉的场景里（写作、研究、分析、编程）持续使用 AI。把一个做法固定下来，反复用到变成习惯。" }
   },
   craft: {
     en: { name: "Prompt Librarian", detail: "Maintains a curated collection of high-quality prompts and templates for yourself or your team. Collect the top 10, prune monthly, add examples of good output." },
-    cn: { name: "提示词管理员", detail: "为自己或团队维护一个精选的高质量提示词和模板库。收集最好的 10 个，每月精简，附上好输出的示例。" }
+    cn: { name: "提示词整理者 (Prompt Librarian)", detail: "为自己或团队维护一个「好用提示词合集」。收集最好的 10 个，每月淘汰不好用的，附上成功案例。" }
   },
   tech_depth: {
     en: { name: "Tool Integrator", detail: "Connects AI to existing tools and systems. Start with no-code/low-code integrations, then progress to APIs. The goal: make AI do real work, not just chat." },
-    cn: { name: "工具集成者", detail: "把 AI 连接到现有工具和系统。从无代码/低代码集成开始，再进阶到 API。目标：让 AI 做真正的工作，而不只是聊天。" }
+    cn: { name: "工具连接者 (Tool Integrator)", detail: "把 AI 和你现有的工具打通。先从不需要写代码的方式开始（比如浏览器插件、Zapier），再进阶到 API。目标：让 AI 做真正的工作，而不只是聊天。" }
   },
   reliability: {
     en: { name: "Quality Gatekeeper", detail: "Adds simple review gates to AI workflows — rubrics, structured output checks, sampling reviews. You're the person who makes AI output trustworthy." },
-    cn: { name: "质量把关人", detail: "为 AI 工作流添加简单的审查关卡 —— 评分标准、结构化输出检查、抽样审核。你是让 AI 输出值得信赖的人。" }
+    cn: { name: "AI 输出质量把关人", detail: "在 AI 工作流里加入简单的检查环节 —— 比如评分标准、固定输出格式、抽样审核。你是让 AI 输出值得信赖的那个人。" }
   },
   agents: {
     en: { name: "Orchestration Designer", detail: "Designs plan→act→check flows for multi-step AI tasks. Start with low-risk tasks like research and summarization. Keep humans in the loop; log errors." },
-    cn: { name: "编排设计师", detail: "为多步骤 AI 任务设计「计划→执行→检查」流程。从低风险任务开始，比如研究和总结。保持人在环中，记录错误。" }
+    cn: { name: "AI 流程编排者 (Orchestration Designer)", detail: "为多步骤任务设计「计划→执行→检查」的流程。从低风险的事开始，比如让 AI 自动搜索+总结。你负责监督，AI 负责跑腿。" }
   },
   mindset: {
     en: { name: "Opportunity Spotter", detail: "The person who notices where AI could save time for the team. Keep a list of 5 repeated pains you observe; bring 1 suggestion per month." },
-    cn: { name: "机会发现者", detail: "注意到团队哪里可以用 AI 省时间的人。记录你观察到的 5 个重复痛点，每月提出 1 个建议。" }
+    cn: { name: "AI 机会发现者", detail: "留意团队里哪些重复工作可以用 AI 省时间的人。记下你观察到的 5 个痛点，每月提出 1 个「这个可以用 AI」的建议。" }
   }
 };
 
@@ -446,20 +446,20 @@ function generateSkillsAndRoles(axisScores) {
   if (!skills.length) {
     const adv = [
       { en: { name: "Multiplier Builder", detail: "Build rails others can run on: tool registry, eval harness, governance framework, or training program. Pick one and roll it out beyond your team." },
-        cn: { name: "乘数效应构建者", detail: "构建别人可以复用的基础设施：工具注册表、评估框架、治理体系或培训计划。选一个，推广到团队之外。" } },
+        cn: { name: "帮别人也用好 AI", detail: "你已经很强了，下一步是让更多人也能用好 AI。比如做一套别人能直接用的工具、模板或培训材料，推广到团队之外。" } },
       { en: { name: "Ecosystem Contributor", detail: "Move from 'my system works' to 'my system spreads'. Publish a benchmark, open-source a component, or lead a cross-team AI program." },
-        cn: { name: "生态贡献者", detail: "从「我的系统能用」到「我的系统在传播」。发布基准测试、开源一个组件，或主导跨团队 AI 项目。" } },
+        cn: { name: "把你的经验变成公共资源", detail: "从「我自己能用」到「别人也能用」。写一篇实践总结、开源一个小工具，或者主导一个跨团队的 AI 项目。" } },
       { en: { name: "Guild Builder", detail: "Grow a cohort of operators and builders so your impact scales beyond you. Run workshops, office hours, and certify people through shipped projects." },
-        cn: { name: "公会建设者", detail: "培养一批操作者和构建者，让你的影响力超越个人。组织工作坊、答疑时间，通过实际项目认证成员。" } }
+        cn: { name: "培养下一批 AI 高手", detail: "你的影响力不应该只靠自己。组织工作坊、定期答疑，通过实际项目带人成长，让更多人达到你的水平。" } }
     ];
     for (const a of adv) skills.push(cn ? a.cn : a.en);
   }
   if (!roles.length) {
     const advR = [
       { en: { name: "AI Platform Architect", detail: "Define architecture, standards, and reusable components across teams. Create contracts, versioning, and governance; measure adoption and ROI." },
-        cn: { name: "AI 平台架构师", detail: "为跨团队定义架构、标准和可复用组件。建立接口契约、版本管理和治理模型，衡量采用率和投资回报。" } },
+        cn: { name: "AI 架构设计者", detail: "为多个团队定义统一的 AI 使用方式：哪些工具用、怎么用、质量怎么保证。让好的做法能被复制和扩展。" } },
       { en: { name: "Talent Multiplier", detail: "The person who makes other people better at AI. Run monthly workshops, pair with juniors, and build a community of practice." },
-        cn: { name: "人才放大器", detail: "让其他人也变得擅长 AI 的人。每月组织工作坊，与新手结对，建立实践社区。" } }
+        cn: { name: "AI 导师", detail: "让身边的人也变得擅长 AI。每月组织一次分享、和新手结对练习、建立一个互相学习的小圈子。" } }
     ];
     for (const r of advR) roles.push(cn ? r.cn : r.en);
   }
