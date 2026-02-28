@@ -44,7 +44,7 @@ const LANGS = {
     feature_plan_desc: "Concrete how-to steps with resources",
     research_note: "Built on research from:",
     research_sources: "WEF Future of Jobs Report, ManpowerGroup 2026 Global Talent Shortage Survey, Deloitte State of AI in the Enterprise 2026, Forbes Career Strategy, and current labor market data.",
-    time_note: "⏱ Takes about 6–8 minutes · Your results include community comparison data",
+    time_note: "⏱ Takes about 3 minutes · Your results include community comparison data",
     privacy_note: "🔒 Fully anonymous — no personal data collected.",
     btn_begin: "Begin Assessment",
     // Navigation
@@ -154,7 +154,7 @@ const LANGS = {
     feature_plan_desc: "附带资源的具体操作步骤",
     research_note: "研究数据来源：",
     research_sources: "世界经济论坛《未来就业报告》、万宝盛华2026全球人才短缺调查、德勤《2026企业AI现状报告》、福布斯职业策略及最新劳动力市场数据。",
-    time_note: "⏱ 大约需要 6–8 分钟 · 结果包含社区对比数据",
+    time_note: "⏱ 大约需要 3 分钟 · 结果包含社区对比数据",
     privacy_note: "🔒 完全匿名，不收集任何个人信息。",
     btn_begin: "开始评估",
     btn_back: "← 返回",

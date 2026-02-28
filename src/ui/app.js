@@ -486,8 +486,8 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
           <div class="score-bar"><div class="score-fill" style="width:${val}%;background:var(--accent2)"></div></div>`;
       }).join('')}
     </div>
-    ${yourToolsHTML}
     ${renderToolRankings(toolRankings, userTools)}
+    ${yourToolsHTML}
     <div class="result-section">
       <h3>${isCN() ? '🎯 你的下一步成长可能' : '🎯 Your Next Moves'}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
