@@ -45,7 +45,7 @@ const LANGS = {
     research_note: "Built on research from:",
     research_sources: "WEF Future of Jobs Report, ManpowerGroup 2026 Global Talent Shortage Survey, Deloitte State of AI in the Enterprise 2026, Forbes Career Strategy, and current labor market data.",
     time_note: "⏱ Takes about 6–8 minutes · Your results include community comparison data",
-    privacy_note: "🔒 Your privacy matters. We do not collect any personal or sensitive information. Only your anonymous assessment responses are stored to power community insights — nothing that could identify you.",
+    privacy_note: "🔒 Fully anonymous — no personal data collected.",
     btn_begin: "Begin Assessment",
     // Navigation
     btn_back: "← Back",
@@ -149,7 +149,7 @@ const LANGS = {
     research_note: "研究数据来源：",
     research_sources: "世界经济论坛《未来就业报告》、万宝盛华2026全球人才短缺调查、德勤《2026企业AI现状报告》、福布斯职业策略及最新劳动力市场数据。",
     time_note: "⏱ 大约需要 6–8 分钟 · 结果包含社区对比数据",
-    privacy_note: "🔒 我们重视您的隐私。本评估不收集任何个人身份信息或敏感数据，仅匿名存储您的评估回答以生成社区洞察——没有任何内容可以识别您的身份。",
+    privacy_note: "🔒 完全匿名，不收集任何个人信息。",
     btn_begin: "开始评估",
     btn_back: "← 返回",
     btn_next: "下一题 →",
