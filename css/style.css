@@ -43,12 +43,6 @@ header {
 .lang-switch button:hover { color: var(--text); border-color: var(--accent); }
 .lang-switch button.active { background: var(--accent-glow); color: var(--accent2); border-color: var(--accent); }
 .resource-tab.active { background: var(--accent-glow) !important; color: var(--accent2) !important; border-color: var(--accent) !important; }
-.tag.has-detail { cursor: pointer; position: relative; }
-.tag.has-detail:hover { background: var(--accent-glow); border-color: var(--accent); }
-.tag-popover { display: none; position: fixed; max-width: 400px; padding: 14px 16px; font-size: 13px; line-height: 1.65; font-weight: 400; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 100; white-space: normal; pointer-events: none; }
-.tag-popover.visible { display: block; }
-.tag-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 99; }
-.tag-overlay.visible { display: block; }
 .multi-label { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(255,180,50,0.12); color: #f0a030; border: 1px solid rgba(255,180,50,0.35); vertical-align: middle; margin-right: 4px; }
 
 .progress-container { display: inline-flex; flex-direction: column; gap: 6px; margin-left: auto; }

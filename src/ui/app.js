@@ -593,41 +593,6 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   }, 100);
 }
 
-function getItems(field, key, arch) {
-  return isCN() && ARCHETYPES_CN[key]?.[field] || arch[field];
-}
-
-function renderExpandTag(item) {
-  if (typeof item === 'string') return `<span class="tag">${item}</span>`;
-  const parts = item.detail.split('⚡');
-  const html = parts.length > 1
-    ? `${parts[0]}<br><span style="color:var(--accent2)">⚡${parts[1]}</span>`
-    : item.detail;
-  return `<span class="tag has-detail" onclick="event.stopPropagation();showTagDetail(this)">${item.name}<div class="tag-popover">${html}</div></span>`;
-}
-
-function showTagDetail(el) {
-  hideTagDetail();
-  const pop = el.querySelector('.tag-popover');
-  if (!pop) return;
-  let overlay = document.getElementById('tagOverlay');
-  if (!overlay) { overlay = document.createElement('div'); overlay.id = 'tagOverlay'; overlay.className = 'tag-overlay'; overlay.onclick = hideTagDetail; document.body.appendChild(overlay); }
-  overlay.classList.add('visible');
-  pop.classList.add('visible');
-  const tr = el.getBoundingClientRect();
-  const w = Math.min(400, window.innerWidth - 16);
-  pop.style.width = w + 'px';
-  let left = tr.left + tr.width / 2 - w / 2;
-  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
-  pop.style.left = left + 'px';
-  pop.style.bottom = (window.innerHeight - tr.top + 6) + 'px';
-  pop.style.top = '';
-  if (tr.top < pop.offsetHeight + 16) {
-    pop.style.bottom = '';
-    pop.style.top = (tr.bottom + 6) + 'px';
-  }
-}
-
 function toggleGridPops(el) {
   var ps = document.querySelectorAll('.grid-pop');
   var show = ps[0] && ps[0].style.display !== 'block';
@@ -635,13 +600,6 @@ function toggleGridPops(el) {
   el.textContent = show ? (isCN() ? '收起说明 ▴' : 'Hide details ▴') : (isCN() ? '查看说明 ▾' : 'Show details ▾');
 }
 
-function hideTagDetail() {
-  document.querySelectorAll('.tag-popover.visible').forEach(p => {
-    p.classList.remove('visible');
-    p.style.bottom = ''; p.style.top = ''; p.style.left = ''; p.style.width = '';
-  });
-  document.getElementById('tagOverlay')?.classList.remove('visible');
-}
 function renderResources(res) {
   return `
     <div style="margin-bottom:14px">

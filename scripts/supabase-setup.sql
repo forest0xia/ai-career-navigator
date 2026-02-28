@@ -1,6 +1,7 @@
--- Run this in Supabase SQL Editor (Dashboard → SQL Editor → New Query)
+-- AI Career Navigator — Supabase Setup (v3)
+-- Run in Supabase SQL Editor (Dashboard → SQL Editor → New Query)
 
--- Sessions table: stores individual assessment results
+-- Sessions table
 create table sessions (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz default now(),
@@ -14,13 +15,13 @@ create table sessions (
   feedback jsonb
 );
 
--- Community stats table: single row with aggregate data, updated by trigger
+-- Community stats (single row, updated by trigger)
 create table community_stats (
   id int primary key default 1 check (id = 1),
   n int default 0,
   sum_exposure bigint default 0,
   sum_readiness bigint default 0,
-  sum_scores jsonb default '{"adaptability":0,"technical":0,"creative":0,"leadership":0,"aiReadiness":0,"humanEdge":0}',
+  sum_scores jsonb default '{"adoption":0,"mindset":0,"craft":0,"tech_depth":0,"reliability":0,"agents":0}',
   archetype_counts jsonb default '{}',
   exposure_buckets jsonb default '{"low":0,"moderate":0,"high":0}',
   readiness_buckets jsonb default '{"early":0,"building":0,"strong":0}',
@@ -30,61 +31,40 @@ create table community_stats (
   updated_at timestamptz default now()
 );
 
--- Seed the single stats row
 insert into community_stats (id) values (1);
 
--- Enable RLS
+-- RLS
 alter table sessions enable row level security;
 alter table community_stats enable row level security;
 
--- Sessions: anyone can insert, nobody can read/update/delete
-create policy "Anyone can insert sessions"
-  on sessions for insert
-  to anon
-  with check (true);
+create policy "Anyone can insert sessions" on sessions for insert to anon with check (true);
+create policy "Anyone can read community stats" on community_stats for select to anon using (true);
+create policy "Anyone can read sessions" on sessions for select to anon using (true);
+create policy "Anyone can update session feedback" on sessions for update to anon using (true) with check (true);
 
--- Community stats: anyone can read, nobody can write from client
-create policy "Anyone can read community stats"
-  on community_stats for select
-  to anon
-  using (true);
-
--- Function to incrementally update community_stats on each new session
+-- Trigger function
 create or replace function update_community_stats()
 returns trigger as $$
 declare
-  dims text[] := array['adaptability','technical','creative','leadership','aiReadiness','humanEdge'];
-  d text;
-  new_scores jsonb;
-  cur_scores jsonb;
-  cur_ac jsonb;
-  cur_eb jsonb;
-  cur_rb jsonb;
-  cur_tc jsonb;
-  cur_ansc jsonb;
-  tool text;
-  qid text;
-  ans_val jsonb;
-  idx text;
+  dims text[] := array['adoption','mindset','craft','tech_depth','reliability','agents'];
+  d text; new_scores jsonb; cur_scores jsonb; cur_ac jsonb;
+  cur_eb jsonb; cur_rb jsonb; cur_tc jsonb; cur_ansc jsonb;
+  tool text; qid text; ans_val jsonb; idx text;
 begin
-  -- Lock the stats row
   select sum_scores, archetype_counts, exposure_buckets, readiness_buckets, tool_counts, answer_counts
     into cur_scores, cur_ac, cur_eb, cur_rb, cur_tc, cur_ansc
     from community_stats where id = 1 for update;
 
   new_scores := NEW.scores;
 
-  -- Update sum_scores
   foreach d in array dims loop
     cur_scores := jsonb_set(cur_scores, array[d],
       to_jsonb(coalesce((cur_scores->>d)::numeric, 0) + coalesce((new_scores->>d)::numeric, 0)));
   end loop;
 
-  -- Update archetype_counts
   cur_ac := jsonb_set(cur_ac, array[NEW.archetype],
     to_jsonb(coalesce((cur_ac->>NEW.archetype)::int, 0) + 1));
 
-  -- Update exposure_buckets
   if NEW.exposure >= 75 then
     cur_eb := jsonb_set(cur_eb, '{high}', to_jsonb(coalesce((cur_eb->>'high')::int, 0) + 1));
   elsif NEW.exposure >= 45 then
@@ -93,7 +73,6 @@ begin
     cur_eb := jsonb_set(cur_eb, '{low}', to_jsonb(coalesce((cur_eb->>'low')::int, 0) + 1));
   end if;
 
-  -- Update readiness_buckets
   if NEW.readiness >= 70 then
     cur_rb := jsonb_set(cur_rb, '{strong}', to_jsonb(coalesce((cur_rb->>'strong')::int, 0) + 1));
   elsif NEW.readiness >= 40 then
@@ -102,18 +81,13 @@ begin
     cur_rb := jsonb_set(cur_rb, '{early}', to_jsonb(coalesce((cur_rb->>'early')::int, 0) + 1));
   end if;
 
-  -- Update tool_counts
   if array_length(NEW.tool_selections, 1) > 0 then
     foreach tool in array NEW.tool_selections loop
-      if tool != 'None of the above' then
-        cur_tc := jsonb_set(cur_tc, array[tool],
-          to_jsonb(coalesce((cur_tc->>tool)::int, 0) + 1));
-      end if;
+      cur_tc := jsonb_set(cur_tc, array[tool],
+        to_jsonb(coalesce((cur_tc->>tool)::int, 0) + 1));
     end loop;
-    -- tool_users increment handled in main update
   end if;
 
-  -- Update answer_counts
   if NEW.answers is not null then
     for qid, ans_val in select * from jsonb_each(NEW.answers) loop
       if cur_ansc->qid is null then
@@ -133,24 +107,19 @@ begin
   end if;
 
   update community_stats set
-    n = n + 1,
-    sum_exposure = sum_exposure + NEW.exposure,
+    n = n + 1, sum_exposure = sum_exposure + NEW.exposure,
     sum_readiness = sum_readiness + NEW.readiness,
-    sum_scores = cur_scores,
-    archetype_counts = cur_ac,
-    exposure_buckets = cur_eb,
-    readiness_buckets = cur_rb,
+    sum_scores = cur_scores, archetype_counts = cur_ac,
+    exposure_buckets = cur_eb, readiness_buckets = cur_rb,
     tool_counts = cur_tc,
     tool_users = tool_users + case when array_length(NEW.tool_selections, 1) > 0 then 1 else 0 end,
-    answer_counts = cur_ansc,
-    updated_at = now()
+    answer_counts = cur_ansc, updated_at = now()
   where id = 1;
 
   return NEW;
 end;
 $$ language plpgsql security definer;
 
--- Trigger: auto-update stats on every new session
 create trigger on_session_insert
   after insert on sessions
   for each row execute function update_community_stats();
