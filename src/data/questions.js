@@ -1,374 +1,342 @@
-// Research-backed questions with cited insights
-// Dimensions: adaptability, technical, creative, leadership, aiReadiness, humanEdge
-// Multi-select questions use type: "multi"
+// AI Adoption Diagnostic — scenario-based, adaptive branching
+// Dimensions: usage_depth, workflow, system, adaptability, builder
+// Adaptive: 3 calibration → branch into track → ~12-15 total questions
 
 const SECTIONS = {
-  role: "Your Current Role",
-  skills: "Skills & Learning Style",
-  ai: "AI Familiarity & Mindset",
-  tools: "AI Tools & Agents",
-  work: "Work Style & Values",
-  future: "Future Orientation"
+  calibration: "Calibration",
+  usage: "How You Use AI",
+  workflow: "Workflow Thinking",
+  system: "System Thinking",
+  future: "Future Readiness"
 };
 
 const QUESTIONS = [
-  // === ROLE (4 questions) ===
+  // === CALIBRATION (3 questions — everyone sees these) ===
   {
-    id: "domain",
-    section: "role",
-    title: "Which best describes your professional domain?",
-    insight: 'The WEF Future of Jobs Report 2025 projects 170 million new roles created by 2030, but 92 million eliminated — a net gain of 78 million. The impact varies dramatically by sector.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
+    id: "cal_usage",
+    section: "calibration",
+    title: "Your most common AI usage looks like:",
+    insight: 'Sanctioned access to AI tools is now available to ~60% of workers, up from under 40% a year ago. Professionals with AI skills command an average wage premium of 56%.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
-      { text: "Software Engineering / IT / DevOps", scores: { technical: 3, aiReadiness: 2 }, tags: ["tech"] },
-      { text: "Data Science / Analytics / Research", scores: { technical: 2, aiReadiness: 2 }, tags: ["tech"] },
-      { text: "Design / Creative / Content / Marketing", scores: { creative: 3, humanEdge: 1 }, tags: ["creative"] },
-      { text: "Business / Management / Operations / Finance", scores: { leadership: 2, humanEdge: 1 }, tags: ["business"] },
-      { text: "Healthcare / Education / Legal / Government", scores: { humanEdge: 3 }, tags: ["regulated"] },
-      { text: "Trades / Manufacturing / Logistics / Retail", scores: { adaptability: 1 }, tags: ["physical"] },
-      { text: "Student / Career Changer / Between roles", scores: { adaptability: 2 }, tags: ["early"] },
-      { text: "Other", scores: { adaptability: 1 }, tags: ["business"] }
+      { text: "Rare experimentation — tried it a few times", scores: { usage_depth: 1 }, level: 1 },
+      { text: "Writing or summarizing text", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Problem solving, coding help, or daily tasks", scores: { usage_depth: 2, workflow: 1 }, level: 3 },
+      { text: "Daily work assistant across multiple tasks", scores: { usage_depth: 3, workflow: 1 }, level: 4 },
+      { text: "Core part of how I work — can't imagine without it", scores: { usage_depth: 3, workflow: 2 }, level: 5 }
     ]
   },
   {
-    id: "experience",
-    section: "role",
-    title: "How many years of professional experience do you have?",
-    insight: 'Entry and junior-level roles with routine digital work face the highest near-term AI displacement risk. Senior professionals with deep domain expertise have natural resilience — AI struggles to replicate judgment built over years.<div class="source">— Forbes, "How To Protect Your Career From AI Job Displacement," Feb 2026</div>',
+    id: "cal_error",
+    section: "calibration",
+    title: "When AI gives you a wrong or mediocre answer, you:",
+    insight: 'The gap between knowing about AI and applying it effectively is where career value lives. How you handle AI failures reveals your true skill level.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
-      { text: "0–2 years (early career)", scores: { adaptability: 2 } },
-      { text: "3–7 years (mid-career)", scores: { adaptability: 1, leadership: 1 } },
-      { text: "8–15 years (senior)", scores: { leadership: 2, humanEdge: 1 } },
-      { text: "15+ years (veteran)", scores: { leadership: 2, humanEdge: 2 } }
+      { text: "Give up or stop trusting it", scores: { adaptability: -1 }, level: 1 },
+      { text: "Retry with the same question", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Rewrite the prompt with more detail", scores: { usage_depth: 2, workflow: 1 }, level: 3 },
+      { text: "Add examples, context, and constraints", scores: { workflow: 2, usage_depth: 1 }, level: 4 },
+      { text: "Change my approach — different model, system prompt, or process", scores: { system: 2, workflow: 1 }, level: 5 }
     ]
   },
   {
-    id: "daily_tasks",
-    section: "role",
-    title: "What takes up most of your working hours?",
-    type: "multi",
-    insight: 'An estimated 25% of all work hours globally are now considered automatable — up from 18% two years ago.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
+    id: "cal_mental",
+    section: "calibration",
+    title: "AI feels most like:",
+    insight: 'Your mental model of AI predicts how you will use it. People who see AI as a "system component" adopt it 3x faster than those who see it as a search engine.<div class="source">— McKinsey Global Survey on AI, 2025</div>',
     options: [
-      { text: "Writing code, debugging, system design", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
-      { text: "Analyzing data, building models, research", scores: { technical: 2, aiReadiness: 1 }, showIf: ["tech"] },
-      { text: "Writing, designing, creating content", scores: { creative: 3 } },
-      { text: "Meetings, strategy, managing people", scores: { leadership: 3, humanEdge: 1 } },
-      { text: "Client/patient/student interaction, advising", scores: { humanEdge: 4 } },
-      { text: "Hands-on physical or operational work", scores: { humanEdge: 3, adaptability: 1 } },
-      { text: "Administrative tasks, data entry, processing", scores: { adaptability: -1 } },
-      { text: "Other", scores: { adaptability: 1 } }
-    ]
-  },
-  {
-    id: "team_size",
-    section: "role",
-    title: "How large is the team or organization you work in?",
-    insight: 'Larger organizations are adopting AI faster — 72% of large enterprises have deployed AI in at least one function, compared to 35% of small businesses. But smaller teams often have more freedom to experiment and adopt tools individually.<div class="source">— McKinsey Global Survey on AI, 2025</div>',
-    options: [
-      { text: "Solo / freelance / independent", scores: { adaptability: 2, creative: 1 } },
-      { text: "Small team (2–10 people)", scores: { adaptability: 1, humanEdge: 1 } },
-      { text: "Medium team (11–50 people)", scores: { leadership: 1 } },
-      { text: "Large organization (50+ people)", scores: { leadership: 1 } }
+      { text: "A smarter search engine", scores: { usage_depth: 1 }, level: 1 },
+      { text: "A helpful assistant", scores: { usage_depth: 2 }, level: 2 },
+      { text: "A creative collaborator", scores: { workflow: 2, adaptability: 1 }, level: 3 },
+      { text: "A thinking partner I reason with", scores: { workflow: 2, system: 1 }, level: 4 },
+      { text: "A programmable system I design around", scores: { system: 3, builder: 1 }, level: 5 }
     ]
   },
 
-  // === SKILLS (5 questions) ===
+  // === USAGE — How You Actually Use AI ===
   {
-    id: "strongest_skill",
-    section: "skills",
-    title: "What are your strongest professional skills?",
-    type: "multi",
-    insight: 'McKinsey now operates with 20,000 AI agents alongside 40,000 humans. 30% of companies are planning AI-driven workforce reductions in 2026. Yet despite surging AI demand, communication, collaboration, and adaptability remain the most sought-after human attributes (cited by 39% of employers).<div class="source">— McKinsey, Jan 2026; ManpowerGroup 2026 Talent Shortage Survey</div>',
+    id: "start_unfamiliar",
+    section: "usage",
+    title: "When you start something unfamiliar, you usually:",
+    track: "explorer",
+    insight: 'Professionals who combine hands-on experimentation with structured learning adopt AI tools 2–3x faster than those who rely on passive consumption.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
     options: [
-      { text: "Analytical thinking and complex problem-solving", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Communication, persuasion, and storytelling", scores: { humanEdge: 3 } },
-      { text: "Creative ideation and design thinking", scores: { creative: 3 } },
-      { text: "Leadership, team building, and strategic thinking", scores: { leadership: 3 } },
-      { text: "Deep technical expertise in a specialized area", scores: { technical: 3 } },
-      { text: "Empathy, relationship building, and emotional intelligence", scores: { humanEdge: 3 } },
-      { text: "Adaptability and rapid learning", scores: { adaptability: 3 } },
-      { text: "Other", scores: { adaptability: 1 } }
+      { text: "Google it or search articles", scores: { adaptability: 1 }, level: 1 },
+      { text: "Ask AI for a quick answer", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Ask AI to explain step-by-step", scores: { usage_depth: 2 }, level: 3 },
+      { text: "Ask AI to plan how to approach it", scores: { workflow: 2 }, level: 4 },
+      { text: "Build a reusable workflow immediately", scores: { builder: 2, system: 1 }, level: 5 }
     ]
   },
   {
-    id: "learning_approach",
-    section: "skills",
-    title: "How do you approach learning new professional skills?",
-    type: "multi",
-    insight: 'The WEF reports that 59% of workers globally will need reskilling by 2030. But how you learn matters as much as what you learn. Professionals who combine hands-on experimentation with structured learning adopt AI tools 2–3x faster.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
+    id: "time_saved",
+    section: "usage",
+    title: "AI saves you time. You typically:",
+    track: "explorer",
+    insight: 'The WEF reports that 59% of workers globally will need reskilling by 2030. How you reinvest time saved by AI determines whether you grow or plateau.<div class="source">— World Economic Forum, Future of Jobs Report 2025</div>',
     options: [
-      { text: "I experiment first, then formalize — learning by doing", scores: { adaptability: 3, aiReadiness: 1 } },
-      { text: "I take structured courses and earn certifications", scores: { adaptability: 1, technical: 1 } },
-      { text: "I learn from peers, mentors, and communities", scores: { humanEdge: 1, leadership: 1 } },
-      { text: "I read documentation, papers, and deep-dive independently", scores: { technical: 2 } },
-      { text: "I learn best under pressure — on-the-job, real stakes", scores: { adaptability: 2 } },
-      { text: "Other", scores: { adaptability: 1 } }
+      { text: "Finish earlier and relax", scores: { usage_depth: 1 }, level: 1 },
+      { text: "Do more of the same work faster", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Take on bigger or harder problems", scores: { adaptability: 2, workflow: 1 }, level: 3 },
+      { text: "Redesign how the work gets done", scores: { system: 2, workflow: 1 }, level: 4 },
+      { text: "Automate it so it runs without me", scores: { builder: 2, system: 1 }, level: 5 }
     ]
   },
   {
-    id: "cross_functional",
-    section: "skills",
-    title: "How often do you work across different disciplines?",
-    desc: "E.g., a developer who also does product design, or a marketer who analyzes data.",
-    insight: 'AI handles narrow, well-defined tasks well. But connecting insights across domains — seeing patterns between marketing data and engineering constraints, for example — remains a distinctly human capability and is increasingly valued by employers.<div class="source">— Deloitte Human Capital Trends 2025</div>',
+    id: "tool_count",
+    section: "usage",
+    title: "How many AI tools do you actively use?",
+    track: "explorer",
+    insight: 'The most impactful AI adoption comes from mastering domain-specific tools, not generic chatbots. Specialized AI knowledge in your field makes you significantly more valuable.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
     options: [
-      { text: "Constantly — I wear many hats and bridge multiple functions", scores: { adaptability: 2, creative: 2 } },
-      { text: "Often — I collaborate across teams on most projects", scores: { adaptability: 1, leadership: 2 } },
-      { text: "Sometimes — when specific projects require it", scores: { adaptability: 1 } },
-      { text: "Rarely — I'm deep in my specialty and that's where I add value", scores: { technical: 2 } }
+      { text: "None or tried once", scores: {}, level: 1 },
+      { text: "One main tool", scores: { usage_depth: 1 }, level: 2 },
+      { text: "2–3 tools for different tasks", scores: { usage_depth: 2, workflow: 1 }, level: 3 },
+      { text: "A tool stack organized by task type", scores: { workflow: 2, system: 1 }, level: 4 },
+      { text: "Constantly testing and rotating new ones", scores: { adaptability: 2, builder: 1 }, level: 5 }
     ]
   },
   {
-    id: "recent_learning",
-    section: "skills",
-    title: "In the past 6 months, have you learned a significant new skill or tool?",
-    insight: 'Continuous learning is the strongest signal of career resilience. Professionals who set aside dedicated weekly time for skill development report higher confidence, composure, and creativity — traits that become more valuable as AI handles routine work.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
+    id: "learning_skill",
+    section: "usage",
+    title: "When learning a new skill, you:",
+    track: "explorer",
+    insight: 'Continuous learning is the strongest signal of career resilience. Professionals who set aside dedicated weekly time for skill development report higher confidence and adaptability.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
-      { text: "Yes — multiple new skills or tools", scores: { adaptability: 3, aiReadiness: 1 } },
-      { text: "Yes — one meaningful new skill or tool", scores: { adaptability: 2 } },
-      { text: "Explored a bit but nothing I use regularly", scores: { adaptability: 1 } },
-      { text: "No — focused on executing with current skills", scores: { technical: 1 } }
-    ]
-  },
-
-  // === AI FAMILIARITY (4 questions) ===
-  {
-    id: "ai_usage",
-    section: "ai",
-    title: "How do you currently use AI tools in your work?",
-    insight: 'Sanctioned access to AI tools is now available to roughly 60% of workers, up from under 40% a year ago. Professionals with AI skills command an average wage premium of 56%, and AI job postings are 134% above 2020 levels.<div class="source">— Deloitte State of AI in the Enterprise 2026; BusinessWorld, Feb 2026</div>',
-    options: [
-      { text: "Daily — AI is a core part of my workflow", scores: { aiReadiness: 3, adaptability: 2 } },
-      { text: "Several times a week for specific tasks", scores: { aiReadiness: 2, adaptability: 1 } },
-      { text: "Occasionally — I've tried a few tools", scores: { aiReadiness: 1 } },
-      { text: "Rarely — haven't explored much yet", scores: {} },
-      { text: "Tried them but prefer my current methods", scores: { humanEdge: 1 } }
-    ]
-  },
-  {
-    id: "ai_perception",
-    section: "ai",
-    title: "Which statement best reflects your view of AI's role in work?",
-    insight: 'Worker access to AI rose 50% in 2025, and companies with 40%+ AI projects in production are set to double in six months. Organizations investing in workforce development alongside AI are 1.8x more likely to report better financial results.<div class="source">— Deloitte State of AI in the Enterprise 2026; Deloitte Human Capital Trends</div>',
-    options: [
-      { text: "It amplifies what I'm already good at", scores: { aiReadiness: 3, adaptability: 2 } },
-      { text: "Useful for specific tasks, but has clear limits", scores: { aiReadiness: 1, humanEdge: 1 } },
-      { text: "Interesting technology, but fundamentals matter more", scores: { humanEdge: 2 } },
-      { text: "A major shift — many roles will change significantly", scores: { adaptability: 1 } },
-      { text: "Still forming my view — watching how it develops", scores: { adaptability: 1 } }
-    ]
-  },
-  {
-    id: "ai_technical",
-    section: "ai",
-    title: "How would you rate your understanding of how AI/ML systems work?",
-    showIf: ["tech"],
-    insight: 'AI skills have surpassed all others to become the most difficult for employers to find globally, with 72% of employers reporting hiring difficulty. AI Model &amp; Application Development (20%) and AI Literacy (19%) now lead the global ranking of hard-to-find skills.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey (39,000 employers, 41 countries)</div>',
-    options: [
-      { text: "Deep — I build/train models or work with ML infrastructure", scores: { technical: 3, aiReadiness: 3 } },
-      { text: "Solid — I understand architectures, can fine-tune, use APIs effectively", scores: { technical: 2, aiReadiness: 2 } },
-      { text: "Conceptual — I grasp the basics (neural nets, training, prompting)", scores: { technical: 1, aiReadiness: 1 } },
-      { text: "Surface-level — I use AI tools but don't understand the internals", scores: { aiReadiness: 1 } }
-    ]
-  },
-  {
-    id: "ai_general",
-    section: "ai",
-    title: "What's your comfort level with adopting new technology?",
-    showIf: ["creative", "business", "regulated", "physical", "early"],
-    insight: 'You don\'t need to become a programmer to work effectively with AI. But you do need to understand how AI tools function, where they fail, and how to use them strategically. AI literacy — not coding — is the critical skill.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
-    options: [
-      { text: "Very comfortable — I pick up new tools quickly and enjoy it", scores: { aiReadiness: 2, adaptability: 2 } },
-      { text: "Comfortable — I can learn with some guidance and practice", scores: { aiReadiness: 1, adaptability: 1 } },
-      { text: "Cautious — I prefer proven, well-documented tools", scores: { humanEdge: 1 } },
-      { text: "Uncomfortable — technology isn't my strength", scores: {} }
-    ]
-  },
-  {
-    id: "ai_depth",
-    section: "ai",
-    title: "Which of these have you actually done?",
-    desc: "Be honest — this helps us calibrate your recommendations accurately.",
-    type: "multi",
-    insight: 'There is a wide gap between knowing about AI and applying it. This question helps distinguish awareness from hands-on experience, which matters for career positioning.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
-    options: [
-      { text: "Written detailed prompts with system instructions or few-shot examples", scores: { aiReadiness: 1 } },
-      { text: "Built a workflow that connects AI to other tools (APIs, automation)", scores: { aiReadiness: 2, technical: 1 } },
-      { text: "Fine-tuned or trained a model on custom data", scores: { aiReadiness: 3, technical: 2 } },
-      { text: "Evaluated AI output quality systematically (not just casual use)", scores: { aiReadiness: 1, humanEdge: 1 } },
-      { text: "Deployed an AI-powered feature or product to real users", scores: { aiReadiness: 3, technical: 2, leadership: 1 } },
-      { text: "Taught others how to use AI tools effectively", scores: { leadership: 2, aiReadiness: 1 } },
-      { text: "None of these yet", scores: {} }
+      { text: "Watch videos and read articles", scores: { adaptability: 1 }, level: 1 },
+      { text: "Ask AI questions as they come up", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Practice with AI guidance and feedback", scores: { usage_depth: 2, adaptability: 1 }, level: 3 },
+      { text: "Design a learning plan with AI", scores: { workflow: 2, adaptability: 1 }, level: 4 },
+      { text: "Build a personal knowledge system with AI", scores: { system: 2, builder: 1 }, level: 5 }
     ]
   },
 
-  // === AI TOOLS (2 questions, including multi-select) ===
+  // === WORKFLOW — Process Thinking ===
   {
-    id: "ai_interest",
-    section: "tools",
-    title: "What interests you most about AI?",
-    type: "multi",
-    insight: 'How you want to engage with AI matters more than your current skill level. Some people want to build AI products, others want to use AI to be better at their existing job, and others want to lead AI adoption in their organization.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    id: "repeat_task",
+    section: "workflow",
+    title: "You do the same task every day. You:",
+    track: "workflow",
+    insight: 'An estimated 25% of all work hours globally are now automatable — up from 18% two years ago. The professionals who systematize repetitive work free themselves for higher-value thinking.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
     options: [
-      { text: "Building AI-powered products, tools, or automations", scores: { technical: 3, aiReadiness: 2 } },
-      { text: "Using AI to be dramatically better at my current job", scores: { adaptability: 2, aiReadiness: 1 } },
-      { text: "Leading AI adoption and strategy in my organization", scores: { leadership: 3, aiReadiness: 1 } },
-      { text: "Understanding AI's creative possibilities", scores: { creative: 3, aiReadiness: 1 } },
-      { text: "Making sure AI is used responsibly and ethically", scores: { humanEdge: 3 } },
-      { text: "Figuring out how AI changes my career options", scores: { adaptability: 2 } }
+      { text: "Just repeat it manually each time", scores: { usage_depth: 1 }, level: 1 },
+      { text: "Ask AI to help each time", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Reuse old prompts I've saved", scores: { workflow: 2 }, level: 3 },
+      { text: "Create a structured template with instructions", scores: { workflow: 3 }, level: 4 },
+      { text: "Automate the entire workflow", scores: { system: 2, builder: 1 }, level: 5 }
     ]
   },
   {
-    id: "ai_tools",
-    section: "tools",
-    type: "multi",
-    title: "Which AI tools and agents do you actively use?",
-    desc: "Select all that apply. This helps us show you what tools others in similar roles are using.",
-    insight: 'The most impactful AI adoption comes from mastering domain-specific tools, not generic chatbots. Specialized AI knowledge in your field makes you significantly more valuable to employers.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
+    id: "writing_important",
+    section: "workflow",
+    title: "Writing something important, you:",
+    track: "workflow",
+    insight: 'AI-augmented professionals report 30-50% time savings on content creation. But the quality gap between "AI-assisted" and "AI-directed" writing is where career differentiation happens.<div class="source">— Deloitte Human Capital Trends 2025</div>',
     options: [
-      { text: "ChatGPT (OpenAI)", toolCategory: "general" },
-      { text: "Claude (Anthropic)", toolCategory: "general" },
-      { text: "Google Gemini", toolCategory: "general" },
-      { text: "Perplexity", toolCategory: "research" },
-      { text: "Microsoft Copilot (Office / Windows)", toolCategory: "productivity" },
-      { text: "GitHub Copilot", toolCategory: "coding" },
-      { text: "Cursor", toolCategory: "coding" },
-      { text: "Windsurf", toolCategory: "coding" },
-      { text: "Kiro (prev. Amazon Q Developer)", toolCategory: "coding" },
-      { text: "Claude Code", toolCategory: "coding" },
-      { text: "Midjourney", toolCategory: "creative" },
-      { text: "DALL·E / ChatGPT Images", toolCategory: "creative" },
-      { text: "Stable Diffusion / FLUX", toolCategory: "creative" },
-      { text: "Adobe Firefly", toolCategory: "creative" },
-      { text: "Canva AI (Magic Studio)", toolCategory: "creative" },
-      { text: "Suno / Udio (music)", toolCategory: "creative" },
-      { text: "ElevenLabs (voice / audio)", toolCategory: "creative" },
-      { text: "Notion AI", toolCategory: "productivity" },
-      { text: "Grammarly AI", toolCategory: "productivity" },
-      { text: "LangChain / LlamaIndex / AI frameworks", toolCategory: "advanced" },
-      { text: "Hugging Face / open-source models", toolCategory: "advanced" },
-      { text: "Other", toolCategory: "other" }
+      { text: "Write it myself fully", scores: { adaptability: 1 }, level: 1 },
+      { text: "Ask AI for a draft, then edit", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Co-write iteratively with AI", scores: { workflow: 2 }, level: 3 },
+      { text: "Provide style, constraints, and examples to AI", scores: { workflow: 3 }, level: 4 },
+      { text: "Maintain a reusable writing system with AI", scores: { system: 2, builder: 1 }, level: 5 }
     ]
   },
   {
-    id: "ai_application",
-    section: "tools",
-    title: "Which AI capabilities would be most valuable in your current role?",
-    type: "multi",
-    insight: 'Employers now value judgment and output quality over effort alone. Professionals who use AI to focus on higher-value work report greater job satisfaction and career growth.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    id: "useful_prompt",
+    section: "workflow",
+    title: "You discover a prompt that works really well. You:",
+    track: "workflow",
+    insight: 'Knowledge management is becoming a critical AI-era skill. Professionals who systematize their AI interactions compound their productivity gains over time.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
-      { text: "Automating repetitive tasks so I can focus on higher-value work", scores: { adaptability: 2, aiReadiness: 1 } },
-      { text: "Generating first drafts of content, code, or analysis", scores: { creative: 2, aiReadiness: 2 } },
-      { text: "Analyzing large datasets to find patterns I'd miss", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Helping me learn new skills and domains faster", scores: { adaptability: 2 } },
-      { text: "Improving communication — writing, presentations, translations", scores: { humanEdge: 1, aiReadiness: 1 } },
-      { text: "I'm not sure what AI could do for my specific work", scores: {} }
+      { text: "Forget about it later", scores: {}, level: 1 },
+      { text: "Screenshot or bookmark it", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Save it in a notes app", scores: { workflow: 1 }, level: 3 },
+      { text: "Add it to an organized prompt library", scores: { workflow: 2, system: 1 }, level: 4 },
+      { text: "Convert it into a reusable tool or template", scores: { system: 2, builder: 1 }, level: 5 }
+    ]
+  },
+  {
+    id: "new_model",
+    section: "workflow",
+    title: "A new AI model drops. You:",
+    track: "workflow",
+    insight: 'The AI tool landscape changes monthly. Professionals who evaluate new tools strategically — not just chase hype — make better adoption decisions.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
+    options: [
+      { text: "Ignore it — too much noise", scores: {}, level: 1 },
+      { text: "Try it once out of curiosity", scores: { adaptability: 1 }, level: 2 },
+      { text: "Compare it casually with what I use", scores: { adaptability: 2 }, level: 3 },
+      { text: "Evaluate it against my specific use cases", scores: { workflow: 2, system: 1 }, level: 4 },
+      { text: "Redesign workflows if it's meaningfully better", scores: { system: 2, builder: 1 }, level: 5 }
     ]
   },
 
-  // === WORK STYLE (4 questions) ===
+  // === SYSTEM — Architecture Thinking ===
   {
-    id: "work_value",
-    section: "work",
-    title: "What do you value most in your work?",
-    type: "multi",
-    insight: 'As AI absorbs routine tasks, it shifts human work toward judgment, strategy, and complex problem-solving. Roles centered on meaning, relationships, and creative expression are more resilient than those centered purely on efficiency and output volume.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
+    id: "large_project",
+    section: "system",
+    title: "Facing a large repetitive project, you:",
+    track: "operator",
+    insight: 'Organizations investing in workforce development alongside AI are 1.8x more likely to report better financial results. System-level thinking is the differentiator.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
     options: [
-      { text: "Solving complex, novel problems nobody else can crack", scores: { technical: 2, creative: 1 } },
-      { text: "Making a direct, visible impact on people's lives", scores: { humanEdge: 4 } },
-      { text: "Building and creating tangible things", scores: { creative: 3, technical: 1 } },
-      { text: "Leading teams and shaping organizational direction", scores: { leadership: 4 } },
-      { text: "Stability, predictability, and work-life balance", scores: { adaptability: -1, humanEdge: 1 } },
-      { text: "Continuous learning, growth, and new challenges", scores: { adaptability: 3 } }
+      { text: "Do it manually, piece by piece", scores: { adaptability: 1 }, level: 1 },
+      { text: "Ask AI to help with each piece", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Batch similar tasks together", scores: { workflow: 2 }, level: 3 },
+      { text: "Script or template the workflow", scores: { system: 2 }, level: 4 },
+      { text: "Build an agent or automation loop", scores: { builder: 3 }, level: 5 }
     ]
   },
   {
-    id: "change_response",
-    section: "work",
-    title: "When your industry undergoes major disruption, you typically…",
-    insight: 'Reskilling isn\'t a last resort — it\'s a strategic move. The professionals who treat learning as an ongoing process stay ahead of change instead of scrambling to catch up. Adaptability is the #1 predictor of career resilience.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
+    id: "hallucination",
+    section: "system",
+    title: "AI hallucination happens in something important. You:",
+    track: "operator",
+    insight: 'AI skills have surpassed all others as the most difficult for employers to find globally, with 72% reporting hiring difficulty. Knowing how to handle AI failures is a premium skill.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
     options: [
-      { text: "Move early — I prefer to be ahead of changes", scores: { adaptability: 3, aiReadiness: 1 } },
-      { text: "Observe first, then act decisively", scores: { adaptability: 2, leadership: 1 } },
-      { text: "Adapt when my role requires it", scores: { adaptability: 1 } },
-      { text: "Stay with proven approaches — I value consistency", scores: { humanEdge: 1, adaptability: -1 } }
+      { text: "Accept the risk — it's AI", scores: {}, level: 1 },
+      { text: "Double-check everything manually", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Add constraints to reduce errors", scores: { workflow: 2 }, level: 3 },
+      { text: "Build a validation process", scores: { system: 2 }, level: 4 },
+      { text: "Create an automated evaluation loop", scores: { builder: 2, system: 1 }, level: 5 }
     ]
   },
   {
-    id: "collaboration",
-    section: "work",
-    title: "How do you prefer to work?",
-    insight: 'The WEF framework emphasizes cross-functional "innovation pods" combining HR, technology, and operations. Individual contributors who can orchestrate AI tools become force multipliers; collaborative leaders who integrate AI into team workflows are in highest demand.<div class="source">— WEF Workforce Transformation Framework, Feb 2026</div>',
+    id: "consistent_results",
+    section: "system",
+    title: "You need consistent AI results across a team. You:",
+    track: "operator",
+    insight: 'By 2030, 70% of workplace skills will change because of AI. Teams that standardize AI workflows outperform those where everyone experiments individually.<div class="source">— BusinessWorld, Feb 2026; Forbes Career Strategy</div>',
     options: [
-      { text: "Independently — deep focus, minimal interruptions", scores: { technical: 1, creative: 1 } },
-      { text: "Small team — close collaboration with a few trusted people", scores: { humanEdge: 2, leadership: 1 } },
-      { text: "Cross-functional — I thrive connecting different groups and ideas", scores: { leadership: 3, adaptability: 1 } },
-      { text: "Client/stakeholder-facing — I'm energized by external interaction", scores: { humanEdge: 3 } }
+      { text: "Hope the prompts work each time", scores: {}, level: 1 },
+      { text: "Retry until it looks right", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Write better, more specific prompts", scores: { workflow: 2 }, level: 3 },
+      { text: "Create structured templates with examples", scores: { system: 2, workflow: 1 }, level: 4 },
+      { text: "Use programmatic control — APIs, system prompts, guardrails", scores: { builder: 3 }, level: 5 }
     ]
   },
   {
-    id: "decision_making",
-    section: "work",
-    title: "How do you typically make important professional decisions?",
-    insight: 'AI excels at data-driven pattern recognition but struggles with decisions involving ambiguity, ethics, stakeholder politics, and novel situations. Understanding your decision-making style reveals where you naturally complement AI — and where you might over-rely on it.<div class="source">— Deloitte Human Capital Trends 2025</div>',
+    id: "bottleneck",
+    section: "system",
+    title: "A work bottleneck appears. You:",
+    track: "operator",
+    insight: 'As AI absorbs routine tasks, it shifts human work toward judgment, strategy, and complex problem-solving. How you respond to bottlenecks reveals your operating level.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
     options: [
-      { text: "Data-driven — I gather evidence and analyze before deciding", scores: { technical: 2, aiReadiness: 1 } },
-      { text: "Intuition-guided — I trust my experience and gut feeling", scores: { humanEdge: 3 } },
-      { text: "Collaborative — I consult others and build consensus", scores: { leadership: 3, humanEdge: 1 } },
-      { text: "Experimental — I try things quickly and iterate based on results", scores: { adaptability: 3 } }
+      { text: "Work harder and push through", scores: { adaptability: 1 }, level: 1 },
+      { text: "Ask AI for help with the stuck part", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Optimize the specific steps that are slow", scores: { workflow: 2 }, level: 3 },
+      { text: "Remove unnecessary work entirely", scores: { system: 2 }, level: 4 },
+      { text: "Rebuild the workflow with AI at the center", scores: { builder: 2, system: 1 }, level: 5 }
     ]
   },
 
-  // === FUTURE (4 questions) ===
+  // === FUTURE — Readiness & Direction ===
   {
-    id: "five_year",
+    id: "agents_view",
     section: "future",
-    title: "Where do you want to be in 5 years?",
-    insight: 'By 2030, 70% of workplace skills will change because of AI. People with a clear direction can use AI to accelerate toward their goals. Those without one risk being swept along by default — the "safe" choice of staying still is becoming the riskiest strategy.<div class="source">— BusinessWorld, Feb 2026; Forbes Career Strategy</div>',
+    title: "AI agents replacing manual workflows — you think:",
+    insight: 'IDC predicts that by 2026, over 90% of organizations will feel the pain of the IT skills crisis. The demand for people who can work with AI agents far outstrips supply.<div class="source">— IDC Survey 2024; ManageEngine</div>',
     options: [
-      { text: "Leading a team, department, or organization", scores: { leadership: 4 } },
-      { text: "Recognized as a deep technical expert or thought leader", scores: { technical: 4 } },
-      { text: "Running my own business, consultancy, or freelance practice", scores: { adaptability: 2, leadership: 2 } },
-      { text: "Doing meaningful work with more autonomy and impact", scores: { creative: 1, humanEdge: 1, adaptability: 1 } },
-      { text: "Working in a completely different field than today", scores: { adaptability: 3 } },
-      { text: "Honestly, I'm still figuring that out", scores: { adaptability: 1 } }
+      { text: "Sounds like hype", scores: {}, level: 1 },
+      { text: "Interesting idea, watching from the side", scores: { adaptability: 1 }, level: 2 },
+      { text: "Probably useful — I'd try it", scores: { adaptability: 2 }, level: 3 },
+      { text: "Already experimenting with agents", scores: { builder: 2, system: 1 }, level: 4 },
+      { text: "Building or planning agent-based workflows", scores: { builder: 3 }, level: 5 }
     ]
   },
   {
-    id: "ai_invest",
+    id: "ideal_future",
     section: "future",
-    title: "How much time are you willing to invest in AI-related learning?",
-    insight: 'IDC predicts that by 2026, over 90% of organizations worldwide will feel the pain of the IT skills crisis, amounting to $5.5 trillion in losses. The demand for AI-skilled professionals far outstrips supply — even modest investment in AI learning creates outsized career returns.<div class="source">— IDC Survey 2024; ManageEngine, "The Future of Workforce Reskilling"</div>',
-    options: [
-      { text: "Significant — I'd dedicate several hours per week", scores: { aiReadiness: 3, adaptability: 2 } },
-      { text: "Moderate — a few hours per month, consistently", scores: { aiReadiness: 2, adaptability: 1 } },
-      { text: "Minimal — only if directly relevant to my current job", scores: { aiReadiness: 1 } },
-      { text: "None right now — I have other priorities", scores: {} }
-    ]
-  },
-  {
-    id: "risk_tolerance",
-    section: "future",
-    title: "How do you feel about career risk?",
-    insight: 'Calculated career moves — even lateral ones — build the adaptability that the AI era demands. The WEF reports that 40% of job skills will change by 2030, making intentional career planning more important than ever.<div class="source">— WEF Future of Jobs Report; Forbes Career Strategy, 2026</div>',
-    options: [
-      { text: "I seek out bold career moves", scores: { adaptability: 3, leadership: 1 } },
-      { text: "I take calculated risks when the upside is clear", scores: { adaptability: 2 } },
-      { text: "I prefer steady, incremental progression", scores: { humanEdge: 1 } },
-      { text: "Stability is my top priority right now", scores: { adaptability: -1 } }
-    ]
-  },
-  {
-    id: "biggest_concern",
-    section: "future",
-    title: "What's your biggest concern about AI and your career?",
+    title: "Your ideal future work style:",
     insight: 'Research shows that people who channel AI-related concern into action — learning, experimenting, networking — consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
     options: [
-      { text: "My current skills becoming obsolete", scores: { adaptability: 1 } },
-      { text: "Not knowing which AI skills to invest in", scores: { aiReadiness: 1 } },
-      { text: "AI replacing my specific role or function", scores: {} },
-      { text: "Falling behind peers who adopt AI faster", scores: { adaptability: 1, aiReadiness: 1 } },
-      { text: "Ethical concerns about AI in my industry", scores: { humanEdge: 3 } },
-      { text: "I'm not particularly concerned — I see mostly opportunity", scores: { aiReadiness: 2, adaptability: 1 } }
+      { text: "Mostly manual — AI as occasional helper", scores: { adaptability: 1 }, level: 1 },
+      { text: "AI assists me on specific tasks", scores: { usage_depth: 2 }, level: 2 },
+      { text: "AI collaborates with me throughout the day", scores: { workflow: 2, adaptability: 1 }, level: 3 },
+      { text: "AI-first workflow — I direct, AI executes", scores: { system: 2, workflow: 1 }, level: 4 },
+      { text: "I design systems where humans direct AI systems", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+  {
+    id: "new_tech",
+    section: "future",
+    title: "When facing completely new technology, you:",
+    insight: 'Calculated career moves — even lateral ones — build the adaptability that the AI era demands. 40% of job skills will change by 2030.<div class="source">— WEF Future of Jobs Report; Forbes Career Strategy, 2026</div>',
+    options: [
+      { text: "Wait until it's mature and proven", scores: {}, level: 1 },
+      { text: "Follow what friends or colleagues recommend", scores: { adaptability: 1 }, level: 2 },
+      { text: "Try the popular tools myself", scores: { adaptability: 2 }, level: 3 },
+      { text: "Explore deeply — read docs, test edge cases", scores: { system: 1, adaptability: 2 }, level: 4 },
+      { text: "Build something with it early", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+  {
+    id: "self_identify",
+    section: "future",
+    title: "Which feels closest to you right now?",
+    insight: 'Self-awareness about your current position is the first step to intentional growth. Where you are matters less than knowing where you want to go.<div class="source">— Deloitte Human Capital Trends 2025</div>',
+    options: [
+      { text: "AI observer — watching from the sidelines", scores: { usage_depth: 1 }, level: 1 },
+      { text: "Casual user — it helps sometimes", scores: { usage_depth: 2 }, level: 2 },
+      { text: "Power user — AI is part of my daily work", scores: { workflow: 2, usage_depth: 1 }, level: 3 },
+      { text: "Workflow optimizer — I design how AI fits into processes", scores: { system: 2, workflow: 1 }, level: 4 },
+      { text: "AI builder — I create tools and systems with AI", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+
+  // === BUILDER FAST-TRACK (only if ≥2 level-5 answers in calibration+early) ===
+  {
+    id: "deploy_team",
+    section: "system",
+    title: "You need to deploy AI capability for your team. You:",
+    track: "builder",
+    insight: 'Companies with 40%+ AI projects in production are set to double in six months. The ability to deploy AI for teams — not just yourself — is a leadership multiplier.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    options: [
+      { text: "Share useful prompts in chat", scores: { workflow: 1 }, level: 2 },
+      { text: "Create shared templates and guides", scores: { workflow: 2 }, level: 3 },
+      { text: "Build an internal tool or dashboard", scores: { system: 2, builder: 1 }, level: 4 },
+      { text: "Set up API-based services the team can use", scores: { builder: 2, system: 1 }, level: 5 },
+      { text: "Design an autonomous agent system", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+  {
+    id: "reliability",
+    section: "system",
+    title: "AI output reliability matters for your project. You:",
+    track: "builder",
+    insight: 'The ability to evaluate AI reliably is rare and extremely valuable. Most organizations lack systematic approaches to AI quality assurance.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    options: [
+      { text: "Manual spot-checking", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Sampling review on a percentage", scores: { workflow: 2 }, level: 3 },
+      { text: "Prompt constraints and structured output", scores: { system: 2 }, level: 4 },
+      { text: "Evaluation dataset with scoring criteria", scores: { builder: 2, system: 1 }, level: 5 },
+      { text: "Automated scoring and monitoring loop", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+  {
+    id: "biggest_bottleneck",
+    section: "future",
+    title: "Your biggest AI bottleneck right now:",
+    track: "builder",
+    insight: 'Understanding your specific bottleneck is the fastest path to your next level. Most people overestimate their tool knowledge and underestimate their system design gaps.<div class="source">— McKinsey Global Survey on AI, 2025</div>',
+    options: [
+      { text: "Learning the basics of prompting", scores: { usage_depth: 1 }, level: 1 },
+      { text: "Organizing my AI knowledge and prompts", scores: { workflow: 2 }, level: 3 },
+      { text: "Scaling workflows beyond myself", scores: { system: 2 }, level: 4 },
+      { text: "System integration and reliability", scores: { builder: 2 }, level: 5 },
+      { text: "Evaluation, monitoring, and governance", scores: { builder: 3 }, level: 5 }
+    ]
+  },
+
+  // === CROSS-CHECK (confidence verification — everyone sees 1) ===
+  {
+    id: "deadline_pressure",
+    section: "future",
+    title: "Deadline pressure hits. You:",
+    crossCheck: true,
+    insight: 'How you behave under pressure reveals your true operating level — not your aspirational one. The gap between "what I do when relaxed" and "what I do under stress" is your real skill floor.<div class="source">— Deloitte Human Capital Trends 2025</div>',
+    options: [
+      { text: "Revert to manual — no time to experiment", scores: { adaptability: -1 }, level: 1 },
+      { text: "Quick AI answers for speed", scores: { usage_depth: 1 }, level: 2 },
+      { text: "Reuse my existing workflows", scores: { workflow: 2 }, level: 3 },
+      { text: "Automate the urgent parts quickly", scores: { system: 2 }, level: 4 },
+      { text: "Rely on systems I've already built", scores: { builder: 2, system: 1 }, level: 5 }
     ]
   }
 ];

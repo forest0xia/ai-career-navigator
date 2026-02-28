@@ -1,150 +1,127 @@
-// Scoring engine — archetype determination, exposure/readiness, personalized insights
+// Scoring engine — adaptive branching + 5-level archetype determination
 
-// Normalize raw scores: each dimension gets different max opportunities,
-// so we normalize to 0-10 scale before archetype comparison
-function _normalizeScores(raw) {
-  // Approximate realistic max per dimension
-  // Adjusted for multi-select questions allowing multiple selections
-  const maxExpected = {
-    adaptability: 20, technical: 14, creative: 12,
-    leadership: 16, aiReadiness: 16, humanEdge: 16
-  };
-  const norm = {};
-  for (const d of Object.keys(maxExpected)) {
-    norm[d] = Math.max(0, (raw[d] || 0) / maxExpected[d]) * 10;
+// Determine which track to branch into after calibration
+function determineTrack(answers) {
+  let levelSum = 0, count = 0, builderHits = 0;
+  for (const [qid, ans] of Object.entries(answers)) {
+    const q = QUESTIONS.find(q => q.id === qid);
+    if (!q) continue;
+    const selections = ans instanceof Set ? [...ans] : [ans];
+    for (const idx of selections) {
+      const opt = q.options[idx];
+      if (!opt) continue;
+      levelSum += opt.level || 0;
+      count++;
+      if (opt.level >= 5) builderHits++;
+    }
   }
-  return norm;
+  const avg = count ? levelSum / count : 0;
+  if (builderHits >= 2) return "builder";
+  if (avg >= 3.5) return "operator";
+  if (avg >= 2.2) return "workflow";
+  return "explorer";
 }
 
-function determineArchetype(scores, tags) {
-  const n = _normalizeScores(scores);
-  const isTech = tags.includes("tech");
-
-  // Find the user's dominant dimension
-  const dims = ['adaptability', 'technical', 'creative', 'leadership', 'aiReadiness', 'humanEdge'];
-  const sorted = dims.slice().sort((a, b) => n[b] - n[a]);
-  const top = sorted[0];
-
-  const archetypeScores = {
-    aiArchitect:      n.technical * 2.5 + n.aiReadiness * 2 + (isTech ? 3 : 0),
-    aiCollaborator:   n.adaptability * 1.5 + n.aiReadiness * 1.5 + n.technical * 0.5,
-    humanEdge:        n.humanEdge * 3 + n.leadership * 1 - n.aiReadiness * 0.3,
-    strategicLeader:  n.leadership * 3 + n.adaptability * 0.8 + n.humanEdge * 0.5,
-    creativeInnovator:n.creative * 3 + n.adaptability * 0.8 + n.aiReadiness * 0.3,
-    careerPivot:      n.adaptability * 2 - n.technical * 0.8 - n.leadership * 0.5 + (tags.includes("early") ? 5 : 0)
-  };
-
-  let best = "aiCollaborator", bestScore = -Infinity;
-  for (const [k, v] of Object.entries(archetypeScores)) {
-    if (v > bestScore) { bestScore = v; best = k; }
-  }
-  return best;
+// Get questions for a track (calibration + track-specific + future + crosscheck)
+function getAdaptiveQuestions(track) {
+  const calibration = QUESTIONS.filter(q => q.section === 'calibration');
+  const trackQs = QUESTIONS.filter(q => q.track === track);
+  const future = QUESTIONS.filter(q => q.section === 'future' && !q.track && !q.crossCheck);
+  const crossCheck = QUESTIONS.filter(q => q.crossCheck);
+  // Explorer also gets some usage questions
+  const usage = track === 'explorer' ? QUESTIONS.filter(q => q.track === 'explorer') : [];
+  const pool = [...calibration, ...(track === 'explorer' ? usage : trackQs), ...future, ...crossCheck];
+  // Deduplicate
+  const seen = new Set();
+  return pool.filter(q => { if (seen.has(q.id)) return false; seen.add(q.id); return true; });
 }
 
-function computeAIExposure(scores, tags) {
-  let exposure = 50;
-  if (tags.includes("tech")) exposure += 15;
-  if (tags.includes("creative")) exposure += 10;
-  if (tags.includes("physical")) exposure -= 20;
-  if (tags.includes("regulated")) exposure -= 5;
-  exposure += scores.technical * 3;
-  exposure -= scores.humanEdge * 2;
-  return Math.max(10, Math.min(95, exposure));
-}
+// Calculate scores from all answers
+function calculateScores(answers) {
+  const raw = { usage_depth: 0, workflow: 0, system: 0, adaptability: 0, builder: 0 };
+  let levelSum = 0, levelCount = 0;
 
-function computeReadiness(scores) {
-  const max = 50;
-  const total = Object.values(scores).reduce((a, b) => a + Math.max(0, b), 0);
-  return Math.max(5, Math.min(95, Math.round((total / max) * 100)));
-}
-
-function getExposureLabel(pct) {
-  if (pct >= 75) return { label: "High Transformation Zone", color: "var(--warning)", detail: "AI will significantly reshape your work within 2–3 years. Act now for maximum advantage." };
-  if (pct >= 45) return { label: "Moderate Evolution Zone", color: "var(--accent2)", detail: "AI will augment parts of your work. Starting now gives you a major edge over peers who wait." };
-  return { label: "Gradual Shift Zone", color: "var(--success)", detail: "AI will change your field more slowly, but AI literacy still matters long-term." };
-}
-
-function getReadinessLabel(pct) {
-  if (pct >= 70) return { label: "Well Positioned", color: "var(--success)", detail: "Strong AI-relevant foundation. Focus on deepening expertise and staying ahead of trends." };
-  if (pct >= 40) return { label: "Building Momentum", color: "var(--accent2)", detail: "You're on the right track. Consistent effort on AI skills will significantly strengthen your position." };
-  return { label: "Early Stage — High Growth Potential", color: "var(--warning)", detail: "Significant room to grow. Even small investments in AI learning will yield outsized returns." };
-}
-
-// Generate personalized insight text based on user's unique profile
-function generateInsight(scores, exposure, readiness, archetypeKey, community) {
-  const dims = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
-  const sorted = dims.slice().sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
-  const top1 = sorted[0], top2 = sorted[1];
-  const lowest = sorted[sorted.length - 1];
-
-  const cn = typeof isCN === 'function' && isCN();
-
-  const dimNames = cn
-    ? { adaptability: "适应力", technical: "技术深度", creative: "创造力", leadership: "领导力", aiReadiness: "AI就绪度", humanEdge: "人类优势" }
-    : { adaptability: "adaptability", technical: "technical depth", creative: "creative thinking", leadership: "leadership", aiReadiness: "AI readiness", humanEdge: "human edge" };
-
-  const archLabel = cn && typeof ARCHETYPES_CN !== 'undefined' && ARCHETYPES_CN[archetypeKey]
-    ? ARCHETYPES_CN[archetypeKey].name
-    : (typeof ARCHETYPES !== 'undefined' && ARCHETYPES[archetypeKey] ? ARCHETYPES[archetypeKey].name : archetypeKey);
-
-  const parts = [];
-
-  if (cn) {
-    parts.push(`你的画像显示你最适合作为<strong style="color:var(--accent2)">${archLabel}</strong>。`);
-  } else {
-    parts.push(`Your profile identifies you as <strong style="color:var(--accent2)">${archLabel}</strong>.`);
-  }
-
-  if (cn) {
-    parts.push(`你最突出的优势组合是<strong style="color:var(--accent2)">${dimNames[top1]}</strong>和<strong style="color:var(--accent2)">${dimNames[top2]}</strong>——这种组合在 AI 时代尤其有价值，因为它很难被自动化复制。`);
-  } else {
-    parts.push(`Your standout combination of <strong style="color:var(--accent2)">${dimNames[top1]}</strong> and <strong style="color:var(--accent2)">${dimNames[top2]}</strong> is particularly valuable in the AI era — this pairing is difficult for automation to replicate.`);
-  }
-
-  if (exposure >= 65 && readiness >= 65) {
-    parts.push(cn
-      ? '你的 AI 影响度和准备度都很高——你处于最佳位置，可以将 AI 变革转化为职业加速器。'
-      : 'Both your AI exposure and readiness are high — you\'re in the best position to turn AI disruption into a career accelerator.');
-  } else if (exposure >= 65 && readiness < 45) {
-    parts.push(cn
-      ? '你的工作面临较高的 AI 变革，但准备度还有提升空间。好消息是：你的优势基础扎实，集中精力提升 AI 技能将带来显著回报。'
-      : 'Your work faces significant AI transformation, but your readiness has room to grow. The good news: your strength foundation is solid — focused AI upskilling will yield outsized returns.');
-  } else if (exposure < 45 && readiness >= 65) {
-    parts.push(cn
-      ? '虽然 AI 对你当前工作的直接影响较小，但你的高准备度意味着你可以主动选择如何利用 AI 来扩展你的影响力。'
-      : 'While AI\'s direct impact on your current work is moderate, your high readiness means you can proactively choose how to leverage AI to expand your impact.');
-  } else {
-    parts.push(cn
-      ? '你有充足的时间来建立 AI 能力。关键是从小处开始，保持一致性——每周投入少量时间学习 AI 工具，效果会随时间复利增长。'
-      : 'You have time to build AI capabilities at your own pace. The key is starting small and staying consistent — even a few hours per week on AI tools compounds dramatically over time.');
-  }
-
-  if (scores[lowest] <= 0) {
-    parts.push(cn
-      ? `你的<strong style="color:var(--text2)">${dimNames[lowest]}</strong>是最大的成长空间。即使小幅提升这个维度，也能显著拓宽你的职业选择。`
-      : `Your biggest growth opportunity is <strong style="color:var(--text2)">${dimNames[lowest]}</strong>. Even a modest improvement here would significantly broaden your career options.`);
-  }
-
-  if (community && community.totalSessions > 2) {
-    const pctile = Math.round(
-      community.avgReadiness < readiness
-        ? 50 + ((readiness - community.avgReadiness) / (100 - community.avgReadiness)) * 50
-        : (readiness / community.avgReadiness) * 50
-    );
-    if (pctile >= 70) {
-      parts.push(cn
-        ? `在所有参与评估的用户中，你的准备度高于大多数人。继续保持这种势头。`
-        : `Among all assessment participants, your readiness is above the majority. Keep building on this momentum.`);
-    } else if (pctile <= 30) {
-      parts.push(cn
-        ? `许多参与者的准备度比你更高——但这正是机会所在。从上面的行动 #1 开始，本周就行动起来。`
-        : `Many participants score higher on readiness — but that\'s exactly where the opportunity lies. Start with action #1 above this week.`);
+  for (const [qid, ans] of Object.entries(answers)) {
+    const q = QUESTIONS.find(q => q.id === qid);
+    if (!q) continue;
+    const selections = ans instanceof Set ? [...ans] : [ans];
+    for (const idx of selections) {
+      const opt = q.options[idx];
+      if (!opt) continue;
+      for (const [dim, val] of Object.entries(opt.scores || {})) {
+        raw[dim] = (raw[dim] || 0) + val;
+      }
+      levelSum += opt.level || 0;
+      levelCount++;
     }
   }
 
-  parts.push(cn
-    ? '世界经济论坛预测到 2030 年将新增 1.7 亿个岗位。主动规划的人始终优于被动等待的人。小而持续的行动会带来巨大的职业转变。'
-    : 'The WEF projects 170 million new roles by 2030. Those who act intentionally consistently outperform those who wait. Small, consistent steps compound into transformative career moves.');
+  // Normalize to 0-10
+  const maxExpected = { usage_depth: 18, workflow: 18, system: 16, adaptability: 12, builder: 16 };
+  const normalized = {};
+  for (const d of Object.keys(maxExpected)) {
+    normalized[d] = Math.min(10, Math.max(0, (raw[d] || 0) / maxExpected[d] * 10));
+  }
 
-  return parts.join(' ');
+  const avgLevel = levelCount ? levelSum / levelCount : 1;
+  return { raw, normalized, avgLevel };
 }
+
+// Determine archetype from scores
+function determineArchetype(scores) {
+  const { normalized, avgLevel } = scores;
+  // Primary signal: average level from option selections
+  // Secondary: dimension scores for tie-breaking
+  if (avgLevel >= 4.2 || normalized.builder >= 6) return 'architect';
+  if (avgLevel >= 3.4 || normalized.system >= 5) return 'operator';
+  if (avgLevel >= 2.4 || normalized.workflow >= 4) return 'hacker';
+  if (avgLevel >= 1.6 || normalized.usage_depth >= 3) return 'explorer';
+  return 'tourist';
+}
+
+// Cross-check: detect inconsistency between claimed level and pressure behavior
+function applyCrossCheck(scores, answers) {
+  const pressureAns = answers['deadline_pressure'];
+  if (pressureAns === undefined) return scores;
+  const pressureLevel = QUESTIONS.find(q => q.id === 'deadline_pressure')?.options[pressureAns]?.level || 0;
+  const gap = scores.avgLevel - pressureLevel;
+  // If pressure behavior is 2+ levels below claimed, adjust down
+  if (gap >= 2) {
+    scores.avgLevel = (scores.avgLevel + pressureLevel) / 2;
+  }
+  return scores;
+}
+
+// Generate personalized insight based on scores
+function generateInsight(archetypeKey, scores) {
+  const arch = ARCHETYPES[archetypeKey];
+  const { normalized } = scores;
+  const top = Object.entries(normalized).sort((a, b) => b[1] - a[1]);
+  const strongest = top[0][0];
+  const weakest = top[top.length - 1][0];
+
+  const dimNames = {
+    usage_depth: 'AI usage depth', workflow: 'workflow thinking',
+    system: 'system thinking', adaptability: 'adaptability', builder: 'builder instinct'
+  };
+  const dimNamesCN = {
+    usage_depth: 'AI 使用深度', workflow: '工作流思维',
+    system: '系统思维', adaptability: '适应力', builder: '构建者直觉'
+  };
+
+  const names = typeof isCN === 'function' && isCN() ? dimNamesCN : dimNames;
+  return `Your strongest signal is ${names[strongest]}. Your biggest growth opportunity is ${names[weakest]}. ${arch.blindSpot}`;
+}
+
+// Exposure/readiness labels (kept for compatibility)
+const EXPOSURE_LABELS = {
+  high: { label: "High Transformation Zone", detail: "AI will significantly reshape your work within 2–3 years." },
+  moderate: { label: "Moderate Evolution Zone", detail: "AI will augment parts of your work. Starting now gives you an edge." },
+  low: { label: "Gradual Change Zone", detail: "AI changes will come slower to your field, but AI literacy still matters." }
+};
+
+const READINESS_LABELS = {
+  strong: { label: "Well Prepared", detail: "Strong AI skill foundation. Focus on deepening expertise." },
+  building: { label: "Building Momentum", detail: "Right direction. Consistent AI skill-building will compound." },
+  early: { label: "Early Stage — High Growth Potential", detail: "Lots of room to grow. Small AI learning investments yield outsized returns." }
+};

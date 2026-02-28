@@ -35,20 +35,16 @@ function archDesc(key) {
 }
 function dimLabel(key) { return t('dim_' + key); }
 function exposureLabel(pct) {
-  if (isCN()) {
-    if (pct >= 75) return { label: EXPOSURE_LABELS_CN.high.label, color: "var(--warning)", detail: EXPOSURE_LABELS_CN.high.detail };
-    if (pct >= 45) return { label: EXPOSURE_LABELS_CN.moderate.label, color: "var(--accent2)", detail: EXPOSURE_LABELS_CN.moderate.detail };
-    return { label: EXPOSURE_LABELS_CN.low.label, color: "var(--success)", detail: EXPOSURE_LABELS_CN.low.detail };
-  }
-  return getExposureLabel(pct);
+  const labels = isCN() ? EXPOSURE_LABELS_CN : EXPOSURE_LABELS;
+  if (pct >= 75) return { label: labels.high.label, color: "var(--warning)", detail: labels.high.detail };
+  if (pct >= 45) return { label: labels.moderate.label, color: "var(--accent2)", detail: labels.moderate.detail };
+  return { label: labels.low.label, color: "var(--success)", detail: labels.low.detail };
 }
 function readinessLabel(pct) {
-  if (isCN()) {
-    if (pct >= 70) return { label: READINESS_LABELS_CN.strong.label, color: "var(--success)", detail: READINESS_LABELS_CN.strong.detail };
-    if (pct >= 40) return { label: READINESS_LABELS_CN.building.label, color: "var(--accent2)", detail: READINESS_LABELS_CN.building.detail };
-    return { label: READINESS_LABELS_CN.early.label, color: "var(--warning)", detail: READINESS_LABELS_CN.early.detail };
-  }
-  return getReadinessLabel(pct);
+  const labels = isCN() ? READINESS_LABELS_CN : READINESS_LABELS;
+  if (pct >= 70) return { label: labels.strong.label, color: "var(--success)", detail: labels.strong.detail };
+  if (pct >= 40) return { label: labels.building.label, color: "var(--accent2)", detail: labels.building.detail };
+  return { label: labels.early.label, color: "var(--warning)", detail: labels.early.detail };
 }
 
 function showScreen(id) {
@@ -63,11 +59,13 @@ function updateProgress() {
   $('progressText').textContent = pct + '%';
 }
 
+let currentTrack = null;
+
 function getFilteredQuestions() {
-  return QUESTIONS.filter(q => {
-    if (!q.showIf) return true;
-    return q.showIf.some(tag => userTags.includes(tag));
-  });
+  // Phase 1: calibration only
+  if (!currentTrack) return QUESTIONS.filter(q => q.section === 'calibration');
+  // Phase 2: full adaptive set
+  return getAdaptiveQuestions(currentTrack);
 }
 
 // Initialize on load
@@ -115,7 +113,7 @@ function renderWelcome() {
 }
 
 function startAssessment() {
-  userTags = []; answers = {}; currentQ = 0;
+  userTags = []; answers = {}; currentQ = 0; currentTrack = null;
   filteredQuestions = getFilteredQuestions();
   $('progressContainer').style.display = 'flex';
   showScreen('questionScreen');
@@ -182,7 +180,6 @@ function updateNextButton(q) {
 
 function selectOption(qId, idx, opt, btn) {
   answers[qId] = idx;
-  if (qId === 'domain' && opt.tags) { userTags = [...opt.tags]; filteredQuestions = getFilteredQuestions(); }
   document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   $('nextBtn').disabled = false;
@@ -209,38 +206,39 @@ function toggleMulti(qId, idx, btn, allOptions) {
 }
 
 function goNext() {
-  if (currentQ < filteredQuestions.length - 1) { currentQ++; showScreen('questionScreen'); renderQuestion(); }
+  if (currentQ < filteredQuestions.length - 1) {
+    currentQ++;
+    // After calibration (3 questions), determine track and expand question set
+    if (!currentTrack && currentQ >= 3) {
+      currentTrack = determineTrack(answers);
+      const newQs = getFilteredQuestions();
+      currentQ = newQs.findIndex(q => !answers.hasOwnProperty(q.id));
+      if (currentQ < 0) currentQ = newQs.length - 1;
+      filteredQuestions = newQs;
+    }
+    showScreen('questionScreen'); renderQuestion();
+  }
   else showResults();
 }
 function goBack() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
 
 function computeScores() {
-  const scores = { adaptability: 0, technical: 0, creative: 0, leadership: 0, aiReadiness: 0, humanEdge: 0 };
-  for (const q of filteredQuestions) {
-    if (q.type === "multi") continue;
-    const idx = answers[q.id];
-    if (idx === undefined) continue;
-    const opt = q.options[idx];
-    if (!opt || !opt.scores) continue;
-    for (const [dim, val] of Object.entries(opt.scores)) scores[dim] = (scores[dim] || 0) + val;
-  }
-  return scores;
+  const result = calculateScores(answers);
+  applyCrossCheck(result, answers);
+  return result;
 }
 
-function getToolSelections() {
-  const toolQ = QUESTIONS.find(q => q.id === "ai_tools");
-  if (!toolQ || !answers.ai_tools || !(answers.ai_tools instanceof Set)) return [];
-  return [...answers.ai_tools].map(i => toolQ.options[i]?.text).filter(Boolean);
-}
+function getToolSelections() { return []; }
 
 function generateActionContext(scores, archetypeKey) {
   const cn = isCN();
-  const dims = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
-  const sorted = dims.slice().sort((a, b) => (scores[b] || 0) - (scores[a] || 0));
+  const { normalized } = scores;
+  const dims = Object.keys(normalized);
+  const sorted = dims.slice().sort((a, b) => (normalized[b] || 0) - (normalized[a] || 0));
   const top = sorted[0], weak = sorted[sorted.length - 1];
   const dimNames = cn
-    ? { adaptability: "适应力", technical: "技术深度", creative: "创造力", leadership: "领导力", aiReadiness: "AI就绪度", humanEdge: "人类优势" }
-    : { adaptability: "adaptability", technical: "technical depth", creative: "creative thinking", leadership: "leadership", aiReadiness: "AI readiness", humanEdge: "human edge" };
+    ? { usage_depth: "AI 使用深度", workflow: "工作流思维", system: "系统思维", adaptability: "适应力", builder: "构建者直觉" }
+    : { usage_depth: "AI usage depth", workflow: "workflow thinking", system: "system thinking", adaptability: "adaptability", builder: "builder instinct" };
   if (cn) return `基于你在「${dimNames[top]}」方面的优势和「${dimNames[weak]}」方面的成长空间，以下建议专为你定制：`;
   return `Based on your strength in ${dimNames[top]} and growth opportunity in ${dimNames[weak]}, these recommendations are tailored for you:`;
 }
@@ -280,14 +278,13 @@ function showSavedResults(saved) {
 async function showResults() {
   $('progressContainer').style.display = 'none';
   const scores = computeScores();
-  const archetypeKey = determineArchetype(scores, userTags);
-  const exposure = computeAIExposure(scores, userTags);
-  const readiness = computeReadiness(scores);
-  const userTools = getToolSelections();
+  const archetypeKey = determineArchetype(scores);
+  const exposure = Math.round(scores.avgLevel / 5 * 100);
+  const readiness = Math.round(((scores.normalized.usage_depth + scores.normalized.workflow + scores.normalized.system) / 30) * 100);
+  const userTools = [];
 
-  currentSessionId = await Analytics.recordSession(answers, userTags, scores, archetypeKey, exposure, readiness, userTools);
+  currentSessionId = await Analytics.recordSession(answers, userTags, scores.normalized, archetypeKey, exposure, readiness, userTools);
 
-  // Push session ID to URL for sharing
   const url = new URL(window.location);
   url.searchParams.set('id', currentSessionId);
   history.replaceState(null, '', url);
@@ -300,62 +297,48 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   const expInfo = exposureLabel(exposure);
   const readInfo = readinessLabel(readiness);
   const community = Analytics.getCommunityStats();
-  const toolRankings = Analytics.getToolRankings();
 
   const dims = [
-    { key: 'adaptability', icon: '🔄' }, { key: 'technical', icon: '⚙️' },
-    { key: 'creative', icon: '💡' }, { key: 'leadership', icon: '🧭' },
-    { key: 'aiReadiness', icon: '🤖' }, { key: 'humanEdge', icon: '💎' }
+    { key: 'usage_depth', icon: '📊' }, { key: 'workflow', icon: '⚙️' },
+    { key: 'system', icon: '🧠' }, { key: 'adaptability', icon: '🔄' },
+    { key: 'builder', icon: '🏗️' }
   ];
-  const maxDim = Math.max(...Object.values(scores).map(v => Math.abs(v)), 1);
+  const norm = scores.normalized || scores;
+  const maxDim = Math.max(...dims.map(d => norm[d.key] || 0), 1);
 
   const MIN_COMMUNITY = 2;
   let communityHTML = '';
   if (community && community.totalSessions >= MIN_COMMUNITY) {
-    const topArch = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
-    const topArchPct = Math.round(topArch[1] / community.totalSessions * 100);
-    const archetypeLine = topArchPct < 100
-      ? `<p style="font-size:13px;color:var(--text2)"><strong style="color:var(--text)">${t('common_archetype')}</strong> ${archName(topArch[0])} (${topArchPct}%)</p>`
-      : '';
     communityHTML = `
     <div class="result-section">
       <h3>${t('community_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('community_desc').replace('{n}', community.totalSessions)}${community.totalSessions < 50 ? ' ' + t('community_early_note') : ''}</p>
       <div class="chart-container">
         <div id="radarChart"></div>
-        <div class="chart-legend">
-          <span><span class="legend-dot" style="background:#818cf8"></span>${t('legend_you')}</span>
-          <span><span class="legend-dot" style="background:rgba(156,163,184,0.5)"></span>${t('legend_community')}</span>
-        </div>
-      </div>
-      <div class="community-stats">
-        <div class="stat-card"><div class="stat-value">${community.totalSessions}</div><div class="stat-label">${t('stat_total')}</div></div>
-        <div class="stat-card">
-          <div class="stat-value" style="color:var(--text2)">${community.avgExposure}% <span style="color:#818cf8">(${exposure}%)</span></div>
-          <div class="stat-label">${t('stat_exposure')}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" style="color:var(--text2)">${community.avgReadiness}% <span style="color:#818cf8">(${readiness}%)</span></div>
-          <div class="stat-label">${t('stat_readiness')}</div>
-        </div>
-      </div>
-      <div style="margin-top:16px">
-        ${archetypeLine}
-        <p style="font-size:13px;color:var(--text2);margin-top:4px"><strong style="color:var(--text)">${t('readiness_dist')}</strong> ${community.readinessBuckets.strong} ${t('readiness_strong')} · ${community.readinessBuckets.building} ${t('readiness_building')} · ${community.readinessBuckets.early} ${t('readiness_early')}</p>
       </div>
     </div>`;
   }
 
-  let yourToolsHTML = '';
-  if (userTools.length > 0 && !userTools.includes("None of the above")) {
-    const advice = userTools.length >= 5 ? t('toolkit_many') : userTools.length >= 3 ? t('toolkit_mid') : t('toolkit_few');
-    yourToolsHTML = `
-    <div class="result-section">
-      <h3>${t('toolkit_title')}</h3>
-      <div>${userTools.map(ti => `<span class="tag">${ti}</span>`).join('')}</div>
-      <p style="font-size:13px;color:var(--text2);margin-top:12px">${t('using_tools').replace('{n}', userTools.length)} ${advice}</p>
-    </div>`;
-  }
+  // Strengths detected
+  const strengthsHTML = arch.strengths ? arch.strengths.map(s => {
+    const str = isCN() && ARCHETYPES_CN[archetypeKey]?.strengths ? ARCHETYPES_CN[archetypeKey].strengths[arch.strengths.indexOf(s)] || s : s;
+    return `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">✔ ${str}</div>`;
+  }).join('') : '';
+
+  // Blind spot
+  const blindSpot = isCN() && ARCHETYPES_CN[archetypeKey]?.blindSpot ? ARCHETYPES_CN[archetypeKey].blindSpot : arch.blindSpot;
+
+  // Next level hint
+  const nextLevel = isCN() && ARCHETYPES_CN[archetypeKey]?.nextLevel ? ARCHETYPES_CN[archetypeKey].nextLevel : arch.nextLevel;
+
+  // Evolution map
+  const levels = ['tourist', 'explorer', 'hacker', 'operator', 'architect'];
+  const levelNames = isCN()
+    ? { tourist: '🌱 AI 游客', explorer: '🧭 提示词探索者', hacker: '⚙️ 工作流黑客', operator: '🧠 AI 操作者', architect: '🏗️ 系统架构师' }
+    : { tourist: '🌱 AI Tourist', explorer: '🧭 Prompt Explorer', hacker: '⚙️ Workflow Hacker', operator: '🧠 AI Operator', architect: '🏗️ System Architect' };
+  const evolutionMap = levels.map(l =>
+    `<span style="padding:6px 12px;border-radius:6px;font-size:13px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
+  ).join('<span style="color:var(--text2);opacity:0.3;margin:0 2px">→</span>');
 
   $('resultsContent').innerHTML = `
     <div class="results-header">
@@ -364,42 +347,30 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       <p class="subtitle" style="max-width:560px;margin:0 auto">${archDesc(archetypeKey)}</p>
     </div>
     <div class="result-section">
-      <h3>${t('impact_title')}</h3>
-      <div class="score-label"><span>${t('exposure_label')} — ${expInfo.label}</span><span>${exposure}%</span></div>
-      <div class="score-bar"><div class="score-fill" style="width:${exposure}%;background:${expInfo.color}"></div></div>
-      <p style="font-size:14px;color:var(--text2);margin:8px 0 16px">${expInfo.detail}</p>
-      <div class="score-label"><span>${t('readiness_label')} — ${readInfo.label}</span><span>${readiness}%</span></div>
-      <div class="score-bar"><div class="score-fill" style="width:${readiness}%;background:${readInfo.color}"></div></div>
-      <p style="font-size:14px;color:var(--text2);margin:8px 0 0">${readInfo.detail} ${t('readiness_action_hint')}</p>
+      <h3>${t('evolution_title') || '🗺️ Your Position'}</h3>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:16px">${evolutionMap}</div>
+      ${nextLevel ? `<p style="font-size:13px;color:var(--text2);line-height:1.6;font-style:italic">⬆️ ${nextLevel}</p>` : ''}
     </div>
-    <div class="result-section" id="dashboardSection"></div>
-    ${communityHTML}
+    <div class="result-section">
+      <h3>${t('detected_title') || '🔍 What We Detected'}</h3>
+      ${strengthsHTML}
+      ${blindSpot ? `<p style="font-size:14px;color:var(--text2);margin-top:12px;line-height:1.6">⚠️ <strong>${t('blind_spot') || 'Blind spot'}:</strong> ${blindSpot}</p>` : ''}
+    </div>
     <div class="result-section">
       <h3>${t('strength_title')}</h3>
       ${dims.map(d => {
-        const val = Math.max(0, scores[d.key]);
-        const pct = Math.round((val / maxDim) * 100);
-        return `<div class="score-label"><span>${d.icon} ${dimLabel(d.key)}</span><span>${val}</span></div>
+        const val = Math.round((norm[d.key] || 0) * 10) / 10;
+        const pct = Math.round((val / 10) * 100);
+        return `<div class="score-label"><span>${d.icon} ${dimLabel(d.key)}</span><span>${val.toFixed(1)}</span></div>
           <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:var(--accent2)"></div></div>`;
       }).join('')}
     </div>
-    ${renderToolRankings(toolRankings, userTools)}
+    ${communityHTML}
     <div class="result-section">
       <h3>${t('action_title')}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
       <p style="font-size:13px;color:var(--accent2);margin-bottom:16px;font-style:italic">${generateActionContext(scores, archetypeKey)}</p>
       ${arch.actions.map((a, i) => renderActionItem(a, i, archetypeKey, scores)).join('')}
-    </div>
-    <div class="result-section">
-      <h3>${t('skills_title')}</h3>
-      <p style="font-size:13px;color:var(--text2);margin:-4px 0 6px;line-height:1.5;font-style:italic;opacity:0.55">${t('skills_mindset')}</p>
-      <p style="font-size:11px;color:var(--text2);margin:0 0 10px;opacity:0.55">${t('tap_tag_hint')}</p>
-      <div>${getItems('skills', archetypeKey, arch).map(s => renderExpandTag(s)).join('')}</div>
-    </div>
-    <div class="result-section">
-      <h3>${t('roles_title')}</h3>
-      <p style="font-size:11px;color:var(--text2);margin:-4px 0 10px;opacity:0.55">${t('tap_tag_hint')}</p>
-      <div>${getItems('roles', archetypeKey, arch).map(r => renderExpandTag(r)).join('')}</div>
     </div>
     ${arch.resources ? `
     <div class="result-section">
@@ -413,11 +384,6 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       <div id="resourcesEN" style="display:none">${renderResources(arch.resources)}</div>
       ` : renderResources(arch.resources)}
     </div>` : ''}
-    <div class="result-section">
-      <h3>${t('insight_title')}</h3>
-      <p style="font-size:15px;color:var(--text2);line-height:1.7">${generateInsight(scores, exposure, readiness, archetypeKey, community)}</p>
-      <p style="font-size:12px;color:var(--text2);margin-top:12px;font-style:italic">${t('insight_sources')}</p>
-    </div>
     <div class="restart-btn">
       <button class="btn primary" onclick="openFeedback()">${t('btn_feedback')}</button>
       <button class="btn secondary" onclick="retakeAssessment()">${t('btn_retake')}</button>
@@ -438,7 +404,6 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
 
   showScreen('results');
 
-  // Populate share URL
   if (currentSessionId) {
     const shareUrl = new URL(window.location);
     shareUrl.searchParams.set('id', currentSessionId);
@@ -446,16 +411,11 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     if ($('shareId')) $('shareId').textContent = currentSessionId;
   }
 
-  // Render charts after DOM is ready
   setTimeout(async () => {
     if (community && community.totalSessions >= MIN_COMMUNITY) {
-      drawRadarChart('radarChart', scores, community.avgScores);
+      drawRadarChart('radarChart', norm, community.avgScores);
     }
-
-    // Dashboard: scatter plots + sentiment chart
-    const allSessions = await Analytics.getScatterData();
-    if (allSessions.length >= MIN_COMMUNITY) {
-      const currentPt = { exposure, readiness, aiReadiness: scores.aiReadiness || 0, adaptability: scores.adaptability || 0 };
+  }, 100);
 
       // Sentiment distribution for ai_perception question
       const perceptionQ = QUESTIONS.find(q => q.id === 'ai_perception');
