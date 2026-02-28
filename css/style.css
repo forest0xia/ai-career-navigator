@@ -47,6 +47,8 @@ header {
 .tag.has-detail:hover { background: var(--accent-glow); border-color: var(--accent); }
 .tag-popover { display: none; position: fixed; max-width: 400px; padding: 14px 16px; font-size: 13px; line-height: 1.65; font-weight: 400; color: var(--text-secondary); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 100; white-space: normal; pointer-events: none; }
 .tag-popover.visible { display: block; }
+.tag-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 99; }
+.tag-overlay.visible { display: block; }
 
 .progress-container { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; margin-left: 32px; }
 .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }

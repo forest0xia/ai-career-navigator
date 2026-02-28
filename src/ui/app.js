@@ -527,6 +527,9 @@ function showTagDetail(el) {
   hideTagDetail();
   const pop = el.querySelector('.tag-popover');
   if (!pop) return;
+  let overlay = document.getElementById('tagOverlay');
+  if (!overlay) { overlay = document.createElement('div'); overlay.id = 'tagOverlay'; overlay.className = 'tag-overlay'; overlay.onclick = hideTagDetail; document.body.appendChild(overlay); }
+  overlay.classList.add('visible');
   pop.classList.add('visible');
   const tr = el.getBoundingClientRect();
   const w = Math.min(400, window.innerWidth - 16);
@@ -547,6 +550,7 @@ function hideTagDetail() {
     p.classList.remove('visible');
     p.style.bottom = ''; p.style.top = ''; p.style.left = ''; p.style.width = '';
   });
+  document.getElementById('tagOverlay')?.classList.remove('visible');
 }
 function renderResources(res) {
   return `
