@@ -87,6 +87,8 @@ const LANGS = {
     share_note: "Bookmark or copy this URL to revisit your report anytime. Community data updates live, but your results stay the same.",
     share_copy: "Copy URL",
     share_id: "Your report ID",
+    view_feedbacks: "📋 View Community Feedback",
+    feedbacks_title: "📋 Community Feedback",
     btn_export: "📥 Export All Data",
     // Feedback
     fb_title: "How useful was this assessment?",
@@ -179,6 +181,8 @@ const LANGS = {
     share_note: "收藏或复制此链接，随时查看你的报告。社区数据会实时更新，但你的个人结果保持不变。",
     share_copy: "复制链接",
     share_id: "你的报告 ID",
+    view_feedbacks: "📋 查看社区反馈",
+    feedbacks_title: "📋 社区反馈",
     btn_export: "📥 导出全部数据",
     fb_title: "这次评估对你有帮助吗？",
     fb_desc: "你的反馈帮助我们改进。请对以下维度评分：",

@@ -414,6 +414,10 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       </div>
       <p style="font-size:12px;color:var(--text2);margin-top:6px">${t('share_id')}: <code id="shareId"></code></p>
     </div>
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn secondary" onclick="showFeedbackViewer()">${t('view_feedbacks')}</button>
+    </div>
+    <div id="feedbackViewer" style="display:none"></div>
   `;
 
   showScreen('results');
@@ -491,6 +495,53 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       $('dashboardSection').style.display = 'none';
     }
   }, 100);
+}
+
+// Feedback viewer with pagination
+let _fbPage = 1;
+const _fbPerPage = 5;
+
+async function showFeedbackViewer(page) {
+  _fbPage = page || 1;
+  const viewer = $('feedbackViewer');
+  viewer.style.display = 'block';
+  viewer.innerHTML = `<div class="result-section" style="margin-top:20px"><p style="color:var(--text2)">${isCN() ? '加载中...' : 'Loading...'}</p></div>`;
+
+  const { rows, total } = await Analytics.getFeedbacks(_fbPage, _fbPerPage);
+  const totalPages = Math.ceil(total / _fbPerPage);
+  const archNames = isCN() && typeof ARCHETYPES_CN !== 'undefined' ? ARCHETYPES_CN : ARCHETYPES;
+  const starStr = (n) => '★'.repeat(n || 0) + '☆'.repeat(5 - (n || 0));
+
+  let html = `<div class="result-section" style="margin-top:20px"><h3>${t('feedbacks_title')}</h3>`;
+  if (rows.length === 0) {
+    html += `<p style="color:var(--text2)">${isCN() ? '暂无反馈' : 'No feedback yet'}</p>`;
+  } else {
+    html += rows.map(r => {
+      const fb = r.feedback;
+      const name = archNames[r.archetype]?.name || r.archetype;
+      const date = new Date(r.created_at).toLocaleDateString();
+      return `<div class="action-item">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:8px">
+          <span>${name}</span><span>${date}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text2)">
+          ${fb.ratings ? Object.entries(fb.ratings).filter(([,v]) => v).map(([k,v]) => `<span style="margin-right:12px">${k}: <span style="color:var(--warning)">${starStr(v)}</span></span>`).join('') : ''}
+        </div>
+        ${fb.comment ? `<p style="font-size:14px;color:var(--text);margin-top:8px">"${fb.comment}"</p>` : ''}
+      </div>`;
+    }).join('');
+
+    // Pagination
+    if (totalPages > 1) {
+      html += `<div style="display:flex;justify-content:center;gap:8px;margin-top:16px">`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="btn ${p === _fbPage ? 'primary' : 'secondary'}" style="padding:6px 14px;font-size:13px" onclick="showFeedbackViewer(${p})">${p}</button>`;
+      }
+      html += `</div>`;
+    }
+  }
+  html += `<p style="font-size:12px;color:var(--text2);margin-top:12px">${total} ${isCN() ? '条反馈' : 'feedback(s) total'}</p></div>`;
+  viewer.innerHTML = html;
 }
 
 function retakeAssessment() {

@@ -2,7 +2,7 @@
 
 A research-backed, interactive web assessment that helps professionals understand their position in the AI era — and gives them concrete, actionable steps to future-proof their careers.
 
-**[Live Demo →](#)** · **No build step** · **No dependencies** · **Pure HTML/CSS/JS**
+**[Live Demo →](https://forest0xia.github.io/ai-career-navigator)** · **No build step** · **No frontend dependencies** · **Pure HTML/CSS/JS**
 
 ---
 

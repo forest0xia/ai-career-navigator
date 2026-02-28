@@ -165,7 +165,7 @@ const Analytics = {
     }));
   },
 
-  // Scatter data: fetch lightweight from Supabase (only exposure/readiness/scores)
+  // Scatter data
   async getScatterData() {
     try {
       const rows = await _sbGet('sessions', 'select=exposure,readiness,scores');
@@ -174,7 +174,24 @@ const Analytics = {
         aiReadiness: r.scores?.aiReadiness || 0, adaptability: r.scores?.adaptability || 0
       }));
     } catch {
-      return []; // Offline — no scatter data
+      return [];
+    }
+  },
+
+  async getFeedbacks(page, perPage) {
+    const offset = (page - 1) * perPage;
+    try {
+      const rows = await _sbGet('sessions',
+        `select=id,created_at,archetype,feedback&feedback=not.is.null&order=created_at.desc&offset=${offset}&limit=${perPage}`,
+      );
+      // Get total count via a separate head request
+      const resp = await fetch(`${SUPABASE_URL}/rest/v1/sessions?feedback=not.is.null&select=id`, {
+        method: 'HEAD', headers: { ..._sbHeaders(), 'Prefer': 'count=exact' }
+      });
+      const total = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0');
+      return { rows, total };
+    } catch {
+      return { rows: [], total: 0 };
     }
   }
 };

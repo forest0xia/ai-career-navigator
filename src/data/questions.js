@@ -25,7 +25,8 @@ const QUESTIONS = [
       { text: "Business / Management / Operations / Finance", scores: { leadership: 2, humanEdge: 1 }, tags: ["business"] },
       { text: "Healthcare / Education / Legal / Government", scores: { humanEdge: 3 }, tags: ["regulated"] },
       { text: "Trades / Manufacturing / Logistics / Retail", scores: { adaptability: 1 }, tags: ["physical"] },
-      { text: "Student / Career Changer / Between roles", scores: { adaptability: 2 }, tags: ["early"] }
+      { text: "Student / Career Changer / Between roles", scores: { adaptability: 2 }, tags: ["early"] },
+      { text: "Other", scores: { adaptability: 1 }, tags: ["business"] }
     ]
   },
   {
@@ -53,7 +54,8 @@ const QUESTIONS = [
       { text: "Meetings, strategy, managing people", scores: { leadership: 3, humanEdge: 1 } },
       { text: "Client/patient/student interaction, advising", scores: { humanEdge: 4 } },
       { text: "Hands-on physical or operational work", scores: { humanEdge: 3, adaptability: 1 } },
-      { text: "Administrative tasks, data entry, processing", scores: { adaptability: -1 } }
+      { text: "Administrative tasks, data entry, processing", scores: { adaptability: -1 } },
+      { text: "A mix of the above / Other", scores: { adaptability: 1 } }
     ]
   },
   {
@@ -191,6 +193,23 @@ const QUESTIONS = [
       { text: "Comfortable — I can learn with some guidance and practice", scores: { aiReadiness: 1, adaptability: 1 } },
       { text: "Cautious — I prefer proven, well-documented tools", scores: { humanEdge: 1 } },
       { text: "Uncomfortable — technology isn't my strength", scores: {} }
+    ]
+  },
+  {
+    id: "ai_depth",
+    section: "ai",
+    title: "Which of these have you actually done? (Select all that apply)",
+    desc: "Be honest — this helps us calibrate your recommendations accurately.",
+    type: "multi",
+    insight: 'There is a wide gap between knowing about AI and applying it. This question helps distinguish awareness from hands-on experience, which matters for career positioning.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    options: [
+      { text: "Written detailed prompts with system instructions or few-shot examples", scores: { aiReadiness: 1 } },
+      { text: "Built a workflow that connects AI to other tools (APIs, automation)", scores: { aiReadiness: 2, technical: 1 } },
+      { text: "Fine-tuned or trained a model on custom data", scores: { aiReadiness: 3, technical: 2 } },
+      { text: "Evaluated AI output quality systematically (not just casual use)", scores: { aiReadiness: 1, humanEdge: 1 } },
+      { text: "Deployed an AI-powered feature or product to real users", scores: { aiReadiness: 3, technical: 2, leadership: 1 } },
+      { text: "Taught others how to use AI tools effectively", scores: { leadership: 2, aiReadiness: 1 } },
+      { text: "None of these yet", scores: {} }
     ]
   },
 
