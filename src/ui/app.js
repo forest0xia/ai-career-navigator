@@ -308,7 +308,7 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   ];
   const maxDim = Math.max(...Object.values(scores).map(v => Math.abs(v)), 1);
 
-  const MIN_COMMUNITY = 10;
+  const MIN_COMMUNITY = 2;
   let communityHTML = '';
   if (community && community.totalSessions >= MIN_COMMUNITY) {
     const topArch = Object.entries(community.archetypeCounts).sort((a, b) => b[1] - a[1])[0];
