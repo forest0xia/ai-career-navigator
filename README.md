@@ -1,6 +1,6 @@
 # AI Career Navigator
 
-A research-backed, interactive web assessment that helps professionals understand their position in the AI era — and gives them concrete, actionable steps to future-proof their careers.
+An interactive web assessment that helps professionals understand their position in the AI era — with personalized insights, community comparison, and concrete next steps.
 
 **[Live Demo →](https://forest0xia.github.io/ai-career-navigator)** · **No build step** · **No frontend dependencies** · **Pure HTML/CSS/JS**
 
@@ -8,275 +8,142 @@ A research-backed, interactive web assessment that helps professionals understan
 
 ## What It Does
 
-Users complete a 6–8 minute in-depth assessment across 5 sections and receive a personalized career profile including:
+Users complete a 6–8 minute adaptive assessment and receive a personalized career profile including:
 
-- **AI Career Archetype** — one of 6 research-backed profiles (AI Architect, AI Collaborator, Human Edge Specialist, Strategic Leader, Creative Innovator, Career Reinventor)
-- **AI Exposure Score** — how much AI will transform their specific work
-- **Readiness Score** — how prepared they are for the shift
-- **6-Dimension Strength Profile** — Adaptability, Technical Depth, Creative Thinking, Leadership, AI Readiness, Human Edge
-- **Personalized Action Plan** — 5 concrete steps with specific how-to instructions and resource links
-- **AI Toolkit Analysis** — what tools they use vs. what the community uses (ranked)
-- **Community Comparison** — radar chart and stats comparing against all other users
-- **Skills & Roles** — recommended skills to develop and roles to explore
-
-## Research Sources
-
-All questions and insights are grounded in current professional research:
-
-| Source | Key Data |
-|--------|----------|
-| [WEF Future of Jobs Report 2025](https://www.weforum.org/publications/the-future-of-jobs-report-2025/) | 170M new roles created, 92M eliminated by 2030 (net +78M) |
-| [Forbes Career Strategy, Feb 2026](https://www.forbes.com/sites/carolinecastrillon/2026/02/16/40-of-job-skills-will-change-by-2030-heres-how-to-prepare/) | 40% of job skills will change by 2030; durable skills outperform technical ones |
-| [Deloitte Human Capital Trends 2025](https://www.deloitte.com/us/en/insights/topics/talent/human-capital-trends/2025.html) | Orgs investing in workforce development are 1.8x more likely to report better financial results |
-| [ManpowerGroup Talent Shortage 2026](https://www.wjfw.com/online_features/press_releases/global-talent-shortage-reaches-turning-point-as-ai-skills-claim-top-spot/) | AI Model & App Development (20%) and AI Literacy (19%) are the top hard-to-find skills globally |
-| [IDC Skills Crisis Forecast](https://insights.manageengine.com/artificial-intelligence/ai-driven-employee-training/) | By 2026, 90%+ of orgs will feel the IT skills crisis — $5.5T in projected losses |
-| [BusinessWorld, Feb 2026](https://www.businessworld.in/article/ai-upskilling-the-best-career-insurance-for-youth-in-todays-changing-job-market-571053) | Professionals with AI skills command a 56% wage premium |
+- **AI Maturity Level** — one of 6 progression levels (Observer → Tourist → Explorer → Workflow Hacker → Operator → System Architect)
+- **6-Axis Radar Profile** — Adoption, Mindset, Craft, Tech Depth, Reliability, Agents (0-100% each)
+- **Sentiment Profile** — psychological orientation (Curious Explorer, Anxious Achiever, Confident Builder, etc.)
+- **AI Exposure Score** — how much AI will transform your specific industry
+- **Readiness Score** — how prepared you are for the shift
+- **Personalized Missions** — 3 targeted actions based on your weakest axes, with success metrics
+- **Skills & Roles** — recommended skills to develop and roles to explore, tailored to your gaps
+- **Community Comparison** — radar chart + grid cards comparing your scores against all users
+- **AI Toolkit Analysis** — what tools you use vs. community rankings (top 8)
+- **Industry Insights** — automation rates and motivational data specific to your domain
 
 ## Assessment Structure
 
-### 23 Questions Across 5 Sections
+### Adaptive Branching (3 Scan Types)
 
-| Section | Questions | Purpose |
-|---------|-----------|---------|
-| **Your Current Role** | 4 | Domain, experience, daily tasks, team size — adapts subsequent questions for tech vs. non-tech |
-| **Skills & Learning** | 5 | Strongest skills, skill combinations, learning style, cross-functional work, recent learning velocity |
-| **AI Familiarity** | 3–4 | Current AI usage, perception of AI, technical depth (adaptive) |
-| **AI Tools & Agents** | 2 | Multi-select tool inventory (17 tools), most-valued AI capability |
-| **Work Style & Values** | 4 | Work values, disruption response, collaboration style, decision-making approach |
-| **Future Orientation** | 4 | 5-year goals, learning investment, risk tolerance, biggest AI concern |
+| Scan | Trigger | Questions | Focus |
+|------|---------|-----------|-------|
+| **Quick Scan** | Low calibration scores | ~8 | Adoption + Mindset basics |
+| **Core Scan** | Most users | ~16 | Balanced across all 6 axes |
+| **Advanced Scan** | High calibration scores | ~21 | Full depth including Reliability + Agents |
 
-### Adaptive Logic
+5 calibration questions determine which scan path you take. Progress bar shows current stage (Calibration → Scan → Wrap-up).
 
-- First question (domain) sets user tags (`tech`, `creative`, `business`, `regulated`, `physical`, `early`)
-- Technical AI depth question only shown to tech professionals
-- General tech comfort question only shown to non-tech professionals
-- Answer options within questions can be conditionally shown based on tags
+### 6 Radar Axes
 
-### 6 Career Archetypes
+| Axis | What It Measures |
+|------|-----------------|
+| **Adoption** | How embedded AI is in your life/work — frequency, breadth, dependency |
+| **Mindset** | Curiosity, confidence, motivation, trust posture, learning habits |
+| **Craft** | Day-to-day skill — iteration, templates, reuse, quality control |
+| **Tech Depth** | Technical integration — extensions, automation, APIs, product integration |
+| **Reliability** | Correctness discipline — verification, structured outputs, eval, monitoring |
+| **Agents** | Autonomy & orchestration — multi-step tool use, agent loops, production usage |
 
-| Archetype | Profile |
-|-----------|---------|
-| 🏗️ **AI Architect** | Deep technical + high AI readiness → build AI systems |
-| 🤝 **AI Collaborator** | Solid adaptability + growing AI fluency → master working with AI |
-| 💎 **Human Edge Specialist** | Strong human skills → double down on what AI can't replicate |
-| 🧭 **Strategic Leader** | Leadership + forward-looking → lead AI transformation |
-| 🎨 **Creative Innovator** | Creative thinking + adaptability → AI as creative amplifier |
-| 🔄 **Career Reinventor** | High adaptability + inflection point → build AI-native skills from scratch |
+### Scoring
 
-Each archetype includes 5 action items with:
-- **What** to do (the goal)
-- **How** to do it (specific steps, timelines, tools)
-- **Resource links** (Google AI Essentials, Coursera, Hugging Face, NIST, etc.)
+- Per-axis: `points / max_possible × 100` (only counts questions the user actually answered)
+- Overall: weighted sum (Craft 25%, Reliability 20%, Mindset/Tech/Agents 15% each, Adoption 10%)
+- Guardrails: low adoption+craft caps at Tourist; high reliability floors at Operator; high agents+reliability floors at Architect
+- Cross-check: deadline pressure behavior adjusts score if inconsistent with claimed level
 
-## Analytics & Data Collection
+### 6 Progression Levels
 
-All data is stored in `localStorage` (browser-side, no server needed).
+| Level | Overall Score | Description |
+|-------|--------------|-------------|
+| 👀 Observer | 0–20 | Watching from the sidelines |
+| 🌱 Tourist | 21–35 | Occasional AI user |
+| 🧭 Explorer | 36–50 | Regular user, discovering better prompts |
+| ⚙️ Workflow Hacker | 51–65 | Templates, processes, daily AI integration |
+| 🧠 Operator | 66–80 | Systems thinker, pipeline designer |
+| 🏗️ Architect | 81–100 | Builds tools and systems others use |
 
-### What's Recorded Per Session
+## Data Sources
 
-```json
-{
-  "id": "m1abc123",
-  "ts": "2026-02-27T17:30:00.000Z",
-  "answers": { "domain": 0, "experience": 1, "ai_tools": [0, 1, 4] },
-  "tags": ["tech"],
-  "scores": { "adaptability": 8, "technical": 12, "creative": 3, "leadership": 4, "aiReadiness": 10, "humanEdge": 2 },
-  "archetype": "aiArchitect",
-  "exposure": 78,
-  "readiness": 72,
-  "toolSelections": ["ChatGPT / GPT-4", "Claude (Anthropic)", "GitHub Copilot / Cursor / Windsurf"],
-  "feedback": {
-    "ratings": { "accuracy": 4, "actionability": 5, "insight": 4, "overall": 4 },
-    "comment": "Very actionable advice"
-  }
-}
-```
+Questions include contextual insights drawn from public industry reports:
 
-### Community Features
-
-After 2+ sessions, the results page shows:
-
-- **Radar chart** — your 6-dimension profile overlaid on community average
-- **Stats cards** — total assessments, average exposure, average readiness
-- **Archetype distribution** — most common archetype with percentage
-- **Readiness breakdown** — how many users are well-positioned vs. building vs. early stage
-- **Tool rankings** — bar chart of most popular AI tools across all users, with your selections highlighted
-
-### Feedback Collection
-
-Users can rate the assessment on 4 dimensions (1–5 stars each):
-- Accuracy of archetype assignment
-- Actionability of the advice
-- Quality of insights and data
-- Overall usefulness
-
-Plus optional free-text comments. All feedback is stored per session for analysis.
-
-### Data Export
-
-Click "Export All Data" on the results page to download a JSON file containing all sessions, answers, scores, and feedback — ready for analysis in Python, Excel, or any data tool.
+| Source | Key Data Used |
+|--------|--------------|
+| WEF Future of Jobs Report 2025 | 170M new roles by 2030; 59% workforce needs reskilling |
+| Deloitte State of AI in the Enterprise 2026 | 60% worker AI access; 1.8x financial performance with AI investment |
+| ManpowerGroup 2026 Global Talent Shortage | 72% hiring difficulty for AI skills; 56% wage premium |
+| Forbes Career Strategy, Feb 2026 | 40% of job skills will change by 2030 |
+| McKinsey Global Survey on AI, 2025 | 25% of work hours automatable; 3x faster adoption with systems mindset |
 
 ## Quick Start
 
 ```bash
-# Clone
 git clone git@github.com:forest0xia/ai-career-navigator.git
 cd ai-career-navigator
-
-# Open in browser (no build step needed)
 open index.html
-```
-
-Or serve locally:
-
-```bash
-python3 -m http.server 8000
-# Visit http://localhost:8000
+# Or: python3 -m http.server 8000
 ```
 
 ## Project Structure
 
 ```
 ai-career-navigator/
-├── index.html              # Entry point — screens, modals, script loading
-├── css/
-│   └── style.css           # Dark theme, responsive layout, animations
+├── index.html
+├── css/style.css
 ├── src/
-│   ├── data/               # Pure data — no logic, easy to edit
-│   │   ├── questions.js    # 23 questions, options, scoring weights, citations
-│   │   └── archetypes.js   # 6 archetypes, action plans, skills, roles
-│   ├── engine/             # Business logic — scoring, storage, aggregation
-│   │   ├── scoring.js      # Archetype determination, exposure/readiness calculators
-│   │   └── analytics.js    # localStorage persistence, community stats, tool rankings
-│   └── ui/                 # Rendering — DOM manipulation, charts, user interaction
-│       ├── app.js          # Navigation, question rendering, results, feedback modal
-│       └── charts.js       # Canvas radar chart renderer
-└── README.md
+│   ├── data/
+│   │   ├── questions.js      # 21 questions, 6-axis scoring, adaptive branching
+│   │   └── archetypes.js     # 6 levels with actions, resources, skills
+│   ├── engine/
+│   │   ├── scoring.js        # Axis scoring, level determination, missions, skills/roles
+│   │   └── analytics.js      # Supabase REST API + localStorage
+│   ├── i18n/
+│   │   ├── lang.js           # EN/CN translations
+│   │   └── cn.js             # Chinese questions, archetypes, insights
+│   └── ui/
+│       ├── app.js            # Navigation, rendering, results page
+│       └── charts.js         # SVG radar, scatter plots, sentiment chart
+└── scripts/
+    ├── supabase-setup.sql    # Initial table + trigger setup
+    └── migrate-v3.sql        # v2→v3 migration (6-axis scoring)
 ```
 
-### Architecture
+## Backend: Supabase
 
-```
-index.html
-  ├── css/style.css              (presentation)
-  ├── src/data/questions.js      (question definitions + research citations)
-  ├── src/data/archetypes.js     (archetype definitions + action plans)
-  ├── src/engine/scoring.js      (scoring algorithms)
-  ├── src/engine/analytics.js    (data persistence + aggregation)
-  ├── src/ui/charts.js           (canvas radar chart)
-  └── src/ui/app.js              (navigation + rendering + feedback)
-```
+Free-tier Supabase for shared community data. No SDK — plain `fetch()` to REST API.
 
-| Layer | Files | Responsibility |
-|-------|-------|----------------|
-| **Data** | `questions.js`, `archetypes.js` | Pure data definitions. Edit these to change questions, options, archetypes, or action plans. No logic. |
-| **Engine** | `scoring.js`, `analytics.js` | Business logic. Scoring algorithms, archetype determination, localStorage CRUD, community aggregation. |
-| **UI** | `app.js`, `charts.js` | DOM rendering, screen navigation, multi-select handling, radar chart, feedback modal. |
+### Setup
 
-## Customization
+1. Create project at [supabase.com](https://supabase.com)
+2. SQL Editor → paste `scripts/supabase-setup.sql` → Run
+3. If upgrading from v1/v2: also run `scripts/migrate-v3.sql`
+4. Copy anon key → update `SUPABASE_URL` and `SUPABASE_KEY` in `analytics.js`
 
-### Adding Questions
+### What's Stored
 
-Add to the `QUESTIONS` array in `src/data/questions.js`:
+- `sessions` table: scores (jsonb), archetype, exposure, readiness, tools, answers, feedback
+- `community_stats` table: single row with aggregated data, updated by trigger
+- RLS: insert-only for sessions, read-only for stats
 
-```js
-{
-  id: "unique_id",
-  section: "role",           // must match a key in SECTIONS
-  title: "Your question?",
-  insight: "Educational context with <div class=\"source\">— Citation</div>",
-  // Optional:
-  desc: "Subtitle text",
-  showIf: ["tech"],          // only show if user has these tags
-  type: "multi",             // for multi-select (omit for single-select)
-  options: [
-    { text: "Option A", scores: { technical: 2, aiReadiness: 1 } },
-    { text: "Option B", scores: { humanEdge: 3 }, tags: ["business"] },  // tags set on first question only
-    { text: "Option C", scores: {}, showIf: ["tech"] }                   // conditional option
-  ]
-}
-```
+### Offline Support
 
-### Adding Archetypes
+- Community stats cached in localStorage
+- Sessions saved locally for `?id=UUID` report retrieval
+- Works in China (Supabase on AWS, not blocked)
 
-Add to the `ARCHETYPES` object in `src/data/archetypes.js` and update the scoring logic in `src/engine/scoring.js`.
+## i18n
 
-### Adding AI Tools
+English + Chinese. Switch via `?lang=cn` URL param or auto-detect from browser.
 
-Add options to the `ai_tools` question in `src/data/questions.js`. Include a `toolCategory` field for potential future filtering.
-
-## Backend: Supabase (Community Data)
-
-The app uses [Supabase](https://supabase.com) (free tier) as a shared backend for community data. No SDK — just plain `fetch()` calls to Supabase's REST API.
-
-### How It Works
-
-```
-User completes assessment
-  → POST to Supabase (insert session row)
-  → PostgreSQL trigger auto-updates community_stats (single row)
-  → Next user loads page → GET community_stats (1 row, instant)
-  → Scatter plots → GET sessions (exposure, readiness, scores only)
-```
-
-### Setup (One-Time, 2 Minutes)
-
-1. Create a free project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** → **New Query** → paste `scripts/supabase-setup.sql` → **Run**
-3. Go to **Settings** → **API** → copy the **`anon` `public`** key (starts with `eyJ...`)
-4. Update `SUPABASE_URL` and `SUPABASE_KEY` in `src/engine/analytics.js`
-5. Deploy — community data is now shared across all users
-
-### What the SQL Script Creates
-
-| Object | Purpose |
-|--------|---------|
-| `sessions` table | Stores each assessment result (scores, archetype, exposure, readiness, tools, answers) |
-| `community_stats` table | Single row with pre-aggregated community data (updated by trigger) |
-| `update_community_stats()` function | PostgreSQL trigger function — incrementally updates stats on every new session |
-| RLS policies | Insert-only for sessions (no read/update/delete), read-only for stats |
-
-### Security
-
-- **Anon key is safe to expose** in client code (same model as Firebase — identifies the project, doesn't grant access)
-- **Row Level Security (RLS)** enforces access control server-side:
-  - Users can insert sessions but cannot read, update, or delete other sessions
-  - Users can read aggregate stats but cannot write them
-  - The trigger function runs as `security definer` (server-side, bypasses RLS)
-- **No authentication required** — anonymous survey submissions by design
-
-### Offline / China Support
-
-- Supabase is hosted on AWS — **works in China** (unlike Firebase/Google)
-- Community stats cached in `localStorage` — if fetch fails, shows cached data
-- Sessions always saved locally too for `?id=UUID` report retrieval
-
-### Shareable Report URLs
-
-Each completed assessment generates a UUID. The URL updates to `?id=<uuid>`:
-
-```
-https://yoursite.github.io/ai-career-navigator/?id=a1b2c3d4-...&lang=cn
-```
-
-- Opening this URL loads the saved user results (fixed) with live community data (updates)
-- Report page includes a copy-URL button and report ID for bookmarking
-- Sessions stored in `localStorage` for retrieval (Supabase stores the canonical copy)
+- All questions, options, insights, archetypes, and UI strings translated
+- Chinese AI models included (DeepSeek, Doubao, Kimi, Qwen, MiniMax)
+- CN resources tab shows verified Chinese AI KOLs
 
 ## Tech Stack
 
-- **Zero frontend dependencies** — pure HTML, CSS, JavaScript
-- **Supabase** — PostgreSQL backend for shared community data (free tier)
-- **No SDK** — plain `fetch()` to Supabase REST API
-- **No build step** — open `index.html` directly
-- **SVG charts** — crisp text at any DPI, CJK-friendly
-- **Mobile responsive** — works on all screen sizes
-- **Dark theme** — professional, modern UI
-- **i18n** — English + Chinese, URL-based switching (`?lang=cn`)
-
-## Browser Support
-
-Works in all modern browsers (Chrome, Firefox, Safari, Edge). Requires `localStorage` for analytics persistence.
+- Zero frontend dependencies — pure HTML, CSS, JavaScript
+- SVG charts — crisp at any DPI, CJK-friendly
+- Mobile responsive, dark theme
+- No build step required
 
 ## License
 
