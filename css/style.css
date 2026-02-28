@@ -51,14 +51,22 @@ header {
 .tag-overlay.visible { display: block; }
 .multi-label { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: rgba(255,180,50,0.12); color: #f0a030; border: 1px solid rgba(255,180,50,0.35); vertical-align: middle; margin-right: 4px; }
 
-.progress-container { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; margin-left: 32px; }
-.progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }
+.progress-container { display: inline-flex; flex-direction: column; gap: 6px; margin-left: auto; }
+.progress-stages { display: flex; gap: 6px; }
+.progress-stages .stage { font-size: 11px; padding: 3px 10px; border-radius: 4px; color: var(--text2); opacity: 0.4; white-space: nowrap; transition: all 0.2s; }
+.progress-stages .stage.active { opacity: 1; color: #92700a; background: rgba(234,179,8,0.15); font-weight: 600; }
+.progress-stages .stage.done { opacity: 0.8; color: var(--success); background: rgba(34,197,94,0.1); }
+.progress-row { display: flex; align-items: center; gap: 8px; }
+.progress-bar { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; position: relative; }
+.progress-pct { font-size: 11px; color: var(--text2); white-space: nowrap; }
 .progress-bar::after {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0;
   width: var(--pct, 0%); background: linear-gradient(90deg, var(--accent), var(--accent2));
   border-radius: 3px; transition: width 0.4s ease;
 }
-.progress-text { font-size: 13px; color: var(--text2); min-width: 36px; }
+/* progress-text removed — replaced by stage tabs */
+.conf-tip .conf-tooltip { display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface2);color:var(--text);font-size:12px;padding:6px 10px;border-radius:6px;white-space:nowrap;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+.conf-tip:hover .conf-tooltip { display:block; }
 
 main { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
 

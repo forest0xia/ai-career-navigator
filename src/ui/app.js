@@ -54,17 +54,42 @@ function showScreen(id) {
 }
 
 function updateProgress() {
-  const pct = Math.round(((currentQ + 1) / filteredQuestions.length) * 100);
+  const q = filteredQuestions[currentQ];
+  const isCalibration = !currentTrack;
+  const isTools = q?.id === 'ai_tools' || q?.id === 'self_identify';
+  const scanLabel = !currentTrack ? '' : currentTrack === 'quick' ? (isCN() ? '快速扫描' : 'Quick Scan') : currentTrack === 'advanced' ? (isCN() ? '深度扫描' : 'Advanced Scan') : (isCN() ? '核心扫描' : 'Core Scan');
+
+  // 3 branch stages: Calibration, Scan, Wrap-up
+  const stages = [
+    { key: 'cal', label: isCN() ? '校准' : 'Calibration' },
+    { key: 'scan', label: scanLabel || (isCN() ? '扫描' : 'Scan') },
+    { key: 'wrap', label: isCN() ? '收尾' : 'Wrap-up' }
+  ];
+
+  let activeKey = 'cal';
+  if (currentTrack && isTools) activeKey = 'wrap';
+  else if (currentTrack) activeKey = 'scan';
+
+  const doneKeys = [];
+  if (activeKey === 'scan' || activeKey === 'wrap') doneKeys.push('cal');
+  if (activeKey === 'wrap') doneKeys.push('scan');
+
+  $('progressStages').innerHTML = stages.map(s => {
+    const cls = doneKeys.includes(s.key) ? 'stage done' : s.key === activeKey ? 'stage active' : 'stage';
+    return `<span class="${cls}">${doneKeys.includes(s.key) ? '✓ ' : ''}${s.label}</span>`;
+  }).join('');
+
+  // Progress bar = overall answered / total
+  const answered = filteredQuestions.filter(fq => answers.hasOwnProperty(fq.id)).length;
+  const pct = Math.min(100, Math.round((answered / filteredQuestions.length) * 100));
   $('progressBar').style.setProperty('--pct', pct + '%');
-  $('progressText').textContent = pct + '%';
+  $('progressPct').textContent = pct + '%';
 }
 
 let currentTrack = null;
 
 function getFilteredQuestions() {
-  // Phase 1: calibration only
-  if (!currentTrack) return QUESTIONS.filter(q => q.section === 'calibration');
-  // Phase 2: full adaptive set
+  if (!currentTrack) return QUESTIONS.filter(q => getCalibrationIds().includes(q.id));
   return getAdaptiveQuestions(currentTrack);
 }
 
@@ -126,8 +151,7 @@ function renderQuestion() {
 
   $('sectionLabel').textContent = sectionName(q.section);
   // Insights: show CN translation if available, otherwise EN, hide if neither
-  const cnInsight = isCN() && QUESTIONS_CN[q.id]?.insight;
-  $('insightBox').innerHTML = cnInsight || (!isCN() && q.insight ? q.insight : '');
+  $('insightBox').innerHTML = (isCN() && QUESTIONS_CN[q.id]?.insight) || q.insight || '';
   $('questionTitle').innerHTML = (q.type === 'multi' ? `<span class="multi-label">${t('multi_label')}</span> ` : '') + qText(q, 'title');
   $('questionDesc').textContent = qText(q, 'desc');
 
@@ -207,19 +231,30 @@ function toggleMulti(qId, idx, btn, allOptions) {
 }
 
 function goNext() {
-  if (currentQ < filteredQuestions.length - 1) {
-    currentQ++;
-    // After calibration (4 questions), determine track and expand question set
-    if (!currentTrack && currentQ >= 4) {
-      currentTrack = determineTrack(answers);
-      const newQs = getFilteredQuestions();
-      currentQ = newQs.findIndex(q => !answers.hasOwnProperty(q.id));
-      if (currentQ < 0) currentQ = newQs.length - 1;
-      filteredQuestions = newQs;
+  // After calibration, determine scan type and expand question set
+  if (!currentTrack && Object.keys(answers).length >= getCalibrationIds().length) {
+    currentTrack = determineScanType(answers);
+    filteredQuestions = getFilteredQuestions();
+    // Skip to first unanswered question (never re-ask)
+    let next = -1;
+    for (let i = 0; i < filteredQuestions.length; i++) {
+      if (!answers.hasOwnProperty(filteredQuestions[i].id)) { next = i; break; }
     }
+    if (next < 0) { showResults(); return; }
+    currentQ = next;
     showScreen('questionScreen'); renderQuestion();
+    return;
   }
-  else showResults();
+
+  // Advance to next unanswered question
+  for (let i = currentQ + 1; i < filteredQuestions.length; i++) {
+    if (!answers.hasOwnProperty(filteredQuestions[i].id)) {
+      currentQ = i;
+      showScreen('questionScreen'); renderQuestion();
+      return;
+    }
+  }
+  showResults();
 }
 function goBack() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
 
@@ -229,28 +264,30 @@ function computeScores() {
   return result;
 }
 
-function getToolSelections() { return []; }
-
 function generateActionContext(scores, archetypeKey) {
-  const cn = isCN();
-  const { normalized } = scores;
-  const dims = Object.keys(normalized);
-  const sorted = dims.slice().sort((a, b) => (normalized[b] || 0) - (normalized[a] || 0));
-  const top = sorted[0], weak = sorted[sorted.length - 1];
-  const dimNames = cn
-    ? { usage_depth: "AI 使用深度", workflow: "工作流思维", system: "系统思维", adaptability: "适应力", builder: "构建者直觉" }
-    : { usage_depth: "AI usage depth", workflow: "workflow thinking", system: "system thinking", adaptability: "adaptability", builder: "builder instinct" };
-  if (cn) return `基于你在「${dimNames[top]}」方面的优势和「${dimNames[weak]}」方面的成长空间，以下建议专为你定制：`;
-  return `Based on your strength in ${dimNames[top]} and growth opportunity in ${dimNames[weak]}, these recommendations are tailored for you:`;
+  return generateSituation(scores.axisScores, archetypeKey);
 }
 
 function renderActionItem(a, i, archetypeKey, scores) {
-  let what = a.what, how = a.how;
-  if (isCN() && ARCHETYPES_CN[archetypeKey] && ARCHETYPES_CN[archetypeKey].actions && ARCHETYPES_CN[archetypeKey].actions[i]) {
-    what = ARCHETYPES_CN[archetypeKey].actions[i].what;
-    how = ARCHETYPES_CN[archetypeKey].actions[i].how;
-  }
-  return `<div class="action-item"><strong>${i + 1}.</strong> ${what}<div class="how">📋 <strong>${t('how_label')}</strong> ${how}</div></div>`;
+  // Support both mission format {title, why, metric, upgrade} and legacy {what, how}
+  const title = a.title || a.what;
+  const body = a.metric || a.how;
+  const why = a.why || '';
+  const upgrade = a.upgrade || '';
+  return `<div class="action-item"><strong>${i + 1}. ${title}</strong>${why ? `<div style="font-size:13px;color:var(--text2);margin:4px 0">${why}</div>` : ''}
+    <div class="how">📋 <strong>${t('how_label')}</strong> ${body}</div>
+    ${upgrade ? `<div style="font-size:12px;color:var(--accent2);margin-top:6px">⬆️ ${isCN() ? '已经在做？' : 'Already doing this?'} ${upgrade}</div>` : ''}</div>`;
+}
+
+function renderSkillsRoles(axisScores) {
+  const { skills, roles } = generateSkillsAndRoles(axisScores);
+  if (!skills.length && !roles.length) return '';
+  return `
+    ${skills.length ? `<h4 style="font-size:14px;color:var(--accent2);margin:20px 0 10px">${t('skills_title')}</h4>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;font-style:italic">${t('skills_mindset')}</p>
+      ${skills.map(s => `<div class="action-item"><strong>${s.name}</strong><div class="how" style="margin-top:6px">${s.detail}</div></div>`).join('')}` : ''}
+    ${roles.length ? `<h4 style="font-size:14px;color:var(--accent2);margin:20px 0 10px">${t('roles_title')}</h4>
+      ${roles.map(r => `<div class="action-item"><strong>${r.name}</strong><div class="how" style="margin-top:6px">${r.detail}</div></div>`).join('')}` : ''}`;
 }
 
 function renderToolRankings(toolRankings, userTools) {
@@ -273,10 +310,15 @@ function renderToolRankings(toolRankings, userTools) {
 
 // Render results from a saved session (URL ?id=UUID)
 function showSavedResults(saved) {
-  const scores = saved.scores?.normalized ? saved.scores : { normalized: saved.scores, avgLevel: 0 };
+  const raw = saved.scores || {};
+  const overall = raw._overall || 0;
+  const answeredCount = raw._answered || Object.keys(saved.answers || {}).length;
+  const axisScores = { ...raw };
+  delete axisScores._overall;
+  delete axisScores._answered;
+  const scores = { axisScores, overall, avgLevel: 0, answeredCount };
   const sent = calculateSentiment(saved.answers || {});
   const sentProfile = getSentimentProfile(sent);
-  if (!scores.normalized.mindset) scores.normalized.mindset = sent.mindset;
   renderResultsPage(scores, saved.archetype, saved.exposure, saved.readiness, saved.toolSelections || [], saved.answers || {}, sentProfile);
 }
 
@@ -285,14 +327,13 @@ async function showResults() {
   const scores = computeScores();
   const archetypeKey = determineArchetype(scores);
   const exposure = computeAIExposure(answers);
-  const readiness = computeReadiness(scores.normalized);
+  const readiness = computeReadiness(scores.axisScores);
   const userTools = getToolSelections(answers);
   userTags = getDomainTags(answers);
   const sentiment = calculateSentiment(answers);
   const sentProfile = getSentimentProfile(sentiment);
-  scores.normalized.mindset = sentiment.mindset;
 
-  currentSessionId = await Analytics.recordSession(answers, userTags, scores.normalized, archetypeKey, exposure, readiness, userTools);
+  currentSessionId = await Analytics.recordSession(answers, userTags, { ...scores.axisScores, _overall: scores.overall, _answered: scores.answeredCount }, archetypeKey, exposure, readiness, userTools);
 
   const url = new URL(window.location);
   url.searchParams.set('id', currentSessionId);
@@ -302,11 +343,15 @@ async function showResults() {
 }
 
 function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, sessionAnswers, sentProfile) {
-  const arch = ARCHETYPES[archetypeKey];
+  const arch = ARCHETYPES[archetypeKey] || ARCHETYPES.observer;
   const expInfo = exposureLabel(exposure);
   const readInfo = readinessLabel(readiness);
   const community = Analytics.getCommunityStats();
   const toolRankings = Analytics.getToolRankings();
+  const axisScores = scores.axisScores || scores;
+  const confidence = getConfidence(scores);
+  const signals = detectSignals(axisScores);
+  const missions = generateMissions(axisScores, archetypeKey, sessionAnswers);
 
   let yourToolsHTML = '';
   if (userTools.length > 0) {
@@ -320,16 +365,28 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   }
 
   const dims = [
-    { key: 'usage_depth', icon: '📊' }, { key: 'workflow', icon: '⚙️' },
-    { key: 'system', icon: '🧠' }, { key: 'adaptability', icon: '🔄' },
-    { key: 'builder', icon: '🏗️' }, { key: 'mindset', icon: '💡' }
+    { key: 'adoption', icon: '📊' }, { key: 'mindset', icon: '💡' },
+    { key: 'craft', icon: '⚙️' }, { key: 'tech_depth', icon: '🔧' },
+    { key: 'reliability', icon: '🛡️' }, { key: 'agents', icon: '🤖' }
   ];
-  const norm = scores.normalized || scores;
-  const maxDim = Math.max(...dims.map(d => norm[d.key] || 0), 1);
 
   const MIN_COMMUNITY = 2;
   let communityHTML = '';
   if (community && community.totalSessions >= MIN_COMMUNITY) {
+    const compRows = dims.map(d => {
+      const you = axisScores[d.key] || 0;
+      const avg = Math.round(community.avgScores[d.key] || 0);
+      const desc = isCN() ? AXIS_DESCRIPTIONS[d.key].cn : AXIS_DESCRIPTIONS[d.key].en;
+      return `<div style="background:var(--surface2);border-radius:8px;padding:8px 6px;text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${d.icon} ${dimLabel(d.key)}</div>
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:4px">
+          <span style="font-size:18px;font-weight:700;color:#818cf8">${you}</span>
+          <span style="font-size:11px;color:var(--text2)">vs</span>
+          <span style="font-size:14px;color:rgba(156,163,184,0.7)">${avg}</span>
+        </div>
+        <div class="grid-pop" style="display:none;font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;text-align:left">${desc}</div>
+      </div>`;
+    }).join('');
     communityHTML = `
     <div class="result-section">
       <h3>${t('community_title')}</h3>
@@ -337,70 +394,106 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       <div class="chart-container">
         <div id="radarChart"></div>
       </div>
+      <div style="margin-top:12px;display:flex;gap:16px;justify-content:center;font-size:12px;margin-bottom:12px">
+        <span><span style="color:#818cf8">●</span> ${t('legend_you')}</span>
+        <span><span style="color:rgba(156,163,184,0.5)">●</span> ${t('legend_community')}</span>
+      </div>
+      <div style="text-align:right;margin-bottom:6px"><span style="font-size:11px;color:var(--accent2);cursor:pointer" onclick="toggleGridPops(this)">${isCN() ? '查看说明 ▾' : 'Show details ▾'}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      ${compRows}
+      </div>
     </div>`;
   }
 
-  // Strengths detected
-  const strengthsHTML = arch.strengths ? arch.strengths.map(s => {
-    const str = isCN() && ARCHETYPES_CN[archetypeKey]?.strengths ? ARCHETYPES_CN[archetypeKey].strengths[arch.strengths.indexOf(s)] || s : s;
-    return `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">✔ ${str}</div>`;
-  }).join('') : '';
+  // Strengths & bottleneck
+  const dimNames = isCN()
+    ? { adoption: '采用度', mindset: '心态', craft: '技艺', tech_depth: '技术深度', reliability: '可靠性', agents: '智能体' }
+    : { adoption: 'Adoption', mindset: 'Mindset', craft: 'Craft', tech_depth: 'Tech Depth', reliability: 'Reliability', agents: 'Agents' };
+  const strengthsHTML = signals.strengths.map(s =>
+    `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">✔ ${isCN() ? '强项' : 'Strength'}: ${dimNames[s]} (${axisScores[s]}%)</div>`
+  ).join('');
+  const bottleneckHTML = `<p style="font-size:14px;color:var(--text2);margin-top:12px;line-height:1.6">⚠️ <strong>${isCN() ? '瓶颈' : 'Bottleneck'}:</strong> ${dimNames[signals.bottleneck]} (${axisScores[signals.bottleneck]}%)</p>`;
 
-  // Blind spot
+  // Blind spot from archetype
   const blindSpot = isCN() && ARCHETYPES_CN[archetypeKey]?.blindSpot ? ARCHETYPES_CN[archetypeKey].blindSpot : arch.blindSpot;
 
   // Next level hint
   const nextLevel = isCN() && ARCHETYPES_CN[archetypeKey]?.nextLevel ? ARCHETYPES_CN[archetypeKey].nextLevel : arch.nextLevel;
 
-  // Evolution map
-  const levels = ['tourist', 'explorer', 'hacker', 'operator', 'architect'];
+  // Situation narrative
+  const situation = generateSituation(axisScores, archetypeKey);
+
+  // Evolution map — 6 levels
+  const levels = ['observer', 'tourist', 'explorer', 'hacker', 'operator', 'architect'];
   const levelNames = isCN()
-    ? { tourist: '🌱 AI 游客', explorer: '🧭 提示词探索者', hacker: '⚙️ 工作流黑客', operator: '🧠 AI 操作者', architect: '🏗️ 系统架构师' }
-    : { tourist: '🌱 AI Tourist', explorer: '🧭 Prompt Explorer', hacker: '⚙️ Workflow Hacker', operator: '🧠 AI Operator', architect: '🏗️ System Architect' };
+    ? { observer: '👀 观察者', tourist: '🌱 游客', explorer: '🧭 探索者', hacker: '⚙️ 黑客', operator: '🧠 操作者', architect: '🏗️ 架构师' }
+    : { observer: '👀 Observer', tourist: '🌱 Tourist', explorer: '🧭 Explorer', hacker: '⚙️ Hacker', operator: '🧠 Operator', architect: '🏗️ Architect' };
   const evolutionMap = levels.map(l =>
-    `<span style="padding:6px 12px;border-radius:6px;font-size:13px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
+    `<span style="padding:6px 10px;border-radius:6px;font-size:12px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
   ).join('<span style="color:var(--text2);opacity:0.3;margin:0 2px">→</span>');
+
+  // Confidence meter
+  const confLabel = isCN()
+    ? { high: '高置信度', medium: '中置信度', low: '低置信度（问题较少）' }
+    : { high: 'High confidence', medium: 'Medium confidence', low: 'Low confidence (fewer questions)' };
+  const confColor = { high: 'var(--success)', medium: 'var(--accent2)', low: 'var(--warning)' };
 
   const sp = SENTIMENT_PROFILES[sentProfile] || SENTIMENT_PROFILES.pragmatic_adopter;
   const sentName = isCN() ? sp.cn : sp.en;
   const sentDesc = isCN() ? sp.desc_cn : sp.desc_en;
 
+  // Overall score display
+  const overallScore = scores.overall || 0;
+
+  // Actions — use missions first, fall back to archetype actions
+  const actions = missions.length > 0 ? missions : (isCN() && ARCHETYPES_CN[archetypeKey]?.actions ? ARCHETYPES_CN[archetypeKey].actions : arch.actions);
+
+  const confTip = isCN()
+    ? { high: '回答了 10+ 道题，结果可信度高', medium: '回答了 6-9 道题，结果有一定参考价值', low: '回答题数较少，结果仅供参考' }
+    : { high: 'Answered 10+ questions — high confidence', medium: 'Answered 6-9 questions — moderate confidence', low: 'Fewer questions answered — results are approximate' };
+
   $('resultsContent').innerHTML = `
     <div class="results-header">
-      <div class="archetype-badge">${archName(archetypeKey)}</div>
-      <p style="font-size:14px;color:var(--accent2);margin:8px 0 4px">— ${sentName}</p>
-      <p style="font-size:13px;color:var(--text2);margin:0 0 12px">${sentDesc}</p>
+      <div class="archetype-badge">${archName(archetypeKey)} <span style="font-size:14px;font-weight:400;color:var(--accent2)">— ${sentName}</span></div>
+      <p style="font-size:13px;color:var(--text2);margin:8px 0 12px">${sentDesc} <span class="conf-tip" style="color:${confColor[confidence]};cursor:help;position:relative">● ${confLabel[confidence]}<span class="conf-tooltip">${confTip[confidence]}</span></span></p>
       <h1>${t('results_title')}</h1>
-      <p class="subtitle" style="max-width:560px;margin:0 auto">${archDesc(archetypeKey)}</p>
+      <p class="subtitle" style="max-width:560px;margin:0 auto">${situation}</p>
     </div>
     <div class="result-section">
       <h3>${t('evolution_title') || '🗺️ Your Position'}</h3>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-bottom:16px">${evolutionMap}</div>
       ${nextLevel ? `<p style="font-size:13px;color:var(--text2);line-height:1.6;font-style:italic">⬆️ ${nextLevel}</p>` : ''}
+      <p style="font-size:13px;color:var(--accent2);line-height:1.6;margin-top:12px">${getLevelMotivation(archetypeKey)}</p>
+      ${getIndustryInsight(userTags) ? `<p style="font-size:12px;color:var(--text2);line-height:1.5;margin-top:8px;font-style:italic">${getIndustryInsight(userTags)}</p>` : ''}
     </div>
     <div class="result-section">
       <h3>${t('detected_title') || '🔍 What We Detected'}</h3>
       ${strengthsHTML}
-      ${blindSpot ? `<p style="font-size:14px;color:var(--text2);margin-top:12px;line-height:1.6">⚠️ <strong>${t('blind_spot') || 'Blind spot'}:</strong> ${blindSpot}</p>` : ''}
+      ${bottleneckHTML}
+      ${blindSpot ? `<p style="font-size:14px;color:var(--text2);margin-top:12px;line-height:1.6">💡 ${blindSpot}</p>` : ''}
     </div>
+    ${communityHTML}
+    <div class="result-section" id="dashboardSection"></div>
+    <div class="result-section" id="sentimentSection"></div>
     <div class="result-section">
       <h3>${t('strength_title')}</h3>
       ${dims.map(d => {
-        const val = Math.round((norm[d.key] || 0) * 10) / 10;
-        const pct = Math.round((val / 10) * 100);
-        return `<div class="score-label"><span>${d.icon} ${dimLabel(d.key)}</span><span>${val.toFixed(1)}</span></div>
-          <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:var(--accent2)"></div></div>`;
+        const val = axisScores[d.key] || 0;
+        const desc = isCN() ? AXIS_DESCRIPTIONS[d.key].cn : AXIS_DESCRIPTIONS[d.key].en;
+        return `<div class="score-label" style="cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.axis-arrow').textContent=this.nextElementSibling.style.display==='none'?'▸':'▾'">
+            <span>${d.icon} ${dimLabel(d.key)} <span class="axis-arrow" style="font-size:11px;color:var(--text2)">▸</span></span><span>${val}%</span></div>
+          <div style="display:none;font-size:12px;color:var(--text2);margin:2px 0 8px;padding-left:24px">${desc}</div>
+          <div class="score-bar"><div class="score-fill" style="width:${val}%;background:var(--accent2)"></div></div>`;
       }).join('')}
     </div>
-    ${communityHTML}
     ${yourToolsHTML}
     ${renderToolRankings(toolRankings, userTools)}
-    <div class="result-section" id="dashboardSection"></div>
     <div class="result-section">
-      <h3>${t('action_title')}</h3>
+      <h3>${isCN() ? '🎯 你的下一步成长可能' : '🎯 Your Next Moves'}</h3>
       <p style="font-size:14px;color:var(--text2);margin-bottom:16px">${t('action_desc')}</p>
-      <p style="font-size:13px;color:var(--accent2);margin-bottom:16px;font-style:italic">${generateActionContext(scores, archetypeKey)}</p>
-      ${arch.actions.map((a, i) => renderActionItem(a, i, archetypeKey, scores)).join('')}
+      <h4 style="font-size:14px;color:var(--accent2);margin:16px 0 10px">${isCN() ? '🚀 具体行动' : '🚀 Actions'}</h4>
+      ${actions.map((a, i) => renderActionItem(a, i, archetypeKey, scores)).join('')}
+      ${renderSkillsRoles(axisScores)}
     </div>
     ${arch.resources ? `
     <div class="result-section">
@@ -442,23 +535,35 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   }
 
   setTimeout(async () => {
+    // Radar chart — normalize axisScores (0-100) to 0-10 for radar
+    const radarNorm = {};
+    for (const d of dims) radarNorm[d.key] = (axisScores[d.key] || 0) / 10;
+
     if (community && community.totalSessions >= MIN_COMMUNITY) {
-      drawRadarChart('radarChart', norm, community.avgScores);
+      const communityNorm = {};
+      for (const d of dims) communityNorm[d.key] = (community.avgScores[d.key] || 0) / 10;
+      drawRadarChart('radarChart', radarNorm, communityNorm);
     }
 
     const allSessions = await Analytics.getScatterData();
-    if (allSessions.length >= MIN_COMMUNITY) {
-      const currentPt = { exposure, readiness, usage_depth: norm.usage_depth || 0, adaptability: norm.adaptability || 0 };
 
-      // Sentiment distribution for sent_emotion question
-      const sentQ = QUESTIONS.find(q => q.id === 'sent_emotion');
-      const sentOpts = sentQ ? sentQ.options : [];
-      const sentLabels = isCN() && QUESTIONS_CN.sent_emotion
-        ? QUESTIONS_CN.sent_emotion.options.map((text, i) => ({ text, origIdx: i }))
-        : sentOpts.map((o, i) => ({ text: o.text, origIdx: i }));
-      const sentDist = Analytics.getAnswerDistribution('sent_emotion', sentOpts);
-      const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i]?.count || 0, pct: sentDist[i]?.pct || 0 }));
-      const userSentIdx = sessionAnswers.sent_emotion;
+    // Sentiment distribution — always show (uses answer_counts, not scatter data)
+    const sentQ = QUESTIONS.find(q => q.id === 'm1_reaction');
+    const sentOpts = sentQ ? sentQ.options : [];
+    const sentLabels = isCN() && QUESTIONS_CN.m1_reaction
+      ? QUESTIONS_CN.m1_reaction.options.map((text, i) => ({ text, origIdx: i }))
+      : sentOpts.map((o, i) => ({ text: o.text, origIdx: i }));
+    const sentDist = Analytics.getAnswerDistribution('m1_reaction', sentOpts);
+    // Include current user's answer even if not yet in community stats
+    const userSentIdx = sessionAnswers.m1_reaction;
+    if (userSentIdx !== undefined && sentDist[userSentIdx]) {
+      sentDist[userSentIdx].count = Math.max(sentDist[userSentIdx].count, 1);
+    }
+    const totalSent = Math.max(sentDist.reduce((s, d) => s + d.count, 0), 1);
+    const sentData = sentLabels.map((sl, i) => ({ label: sl.text, count: sentDist[i]?.count || 0, pct: Math.round((sentDist[i]?.count || 0) / totalSent * 100) }));
+
+    if (allSessions.length >= MIN_COMMUNITY) {
+      const currentPt = { exposure, readiness, adoption: axisScores.adoption || 0, mindset: axisScores.mindset || 0, craft: axisScores.craft || 0, tech_depth: axisScores.tech_depth || 0, reliability: axisScores.reliability || 0 };
 
       const dashEl = $('dashboardSection');
       dashEl.innerHTML = `
@@ -466,43 +571,25 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
         <p style="font-size:14px;color:var(--text2);margin-bottom:20px">${t('dashboard_desc')}</p>
         <div class="chart-grid">
           <div class="chart-box">
-            <h4>${t('scatter_exposure_readiness')}</h4>
+            <h4>${isCN() ? '采用度 vs. 心态就绪度' : 'Adoption × Mindset'}</h4>
             <div id="scatterExposure"></div>
           </div>
           <div class="chart-box">
-            <h4>${t('scatter_adoption_adaptability')}</h4>
+            <h4>${isCN() ? '技术深度 vs. 可靠性' : 'Tech Depth × Reliability'}</h4>
             <div id="scatterAdoption"></div>
-          </div>
-        </div>
-        <div style="margin-top:20px">
-          <div class="chart-box">
-            <h4>${t('sentiment_title')}</h4>
-            <div id="sentimentChart"></div>
-            <div class="chart-note">${t('sentiment_note')}</div>
           </div>
         </div>
       `;
 
-      // Normalize usage_depth and adaptability to 0-100 for scatter
-      const maxUD = Math.max(...allSessions.map(s => s.aiReadiness || s.usage_depth || 0), currentPt.usage_depth, 1);
-      const maxAdapt = Math.max(...allSessions.map(s => s.adaptability || 0), currentPt.adaptability, 1);
-      const normalizedSessions = allSessions.map(s => ({
-        ...s,
-        aiReadinessNorm: Math.round(((s.aiReadiness || s.usage_depth || 0) / maxUD) * 100),
-        adaptabilityNorm: Math.round(((s.adaptability || 0) / maxAdapt) * 100)
-      }));
-      const normalizedCurrent = {
-        ...currentPt,
-        aiReadinessNorm: Math.round((currentPt.usage_depth / maxUD) * 100),
-        adaptabilityNorm: Math.round((currentPt.adaptability / maxAdapt) * 100)
-      };
-
-      drawScatterPlot('scatterExposure', allSessions, currentPt, 'exposure', 'readiness', t('scatter_exposure_label'), t('scatter_readiness_label'));
-      drawScatterPlot('scatterAdoption', normalizedSessions, normalizedCurrent, 'aiReadinessNorm', 'adaptabilityNorm', t('scatter_adoption_label'), t('scatter_adaptability_label'));
-      drawSentimentChart('sentimentChart', sentData, userSentIdx);
+      drawScatterPlot('scatterExposure', allSessions, currentPt, 'adoption', 'mindset', isCN() ? '采用度' : 'Adoption', isCN() ? '心态就绪度' : 'Mindset');
+      drawScatterPlot('scatterAdoption', allSessions, currentPt, 'tech_depth', 'reliability', isCN() ? '技术深度' : 'Tech Depth', isCN() ? '可靠性' : 'Reliability');
     } else {
       $('dashboardSection').style.display = 'none';
     }
+
+    // Sentiment chart — always render into dedicated section
+    $('sentimentSection').innerHTML = `<div class="chart-box"><h4>${t('sentiment_title')}</h4><div id="sentimentChart"></div><div class="chart-note">${t('sentiment_note')}</div></div>`;
+    drawSentimentChart('sentimentChart', sentData, userSentIdx);
   }, 100);
 }
 
@@ -539,6 +626,13 @@ function showTagDetail(el) {
     pop.style.bottom = '';
     pop.style.top = (tr.bottom + 6) + 'px';
   }
+}
+
+function toggleGridPops(el) {
+  var ps = document.querySelectorAll('.grid-pop');
+  var show = ps[0] && ps[0].style.display !== 'block';
+  ps.forEach(function(e) { e.style.display = show ? 'block' : 'none'; });
+  el.textContent = show ? (isCN() ? '收起说明 ▴' : 'Hide details ▴') : (isCN() ? '查看说明 ▾' : 'Show details ▾');
 }
 
 function hideTagDetail() {

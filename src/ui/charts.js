@@ -21,10 +21,10 @@ function drawRadarChart(containerId, userScores, communityAvg) {
   const W = 400, H = 400, cx = W / 2, cy = H / 2, R = 140;
   const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", style: "max-width:400px;display:block;margin:0 auto" });
 
-  const dims = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
+  const dims = ["adoption", "mindset", "craft", "tech_depth", "reliability", "agents"];
   const labels = typeof isCN === 'function' && isCN()
-    ? ["适应力", "技术深度", "创造力", "领导力", "AI 就绪度", "人类优势"]
-    : ["Adaptability", "Technical", "Creative", "Leadership", "AI Readiness", "Human Edge"];
+    ? ["采用度", "心态", "技艺", "技术深度", "可靠性", "智能体"]
+    : ["Adoption", "Mindset", "Craft", "Tech Depth", "Reliability", "Agents"];
   const n = dims.length;
   const step = (2 * Math.PI) / n;
   const start = -Math.PI / 2;

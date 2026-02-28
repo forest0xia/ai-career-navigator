@@ -5,7 +5,7 @@ const SUPABASE_URL = 'https://esymcblyhmeuiudpmdff.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeW1jYmx5aG1ldWl1ZHBtZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTU3ODIsImV4cCI6MjA4Nzc5MTc4Mn0.rTHFZ9yBxdz5Uy70pQRE7avt5k_mwUVOxmCEyAF3LiA';
 const LOCAL_KEY = 'ai_career_nav_sessions';
 const STATS_CACHE_KEY = 'ai_career_nav_stats_cache';
-const _DIMS = ["adaptability", "technical", "creative", "leadership", "aiReadiness", "humanEdge"];
+const _DIMS = ["adoption", "mindset", "craft", "tech_depth", "reliability", "agents"];
 
 function _sbHeaders() {
   return { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
@@ -171,7 +171,9 @@ const Analytics = {
       const rows = await _sbGet('sessions', 'select=exposure,readiness,scores');
       return rows.map(r => ({
         exposure: r.exposure, readiness: r.readiness,
-        aiReadiness: r.scores?.aiReadiness || 0, adaptability: r.scores?.adaptability || 0
+        adoption: r.scores?.adoption || 0, mindset: r.scores?.mindset || 0,
+        craft: r.scores?.craft || 0, tech_depth: r.scores?.tech_depth || 0,
+        reliability: r.scores?.reliability || 0, agents: r.scores?.agents || 0
       }));
     } catch {
       return [];
