@@ -73,7 +73,6 @@ function getFilteredQuestions() {
 // Initialize on load
 window.addEventListener('DOMContentLoaded', async () => {
   I18N.init();
-  document.addEventListener('click', e => { if (!e.target.closest('.has-detail')) hideTagDetail(); });
   $('langEn').classList.toggle('active', I18N.lang() === 'en');
   $('langCn').classList.toggle('active', I18N.lang() === 'cn');
   $('logoText').textContent = t('logo');
@@ -520,7 +519,7 @@ function renderExpandTag(item) {
   const html = parts.length > 1
     ? `${parts[0]}<br><span style="color:var(--accent2)">⚡${parts[1]}</span>`
     : item.detail;
-  return `<span class="tag has-detail" onclick="showTagDetail(this)" onmouseenter="showTagDetail(this)" onmouseleave="hideTagDetail()">${item.name}<div class="tag-popover">${html}</div></span>`;
+  return `<span class="tag has-detail" onclick="event.stopPropagation();showTagDetail(this)">${item.name}<div class="tag-popover">${html}</div></span>`;
 }
 
 function showTagDetail(el) {
