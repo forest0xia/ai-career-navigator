@@ -273,7 +273,11 @@ function renderToolRankings(toolRankings, userTools) {
 
 // Render results from a saved session (URL ?id=UUID)
 function showSavedResults(saved) {
-  renderResultsPage(saved.scores, saved.archetype, saved.exposure, saved.readiness, saved.toolSelections || [], saved.answers);
+  const scores = saved.scores?.normalized ? saved.scores : { normalized: saved.scores, avgLevel: 0 };
+  const sent = calculateSentiment(saved.answers || {});
+  const sentProfile = getSentimentProfile(sent);
+  if (!scores.normalized.mindset) scores.normalized.mindset = sent.mindset;
+  renderResultsPage(scores, saved.archetype, saved.exposure, saved.readiness, saved.toolSelections || [], saved.answers || {}, sentProfile);
 }
 
 async function showResults() {
