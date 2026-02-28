@@ -43,6 +43,13 @@ header {
 .lang-switch button:hover { color: var(--text); border-color: var(--accent); }
 .lang-switch button.active { background: var(--accent-glow); color: var(--accent2); border-color: var(--accent); }
 .resource-tab.active { background: var(--accent-glow) !important; color: var(--accent2) !important; border-color: var(--accent) !important; }
+.expand-tag { margin-bottom: 6px; }
+.expand-tag .tag { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; transition: background 0.2s; }
+.expand-tag .tag:hover { background: var(--accent-glow); border-color: var(--accent); }
+.tag-arrow { font-size: 10px; transition: transform 0.2s; }
+.expand-tag.open .tag-arrow { transform: rotate(90deg); }
+.tag-detail { display: none; padding: 10px 14px; margin: 4px 0 2px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); }
+.expand-tag.open .tag-detail { display: block; }
 
 .progress-container { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; margin-left: 32px; }
 .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }

@@ -391,11 +391,11 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     </div>
     <div class="result-section">
       <h3>${t('skills_title')}</h3>
-      <div>${(isCN() && ARCHETYPES_CN[archetypeKey]?.skills || arch.skills).map(s => `<span class="tag">${s}</span>`).join('')}</div>
+      <div>${getItems('skills', archetypeKey, arch).map(s => renderExpandTag(s)).join('')}</div>
     </div>
     <div class="result-section">
       <h3>${t('roles_title')}</h3>
-      <div>${(isCN() && ARCHETYPES_CN[archetypeKey]?.roles || arch.roles).map(r => `<span class="tag">${r}</span>`).join('')}</div>
+      <div>${getItems('roles', archetypeKey, arch).map(r => renderExpandTag(r)).join('')}</div>
     </div>
     ${arch.resources ? `
     <div class="result-section">
@@ -507,6 +507,19 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       $('dashboardSection').style.display = 'none';
     }
   }, 100);
+}
+
+function getItems(field, key, arch) {
+  return isCN() && ARCHETYPES_CN[key]?.[field] || arch[field];
+}
+
+function renderExpandTag(item) {
+  if (typeof item === 'string') return `<span class="tag">${item}</span>`;
+  const id = 'tag_' + Math.random().toString(36).slice(2, 8);
+  return `<div class="expand-tag" onclick="this.classList.toggle('open')">
+    <span class="tag" style="cursor:pointer">${item.name} <span class="tag-arrow">▸</span></span>
+    <div class="tag-detail">${item.detail}</div>
+  </div>`;
 }
 
 function renderResources(res) {
