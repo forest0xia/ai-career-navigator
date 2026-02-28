@@ -529,9 +529,15 @@ function showTagDetail(el) {
   if (!pop) return;
   pop.classList.add('visible');
   const tr = el.getBoundingClientRect();
+  const w = Math.min(400, window.innerWidth - 16);
+  pop.style.width = w + 'px';
+  let left = tr.left + tr.width / 2 - w / 2;
+  left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+  pop.style.left = left + 'px';
   pop.style.bottom = (window.innerHeight - tr.top + 6) + 'px';
+  pop.style.top = '';
   if (tr.top < pop.offsetHeight + 16) {
-    pop.style.bottom = 'auto';
+    pop.style.bottom = '';
     pop.style.top = (tr.bottom + 6) + 'px';
   }
 }
@@ -539,7 +545,7 @@ function showTagDetail(el) {
 function hideTagDetail() {
   document.querySelectorAll('.tag-popover.visible').forEach(p => {
     p.classList.remove('visible');
-    p.style.bottom = ''; p.style.top = '';
+    p.style.bottom = ''; p.style.top = ''; p.style.left = ''; p.style.width = '';
   });
 }
 function renderResources(res) {
