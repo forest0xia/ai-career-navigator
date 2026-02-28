@@ -110,6 +110,7 @@ function renderWelcome() {
   });
   document.querySelector('#welcome .data-note').innerHTML = `<strong>${t('research_note')}</strong> ${t('research_sources')}`;
   document.querySelector('#welcome .time-note').textContent = t('time_note');
+  $('privacyNote').textContent = t('privacy_note');
   document.querySelector('#welcome .btn').textContent = t('btn_begin');
 }
 
