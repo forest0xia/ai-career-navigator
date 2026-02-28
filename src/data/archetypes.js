@@ -1,4 +1,4 @@
-// Archetypes with practical guidance, resources, and recommended voices
+// Archetypes with practical guidance and recommended resources
 
 const ARCHETYPES = {
   aiArchitect: {
@@ -16,8 +16,8 @@ const ARCHETYPES = {
     roles: ["AI Application Developer", "AI Solutions Engineer", "AI Automation Specialist", "AI Product Builder", "Technical AI Consultant", "AI Agent Developer"],
     resources: {
       people: ["Andrej Karpathy (YouTube — AI concepts explained clearly)", "Simon Willison (blog — practical AI tools & agents)", "Swyx (Latent Space podcast — AI engineering)", "Riley Brown (YouTube — AI agents & automation)", "Matt Shumer (X/Twitter — AI product building)"],
-      books: ["Co-Intelligence by Ethan Mollick — how to think alongside AI", "The AI-First Company by Ash Fontana — building with AI practically", "Prompt Engineering Guide (free online) — master the craft of talking to AI"],
-      articles: ["What I Think About When I Think About AI Agents — Simon Willison", "Building Effective Agents — Anthropic's guide to agent design"]
+      books: ["Antifragile by Nassim Taleb — thriving in chaos and uncertainty", "The Obstacle Is the Way by Ryan Holiday — turning challenges into advantages", "Mindset by Carol Dweck — the growth mindset that builders need"],
+      articles: ["Building Effective Agents — Anthropic's guide to agent design", "What I Think About When I Think About AI Agents — Simon Willison"]
     }
   },
   aiCollaborator: {
@@ -34,9 +34,9 @@ const ARCHETYPES = {
     skills: ["Prompt Engineering", "AI Workflow Design", "Domain-Specific AI Application", "AI Output Quality Judgment", "Change Management & AI Adoption"],
     roles: ["AI-Enhanced [Your Current Role]", "AI Workflow Specialist", "AI Adoption Champion", "AI-Powered Consultant", "Digital Transformation Lead"],
     resources: {
-      people: ["Ethan Mollick (Wharton — practical AI for professionals)", "Lenny Rachitsky (Lenny's Podcast — AI in product/business)", "Dan Shipper (Every — AI for knowledge workers)", "Tina Huang (YouTube — AI productivity for professionals)", "Sahil Lavingia (X/Twitter — AI for entrepreneurs)"],
-      books: ["Co-Intelligence by Ethan Mollick — the essential guide to working with AI", "Impromptu by Reid Hoffman — conversations about AI's impact on work", "The Algorithmic Leader by Mike Walsh — leading in an AI world"],
-      articles: ["Why AI Will Save the World — Marc Andreessen (perspective on AI opportunity)", "How to Use AI to Do Stuff — Ethan Mollick's practical guide"]
+      people: ["Ethan Mollick (Wharton — practical AI for professionals)", "Lenny Rachitsky (Lenny's Podcast — AI in product/business)", "Dan Shipper (Every — AI for knowledge workers)", "Tina Huang (YouTube — AI productivity)", "Sahil Lavingia (X/Twitter — AI for entrepreneurs)"],
+      books: ["Man's Search for Meaning by Viktor Frankl — finding purpose amid change", "Thinking, Fast and Slow by Daniel Kahneman — better decision-making", "Atomic Habits by James Clear — building the learning habits that compound"],
+      articles: ["How to Use AI to Do Stuff — Ethan Mollick's practical guide", "Why AI Will Save the World — Marc Andreessen"]
     }
   },
   humanEdge: {
@@ -53,9 +53,9 @@ const ARCHETYPES = {
     skills: ["Emotional Intelligence", "Ethical Reasoning & AI Oversight", "AI Literacy (for quality control)", "Complex Negotiation & Persuasion", "Trust Building & Relationship Management"],
     roles: ["AI Ethics Advisor", "Human-AI Interaction Designer", "Client Relationship Lead", "AI Quality Reviewer", "Change Management Consultant"],
     resources: {
-      people: ["Brené Brown (leadership & human connection)", "Adam Grant (WorkLife podcast — future of work)", "Lex Fridman (podcast — deep conversations on AI & humanity)", "Joanna Maciejewska (X/Twitter — human creativity vs AI)", "Cal Newport (Deep Work — focus in an AI world)"],
-      books: ["Deep Work by Cal Newport — focus as a superpower in the AI age", "Emotional Intelligence 2.0 by Bradberry & Greaves — the skills AI can't replicate", "Human Compatible by Stuart Russell — understanding AI's limits"],
-      articles: ["The Ones Who Walk Away from AI — on choosing the human path", "Why Soft Skills Are the New Hard Skills — LinkedIn Economic Graph"]
+      people: ["Brené Brown (leadership & human connection)", "Adam Grant (WorkLife podcast — future of work)", "Lex Fridman (podcast — AI & humanity)", "Cal Newport (Deep Work — focus in an AI world)", "Joanna Maciejewska (X/Twitter — human creativity vs AI)"],
+      books: ["Meditations by Marcus Aurelius — inner calm amid external chaos", "Emotional Intelligence 2.0 by Bradberry & Greaves — the skills AI can't replicate", "The Courage to Be Disliked by Kishimi & Koga — freedom from others' expectations"],
+      articles: ["The Ones Who Walk Away from AI — on choosing the human path", "Why Soft Skills Are the New Hard Skills — LinkedIn"]
     }
   },
   strategicLeader: {
@@ -72,9 +72,9 @@ const ARCHETYPES = {
     skills: ["AI Strategy & Vision", "Organizational Change Leadership", "AI ROI & Business Case Development", "Cross-Functional Team Building", "AI Governance & Policy"],
     roles: ["Head of AI Transformation", "AI Strategy Director", "Chief AI Officer", "AI Program Manager", "Innovation Lead"],
     resources: {
-      people: ["Satya Nadella (Microsoft CEO — AI transformation leadership)", "Andrew Ng (DeepLearning.AI — AI strategy for leaders)", "Cassie Kozyrkov (Google — decision intelligence & AI leadership)", "Amy Webb (futurist — AI trends & strategy)", "Sam Altman (OpenAI — where AI is heading)"],
-      books: ["The AI-Powered Organization by Seth Earley — leading AI adoption", "Competing in the Age of AI by Iansiti & Lakhani — strategy in the AI era", "Team of Teams by McChrystal — adaptive leadership for fast-changing environments"],
-      articles: ["AI Strategy for Leaders — Harvard Business Review collection", "The CEO's Guide to AI — McKinsey quarterly"]
+      people: ["Satya Nadella (Microsoft — AI transformation leadership)", "Andrew Ng (DeepLearning.AI — AI strategy)", "Cassie Kozyrkov (Google — decision intelligence)", "Amy Webb (futurist — AI trends)", "Sam Altman (OpenAI — where AI is heading)"],
+      books: ["The Art of War by Sun Tzu — strategy under uncertainty", "Principles by Ray Dalio — decision-making frameworks for leaders", "Who Moved My Cheese by Spencer Johnson — leading through change"],
+      articles: ["AI Strategy for Leaders — Harvard Business Review", "The CEO's Guide to AI — McKinsey"]
     }
   },
   creativeInnovator: {
@@ -91,9 +91,9 @@ const ARCHETYPES = {
     skills: ["AI Creative Tool Mastery", "Creative Direction & Curation", "AI-Augmented Storytelling", "Generative Design Thinking", "Taste & Quality Judgment"],
     roles: ["AI Creative Director", "Generative Designer", "AI Content Strategist", "Creative Technologist", "AI-Augmented Art Director"],
     resources: {
-      people: ["Chase Reeves (YouTube — creativity & AI tools)", "Joanna Maciejewska (X/Twitter — AI & creative work)", "Matt Wolfe (YouTube — AI tools for creators)", "Karen X. Cheng (Instagram — AI-augmented creative work)", "Refik Anadol (AI artist — pushing creative boundaries)"],
-      books: ["The Creative Act by Rick Rubin — creativity principles that transcend tools", "Steal Like an Artist by Austin Kleon — creative process in any era", "AI Art by Lev Manovich — understanding AI's role in creative work"],
-      articles: ["The AI-Augmented Creative — how top creatives use AI today", "Why Taste Is the Last Moat — on human curation in the AI age"]
+      people: ["Chase Reeves (YouTube — creativity & AI)", "Matt Wolfe (YouTube — AI tools for creators)", "Karen X. Cheng (Instagram — AI creative work)", "Refik Anadol (AI artist)", "Joanna Maciejewska (X/Twitter — AI & creativity)"],
+      books: ["The Creative Act by Rick Rubin — creativity principles that transcend tools", "Steal Like an Artist by Austin Kleon — creative process in any era", "Flow by Mihaly Csikszentmihalyi — the psychology of optimal creative experience"],
+      articles: ["The AI-Augmented Creative — how top creatives use AI", "Why Taste Is the Last Moat — on human curation"]
     }
   },
   careerPivot: {
@@ -110,9 +110,9 @@ const ARCHETYPES = {
     skills: ["AI Fundamentals & Literacy", "Rapid Prototyping", "Transferable Skill Mapping", "Networking & Community Building", "Portfolio Development"],
     roles: ["AI Trainer / Evaluator", "AI Product Manager", "AI-Enhanced [Target Role]", "AI Consultant (domain expertise)", "AI Content Strategist"],
     resources: {
-      people: ["Andrew Ng (DeepLearning.AI — best AI educator)", "Ali Abdaal (YouTube — productivity & career change)", "Tina Huang (YouTube — tech career transitions)", "Greg Brockman (OpenAI — AI vision & opportunity)", "Cassie Kozyrkov (Google — making AI accessible)"],
-      books: ["AI For Everyone — Andrew Ng's course companion", "Range by David Epstein — why generalists thrive in a specialized world", "Designing Your Life by Burnett & Evans — career pivoting framework"],
-      articles: ["How to Transition Into AI — practical career change roadmap", "The 100-Hour AI Upskilling Plan — structured learning path for career changers"]
+      people: ["Andrew Ng (DeepLearning.AI — best AI educator)", "Ali Abdaal (YouTube — productivity & career change)", "Tina Huang (YouTube — tech career transitions)", "Cassie Kozyrkov (Google — making AI accessible)", "Greg Brockman (OpenAI — AI opportunity)"],
+      books: ["Range by David Epstein — why generalists thrive in a specialized world", "Designing Your Life by Burnett & Evans — career pivoting framework", "The Alchemist by Paulo Coelho — courage to pursue a new path"],
+      articles: ["How to Transition Into AI — practical career change roadmap", "The 100-Hour AI Upskilling Plan — structured learning path"]
     }
   }
 };

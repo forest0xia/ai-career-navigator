@@ -400,18 +400,14 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
     ${arch.resources ? `
     <div class="result-section">
       <h3>${t('resources_title')}</h3>
-      <div style="margin-bottom:14px">
-        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_people')}</h4>
-        ${arch.resources.people.map(p => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${p}</div>`).join('')}
+      ${isCN() && ARCHETYPES_CN[archetypeKey]?.resources ? `
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn secondary resource-tab active" onclick="switchResourceTab('cn',this)">${t('resources_tab_cn')}</button>
+        <button class="btn secondary resource-tab" onclick="switchResourceTab('en',this)">${t('resources_tab_en')}</button>
       </div>
-      <div style="margin-bottom:14px">
-        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_books')}</h4>
-        ${arch.resources.books.map(b => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${b}</div>`).join('')}
-      </div>
-      <div>
-        <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_articles')}</h4>
-        ${arch.resources.articles.map(a => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${a}</div>`).join('')}
-      </div>
+      <div id="resourcesCN">${renderResources(ARCHETYPES_CN[archetypeKey].resources)}</div>
+      <div id="resourcesEN" style="display:none">${renderResources(arch.resources)}</div>
+      ` : renderResources(arch.resources)}
     </div>` : ''}
     <div class="result-section">
       <h3>${t('insight_title')}</h3>
@@ -511,6 +507,29 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
       $('dashboardSection').style.display = 'none';
     }
   }, 100);
+}
+
+function renderResources(res) {
+  return `
+    <div style="margin-bottom:14px">
+      <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_people')}</h4>
+      ${res.people.map(p => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${p}</div>`).join('')}
+    </div>
+    <div style="margin-bottom:14px">
+      <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_books')}</h4>
+      ${res.books.map(b => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${b}</div>`).join('')}
+    </div>
+    <div>
+      <h4 style="font-size:14px;color:var(--accent2);margin-bottom:8px">${t('resources_articles')}</h4>
+      ${res.articles.map(a => `<div class="action-item" style="padding:10px 14px;margin-bottom:6px">${a}</div>`).join('')}
+    </div>`;
+}
+
+function switchResourceTab(tab, btn) {
+  document.querySelectorAll('.resource-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  $('resourcesCN').style.display = tab === 'cn' ? 'block' : 'none';
+  $('resourcesEN').style.display = tab === 'en' ? 'block' : 'none';
 }
 
 // Feedback viewer with pagination

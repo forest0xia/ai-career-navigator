@@ -42,6 +42,7 @@ header {
 }
 .lang-switch button:hover { color: var(--text); border-color: var(--accent); }
 .lang-switch button.active { background: var(--accent-glow); color: var(--accent2); border-color: var(--accent); }
+.resource-tab.active { background: var(--accent-glow) !important; color: var(--accent2) !important; border-color: var(--accent) !important; }
 
 .progress-container { display: flex; align-items: center; gap: 12px; flex: 1; max-width: 300px; margin-left: 32px; }
 .progress-bar { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }
