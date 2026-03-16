@@ -1,5 +1,6 @@
-// AI Adoption Diagnostic v2 — 6-axis radar, percentage scoring, adaptive branching
+// AI Adoption Diagnostic v3 — 8-level system, 15 questions, 6-axis radar
 // Axes: adoption, mindset, craft, tech_depth, reliability, agents
+// Levels: dabbler, prompter, collaborator, designer, builder, leverager, amplifier, visionary
 
 const SECTIONS = {
   calibration: "Calibration",
@@ -31,7 +32,7 @@ const QUESTIONS = [
     ]
   },
 
-  // === ADOPTION (3) ===
+  // === ADOPTION (2) ===
   {
     id: "a1_frequency",
     section: "adoption",
@@ -42,7 +43,7 @@ const QUESTIONS = [
     options: [
       { text: "Rarely or never", level: 1 },
       { text: "A few times a month", level: 1.5 },
-      { text: "1–2 days a week", level: 2 },
+      { text: "1\u20132 days a week", level: 2 },
       { text: "Most days", level: 3 },
       { text: "Daily, multiple times a day", level: 4 }
     ]
@@ -56,41 +57,26 @@ const QUESTIONS = [
     options: [
       { text: "Not yet", level: 1 },
       { text: "One area (e.g. writing or search)", level: 1.5 },
-      { text: "2–3 areas", level: 2 },
+      { text: "2\u20133 areas", level: 2 },
       { text: "4+ areas", level: 3 },
       { text: "It touches most of my workflows daily", level: 4 }
     ]
   },
-  {
-    id: "a3_dependency",
-    section: "adoption",
-    calibration: true,
-    title: "If AI disappeared tomorrow, how disrupted would you be?",
-    insight: 'How you handle AI failures reveals your true skill level. The gap between knowing about AI and applying it effectively is where career value lives.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
-    axes: { adoption: [0, 1, 2, 3, 4] },
-    options: [
-      { text: "Not disrupted at all", level: 1 },
-      { text: "Minor inconvenience", level: 1.5 },
-      { text: "Noticeably slower", level: 2 },
-      { text: "Some workflows would break", level: 3 },
-      { text: "Significant disruption", level: 4 }
-    ]
-  },
 
-  // === MINDSET (5) ===
+  // === MINDSET (3) ===
   {
     id: "m1_reaction",
     section: "mindset",
     sentiment: true,
     title: "When you hear about rapid AI progress, you mostly feel:",
-    insight: 'Research shows that people who channel AI-related concern into action — learning, experimenting, networking — consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
+    insight: 'Research shows that people who channel AI-related concern into action \u2014 learning, experimenting, networking \u2014 consistently outperform those who either ignore AI or become paralyzed by uncertainty.<div class="source">— Deloitte Human Capital Trends; Forbes Career Strategy, 2026</div>',
     axes: { mindset: [0, 2, 3, 1, 0] },
     options: [
-      { text: "Unaffected — doesn't concern me", level: 1, sent: { confidence: 0, anxiety: 0, motivation: 0 } },
-      { text: "Curious — want to learn more", level: 2, sent: { confidence: 0, anxiety: 0, motivation: 1 } },
-      { text: "Excited — feels like opportunity", level: 3, sent: { confidence: 1, anxiety: 0, motivation: 2 } },
-      { text: "Anxious — worried about falling behind", level: 2, sent: { confidence: -1, anxiety: 2, motivation: 1 } },
-      { text: "Overwhelmed — trying to avoid it", level: 1, sent: { confidence: -1, anxiety: 3, motivation: 0 } }
+      { text: "Unaffected \u2014 doesn\u2019t concern me", level: 1, sent: { confidence: 0, anxiety: 0, motivation: 0 } },
+      { text: "Curious \u2014 want to learn more", level: 2, sent: { confidence: 0, anxiety: 0, motivation: 1 } },
+      { text: "Excited \u2014 feels like opportunity", level: 3, sent: { confidence: 1, anxiety: 0, motivation: 2 } },
+      { text: "Anxious \u2014 worried about falling behind", level: 2, sent: { confidence: -1, anxiety: 2, motivation: 1 } },
+      { text: "Overwhelmed \u2014 trying to avoid it", level: 1, sent: { confidence: -1, anxiety: 3, motivation: 0 } }
     ]
   },
   {
@@ -101,25 +87,11 @@ const QUESTIONS = [
     insight: 'Your mental model of AI predicts how you will use it. People who see AI as a "system component" adopt it 3x faster than those who see it as a search engine.<div class="source">— McKinsey Global Survey on AI, 2025</div>',
     axes: { mindset: [0, 1, 2, 3, 4] },
     options: [
-      { text: "Don't know how to start", level: 1, sent: { confidence: -1, anxiety: 1, motivation: 0 } },
+      { text: "Don\u2019t know how to start", level: 1, sent: { confidence: -1, anxiety: 1, motivation: 0 } },
       { text: "I can get basic help from it", level: 2, sent: { confidence: 1, anxiety: 0, motivation: 1 } },
       { text: "Comfortable experimenting and steering", level: 3, sent: { confidence: 2, anxiety: 0, motivation: 2 } },
       { text: "Confident I can get reliable results", level: 4, sent: { confidence: 3, anxiety: 0, motivation: 2 } },
       { text: "In control of outcomes via process design", level: 5, sent: { confidence: 4, anxiety: 0, motivation: 3 } }
-    ]
-  },
-  {
-    id: "m3_motivation",
-    section: "mindset",
-    title: "What drives your AI interest?",
-    insight: 'Continuous learning is the strongest signal of career resilience. Professionals who set aside dedicated weekly time for skill development report higher confidence and adaptability.<div class="source">— Forbes, "40% Of Job Skills Will Change By 2030," Feb 2026</div>',
-    axes: { mindset: [0, 1, 2, 3, 4] },
-    options: [
-      { text: "No strong reason yet", level: 1, sent: { confidence: 0, anxiety: 0, motivation: 0 } },
-      { text: "Curiosity and learning", level: 2, sent: { confidence: 0, anxiety: 0, motivation: 1 } },
-      { text: "Productivity — getting more done", level: 3, sent: { confidence: 1, anxiety: 0, motivation: 2 } },
-      { text: "Career advantage", level: 3, sent: { confidence: 1, anxiety: 0, motivation: 3 } },
-      { text: "Building systems and products with AI", level: 5, sent: { confidence: 2, anxiety: 0, motivation: 4 } }
     ]
   },
   {
@@ -136,49 +108,21 @@ const QUESTIONS = [
       { text: "Cross-check with sources/tests and iterate", level: 5 }
     ]
   },
-  {
-    id: "m5_learning",
-    section: "mindset",
-    title: "When you see a new AI trend, what do you do?",
-    insight: 'The AI tool landscape changes monthly. Professionals who evaluate new tools strategically — not just chase hype — make better adoption decisions.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
-    axes: { mindset: [0, 1, 1, 3, 4] },
-    options: [
-      { text: "Ignore it", level: 1 },
-      { text: "Save it \"for later\"", level: 1.5 },
-      { text: "Skim and move on", level: 2 },
-      { text: "Test it on a real task", level: 4 },
-      { text: "Evaluate with a checklist or benchmark", level: 5 }
-    ]
-  },
 
-  // === CRAFT (4) ===
+  // === CRAFT (3) ===
   {
     id: "c1_repeat",
     section: "craft",
     calibration: true,
     title: "You did a task with AI today. Tomorrow you need to do it again. You:",
-    insight: 'An estimated 25% of all work hours globally are now automatable — up from 18% two years ago. The professionals who systematize repetitive work free themselves for higher-value thinking.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
+    insight: 'An estimated 25% of all work hours globally are now automatable \u2014 up from 18% two years ago. The professionals who systematize repetitive work free themselves for higher-value thinking.<div class="source">— McKinsey Global Institute; WEF Future of Jobs Report</div>',
     axes: { craft: [0, 1, 2, 3, 4] },
     options: [
       { text: "Redo it manually", level: 1 },
       { text: "Ask AI again from scratch", level: 1.5 },
       { text: "Reuse the same prompt", level: 2 },
       { text: "Follow a template or checklist I made", level: 3 },
-      { text: "It's already systematized — inputs, outputs, rubric, handoffs", level: 5 }
-    ]
-  },
-  {
-    id: "c2_capture",
-    section: "craft",
-    title: "When you discover a prompt or workflow that works well:",
-    insight: 'Knowledge management is becoming a critical AI-era skill. Professionals who systematize their AI interactions compound their productivity gains over time.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
-    axes: { craft: [0, 1, 2, 3, 4] },
-    options: [
-      { text: "It disappears — I forget it", level: 1 },
-      { text: "Save the chat or screenshot it", level: 1.5 },
-      { text: "Write notes about what worked", level: 2 },
-      { text: "Add it to a reusable prompt/template library", level: 4 },
-      { text: "Convert it into a shared tool with examples", level: 5 }
+      { text: "It\u2019s already systematized \u2014 inputs, outputs, rubric, handoffs", level: 5 }
     ]
   },
   {
@@ -200,10 +144,10 @@ const QUESTIONS = [
     section: "craft",
     crossCheck: true,
     title: "Deadline pressure hits. You:",
-    insight: 'How you behave under pressure reveals your true operating level — not your aspirational one. The gap between "what I do when relaxed" and "what I do under stress" is your real skill floor.<div class="source">— Deloitte Human Capital Trends 2025</div>',
+    insight: 'How you behave under pressure reveals your true operating level \u2014 not your aspirational one. The gap between "what I do when relaxed" and "what I do under stress" is your real skill floor.<div class="source">— Deloitte Human Capital Trends 2025</div>',
     axes: { craft: [0, 1, 2, 3, 4] },
     options: [
-      { text: "Go fully manual — no time to experiment", level: 1 },
+      { text: "Go fully manual \u2014 no time to experiment", level: 1 },
       { text: "Quick AI help for speed only", level: 2 },
       { text: "Reuse prompts I know work", level: 3 },
       { text: "Follow my repeatable workflow", level: 4 },
@@ -211,7 +155,7 @@ const QUESTIONS = [
     ]
   },
 
-  // === TECH DEPTH (2) ===
+  // === TECH DEPTH (1) ===
   {
     id: "t1_mode",
     section: "tech",
@@ -226,22 +170,8 @@ const QUESTIONS = [
       { text: "Integrated AI services in my products/workflows", level: 5 }
     ]
   },
-  {
-    id: "t2_knowledge",
-    section: "tech",
-    title: "When you need AI to work with your own documents or data:",
-    insight: 'AI skills have surpassed all others as the most difficult for employers to find globally, with 72% reporting hiring difficulty. Knowing how to handle AI failures is a premium skill.<div class="source">— ManpowerGroup 2026 Global Talent Shortage Survey</div>',
-    axes: { tech_depth: [0, 1, 2, 3, 4] },
-    options: [
-      { text: "I don't do this", level: 1 },
-      { text: "Paste minimal text and hope", level: 1.5 },
-      { text: "Curate relevant snippets carefully", level: 3 },
-      { text: "Prepare a reference pack or prompt kit", level: 4 },
-      { text: "Use retrieval/search or structured data pipelines", level: 5 }
-    ]
-  },
 
-  // === RELIABILITY (2) ===
+  // === RELIABILITY (1) ===
   {
     id: "r1_consistency",
     section: "reliability",
@@ -256,22 +186,8 @@ const QUESTIONS = [
       { text: "Eval sets, automated scoring, and tests", level: 5 }
     ]
   },
-  {
-    id: "r2_mistake",
-    section: "reliability",
-    title: "AI makes a serious mistake in production. You:",
-    insight: 'The ability to evaluate AI reliably is rare and extremely valuable. Most organizations lack systematic approaches to AI quality assurance.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
-    axes: { reliability: [0, 1, 2, 3, 4] },
-    options: [
-      { text: "Stop using AI for important tasks", level: 1 },
-      { text: "Add more human review", level: 2 },
-      { text: "Improve prompts and instructions", level: 3 },
-      { text: "Add safeguards and monitoring triggers", level: 4 },
-      { text: "Build feedback loop — logs, regression tests, eval gates", level: 5 }
-    ]
-  },
 
-  // === AGENTS (2) ===
+  // === AGENTS (1) ===
   {
     id: "g1_maturity",
     section: "agents",
@@ -286,18 +202,20 @@ const QUESTIONS = [
       { text: "Built or ran agents for team/users (production-ish)", level: 5 }
     ]
   },
+
+  // === IMPACT SCOPE (new — differentiates levels 6-8) ===
   {
-    id: "g2_orchestration",
-    section: "agents",
-    title: "How do you handle multi-step AI tasks?",
-    insight: 'Companies with 40%+ AI projects in production are set to double in six months. The ability to deploy AI for teams — not just yourself — is a leadership multiplier.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
-    axes: { agents: [0, 1, 2, 3, 4] },
+    id: "impact_scope",
+    section: "future",
+    title: "What\u2019s the scope of your AI impact?",
+    insight: 'Companies with 40%+ AI projects in production are set to double in six months. The ability to deploy AI for teams \u2014 not just yourself \u2014 is a leadership multiplier.<div class="source">— Deloitte State of AI in the Enterprise 2026</div>',
+    axes: { agents: [0, 0, 1, 3, 4], adoption: [0, 1, 2, 3, 4] },
     options: [
-      { text: "Manual steps only — I do each part", level: 1 },
-      { text: "Ask AI step by step, I coordinate", level: 2 },
-      { text: "Repeatable checklist or workflow", level: 3 },
-      { text: "Semi-automated chaining across tools", level: 4 },
-      { text: "Plan → act → check loops with state and retries", level: 5 }
+      { text: "Still learning the basics", level: 1 },
+      { text: "Use AI effectively in my own work", level: 2 },
+      { text: "Help colleagues or team members use AI better", level: 3 },
+      { text: "Design AI workflows or systems used by my organization", level: 4 },
+      { text: "Build AI products, platforms, or contribute to the AI ecosystem", level: 5 }
     ]
   },
 
@@ -313,9 +231,9 @@ const QUESTIONS = [
       { text: "Claude (Anthropic)", toolCategory: "general" },
       { text: "Google Gemini", toolCategory: "general" },
       { text: "DeepSeek", toolCategory: "general" },
-      { text: "Doubao / 豆包 (ByteDance)", toolCategory: "general" },
+      { text: "Doubao / \u8c46\u5305 (ByteDance)", toolCategory: "general" },
       { text: "Kimi (Moonshot AI)", toolCategory: "general" },
-      { text: "Qwen / 通义千问 (Alibaba)", toolCategory: "general" },
+      { text: "Qwen / \u901a\u4e49\u5343\u95ee (Alibaba)", toolCategory: "general" },
       { text: "Perplexity", toolCategory: "research" },
       { text: "Microsoft Copilot", toolCategory: "productivity" },
       { text: "GitHub Copilot", toolCategory: "coding" },
@@ -325,7 +243,7 @@ const QUESTIONS = [
       { text: "Claude Code", toolCategory: "coding" },
       { text: "MiniMax / Hailuo AI", toolCategory: "creative" },
       { text: "Midjourney", toolCategory: "creative" },
-      { text: "DALL·E / ChatGPT Images", toolCategory: "creative" },
+      { text: "DALL\u00b7E / ChatGPT Images", toolCategory: "creative" },
       { text: "Stable Diffusion / FLUX", toolCategory: "creative" },
       { text: "Adobe Firefly", toolCategory: "creative" },
       { text: "Canva AI", toolCategory: "creative" },
@@ -339,19 +257,22 @@ const QUESTIONS = [
     ]
   },
 
-  // === SELF-IDENTIFY (calibration anchor) ===
+  // === SELF-IDENTIFY (8-level anchor) ===
   {
     id: "self_identify",
     section: "future",
     title: "Which feels closest to you right now?",
     insight: 'Self-awareness about your current position is the first step to intentional growth. Where you are matters less than knowing where you want to go.<div class="source">— Deloitte Human Capital Trends 2025</div>',
-    axes: { adoption: [0, 1, 2, 2, 3], craft: [0, 0, 1, 2, 3] },
+    axes: { adoption: [0, 1, 1, 2, 2, 3, 3, 4], craft: [0, 0, 1, 1, 2, 2, 3, 3] },
     options: [
-      { text: "AI observer — watching from the sidelines", level: 1 },
-      { text: "Casual user — it helps sometimes", level: 2 },
-      { text: "Power user — AI is part of my daily work", level: 3 },
-      { text: "Workflow optimizer — I design how AI fits into processes", level: 4 },
-      { text: "AI builder — I create tools and systems with AI", level: 5 }
+      { text: "AI observer \u2014 watching from the sidelines", level: 1 },
+      { text: "Prompt beginner \u2014 learning to ask better questions", level: 2 },
+      { text: "AI collaborator \u2014 brainstorming and iterating with AI", level: 3 },
+      { text: "Workflow designer \u2014 designing how AI fits into processes", level: 4 },
+      { text: "Automation builder \u2014 building automated AI systems", level: 5 },
+      { text: "AI leverager \u2014 running autonomous AI systems at scale", level: 6 },
+      { text: "Org amplifier \u2014 spreading AI capability across teams", level: 7 },
+      { text: "Ecosystem builder \u2014 building AI products or platforms", level: 8 }
     ]
   }
 ];
