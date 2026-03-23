@@ -1,4 +1,4 @@
-// Scoring engine v2 — 6-axis percentage scoring, adaptive branching, guardrails
+// Scoring engine v3 — 6-axis percentage scoring, 8-level system, adaptive branching, guardrails
 
 const AXES = ['adoption', 'mindset', 'craft', 'tech_depth', 'reliability', 'agents'];
 const AXIS_DESCRIPTIONS = {
@@ -14,11 +14,11 @@ const AXIS_WEIGHTS = { adoption: 0.10, mindset: 0.15, craft: 0.25, tech_depth: 0
 
 // === BRANCHING ===
 
-// Calibration questions: a1_frequency, a3_dependency, m2_confidence, c1_repeat
-function getCalibrationIds() { return ['domain', 'a1_frequency', 'a3_dependency', 'm2_confidence', 'c1_repeat']; }
+// Calibration questions: a1_frequency, m2_confidence, c1_repeat
+function getCalibrationIds() { return ['domain', 'a1_frequency', 'm2_confidence', 'c1_repeat']; }
 
 function determineScanType(answers) {
-  const calIds = ['a1_frequency', 'a3_dependency', 'm2_confidence', 'c1_repeat'];
+  const calIds = ['a1_frequency', 'm2_confidence', 'c1_repeat'];
   let levelSum = 0, count = 0;
   for (const qid of calIds) {
     const idx = answers[qid];
@@ -29,11 +29,7 @@ function determineScanType(answers) {
     count++;
   }
   const avg = count ? levelSum / count : 0;
-  // Quick scan for beginners
   if (avg <= 1.5) return 'quick';
-  // Check for advanced signals
-  const advancedIds = ['t1_mode', 't2_knowledge', 'r1_consistency', 'g1_maturity'];
-  // We don't have these answers yet at branching time, so check calibration for high signals
   if (avg >= 3.5) return 'advanced';
   return 'core';
 }
@@ -42,19 +38,19 @@ function getAdaptiveQuestions(scanType) {
   const cal = QUESTIONS.filter(q => getCalibrationIds().includes(q.id));
   const tools = QUESTIONS.filter(q => q.id === 'ai_tools');
   const selfId = QUESTIONS.filter(q => q.id === 'self_identify');
+  const impact = QUESTIONS.filter(q => q.id === 'impact_scope');
 
   if (scanType === 'quick') {
-    // Quick: calibration + m1, m3 + self_identify + tools
-    const extra = QUESTIONS.filter(q => ['m1_reaction', 'm3_motivation'].includes(q.id));
-    return [...cal, ...extra, ...selfId, ...tools];
+    // Quick: calibration + m1_reaction + self_identify + impact + tools (~8 questions)
+    const extra = QUESTIONS.filter(q => ['m1_reaction'].includes(q.id));
+    return [...cal, ...extra, ...selfId, ...impact, ...tools];
   }
 
   if (scanType === 'advanced') {
-    // Advanced: all questions
     return [...QUESTIONS];
   }
 
-  // Core: calibration + adoption + mindset(3) + craft(3) + 1 tech + 1 reliability + 1 agents + tools
+  // Core: calibration + adoption + mindset + craft(2) + t1_mode + r1_consistency + g1_maturity + impact + tools (~13 questions)
   const adoption = QUESTIONS.filter(q => q.section === 'adoption' && !q.calibration);
   const mindset = QUESTIONS.filter(q => q.section === 'mindset' && !q.calibration);
   const craft = QUESTIONS.filter(q => q.section === 'craft' && !q.calibration && !q.crossCheck);
@@ -63,7 +59,7 @@ function getAdaptiveQuestions(scanType) {
   const agents = QUESTIONS.filter(q => q.id === 'g1_maturity');
   const deadline = QUESTIONS.filter(q => q.crossCheck);
 
-  const pool = [...cal, ...adoption, ...mindset, ...craft, ...tech, ...rel, ...agents, ...deadline, ...tools];
+  const pool = [...cal, ...adoption, ...mindset, ...craft, ...tech, ...rel, ...agents, ...deadline, ...impact, ...tools];
   const seen = new Set();
   return pool.filter(q => { if (seen.has(q.id)) return false; seen.add(q.id); return true; });
 }
@@ -92,13 +88,11 @@ function calculateScores(answers) {
     levelCount++;
   }
 
-  // Per-axis score 0-100
   const axisScores = {};
   for (const a of AXES) {
     axisScores[a] = maxPoints[a] > 0 ? Math.round(Math.min(100, Math.max(0, (points[a] / maxPoints[a]) * 100))) : 0;
   }
 
-  // Overall weighted score
   let overall = 0;
   for (const a of AXES) overall += (AXIS_WEIGHTS[a] || 0) * axisScores[a];
   overall = Math.round(overall);
@@ -107,15 +101,17 @@ function calculateScores(answers) {
   return { axisScores, overall, avgLevel, answeredCount: levelCount };
 }
 
-// === LEVEL DETERMINATION ===
+// === LEVEL DETERMINATION (8 levels) ===
 
 const LEVELS = [
-  { key: 'observer', min: 0, max: 20 },
-  { key: 'tourist', min: 21, max: 35 },
-  { key: 'explorer', min: 36, max: 50 },
-  { key: 'hacker', min: 51, max: 65 },
-  { key: 'operator', min: 66, max: 80 },
-  { key: 'architect', min: 81, max: 100 }
+  { key: 'dabbler', min: 0, max: 12 },
+  { key: 'prompter', min: 13, max: 25 },
+  { key: 'collaborator', min: 26, max: 37 },
+  { key: 'designer', min: 38, max: 50 },
+  { key: 'builder', min: 51, max: 62 },
+  { key: 'leverager', min: 63, max: 75 },
+  { key: 'amplifier', min: 76, max: 87 },
+  { key: 'visionary', min: 88, max: 100 }
 ];
 
 function determineArchetype(scores) {
@@ -123,13 +119,16 @@ function determineArchetype(scores) {
 
   // Guardrails
   if (axisScores.adoption <= 20 && axisScores.craft <= 20) {
-    overall = Math.min(overall, 35); // cap at Tourist
+    overall = Math.min(overall, 25); // cap at Prompter
   }
-  if (axisScores.reliability >= 70) {
-    overall = Math.max(overall, 66); // floor at Operator
+  if (axisScores.reliability >= 70 && axisScores.craft >= 60) {
+    overall = Math.max(overall, 63); // floor at Leverager
   }
   if (axisScores.agents >= 75 && axisScores.reliability >= 60) {
-    overall = Math.max(overall, 81); // floor at Architect
+    overall = Math.max(overall, 76); // floor at Amplifier
+  }
+  if (axisScores.agents >= 85 && axisScores.reliability >= 75 && axisScores.craft >= 70) {
+    overall = Math.max(overall, 88); // floor at Visionary
   }
 
   scores.overall = overall;
@@ -137,7 +136,7 @@ function determineArchetype(scores) {
   for (let i = LEVELS.length - 1; i >= 0; i--) {
     if (overall >= LEVELS[i].min) return LEVELS[i].key;
   }
-  return 'observer';
+  return 'dabbler';
 }
 
 // Cross-check: deadline pressure vs claimed level
@@ -195,7 +194,6 @@ function computeAIExposure(answers) {
 }
 
 function computeReadiness(axisScores) {
-  // Weighted readiness from axis scores
   return Math.min(100, Math.round(
     axisScores.craft * 0.3 + axisScores.adoption * 0.2 + axisScores.tech_depth * 0.2 +
     axisScores.reliability * 0.2 + axisScores.agents * 0.1
@@ -219,7 +217,6 @@ function generateSituation(axisScores, archetypeKey) {
   const cn = typeof isCN === 'function' && isCN();
   const { adoption, craft, tech_depth, reliability, agents, mindset } = axisScores;
 
-  // Template-based situation narrative
   if (adoption >= 60 && craft < 40) return cn
     ? "你大量使用 AI，但在重复性上付出了代价 —— 每次都在重新发明轮子。模板化你的最佳实践会带来巨大回报。"
     : "You're using AI a lot, but paying a repeatability tax. Templating your best practices would unlock huge gains.";
@@ -236,7 +233,6 @@ function generateSituation(axisScores, archetypeKey) {
     ? "你的心态很好 —— 好奇且有动力。现在需要把热情转化为可重复的技能。"
     : "Great mindset — curious and motivated. Now channel that energy into repeatable craft.";
 
-  // Default
   const arch = ARCHETYPES[archetypeKey];
   return cn && ARCHETYPES_CN[archetypeKey]?.desc ? ARCHETYPES_CN[archetypeKey].desc : (arch?.desc || '');
 }
@@ -251,33 +247,41 @@ const INDUSTRY_AUTOMATION = {
   early: { rate: 25, en: "You're entering a job market where AI fluency is the new baseline. Building AI skills now puts you ahead of most candidates before you even start.", cn: "你正在进入一个 AI 素养成为基本门槛的就业市场。现在就建立 AI 技能，让你在起跑前就领先大多数候选人。" }
 };
 
-// Level-based motivational message
+// Level-based motivational message (8 levels)
 function getLevelMotivation(archetypeKey) {
   const cn = typeof isCN === 'function' && isCN();
   const msgs = {
-    observer: {
+    dabbler: {
       en: "AI-skilled professionals earn 56% more on average. You haven't started yet — which means every small step from here has outsized ROI.",
       cn: "掌握 AI 技能的专业人士平均收入高出 56%。你还没开始 —— 这意味着从现在起每一小步都有超额回报。"
     },
-    tourist: {
-      en: "AI-skilled professionals earn 56% more on average. You've started — now consistency will separate you from the 59% who'll need reskilling by 2030.",
-      cn: "掌握 AI 技能的专业人士平均收入高出 56%。你已经开始了 —— 现在持续投入会让你领先于 2030 年前需要再培训的 59% 的人。"
+    prompter: {
+      en: "AI-skilled professionals earn 56% more on average. You've started — now learning to write better prompts will separate you from the 59% who'll need reskilling by 2030.",
+      cn: "掌握 AI 技能的专业人士平均收入高出 56%。你已经开始了 —— 学会写更好的提示词会让你领先于 2030 年前需要再培训的 59% 的人。"
     },
-    explorer: {
-      en: "You're ahead of most. AI-skilled professionals earn 56% more — and 40% of job skills will change by 2030. Systematizing what you know is your next multiplier.",
-      cn: "你已经领先大多数人。AI 技能者收入高 56%，而到 2030 年 40% 的工作技能将改变。把你的知识系统化是下一个倍增器。"
+    collaborator: {
+      en: "You're ahead of most. AI-skilled professionals earn 56% more — and 40% of job skills will change by 2030. Turning your collaboration patterns into systems is your next multiplier.",
+      cn: "你已经领先大多数人。AI 技能者收入高 56%，而到 2030 年 40% 的工作技能将改变。把你的协作模式系统化是下一个倍增器。"
     },
-    hacker: {
+    designer: {
+      en: "Your workflow thinking puts you in the top tier. Companies investing in AI workflows report 1.8x better financial results — and they need people like you.",
+      cn: "你的工作流思维让你处于顶尖水平。投资 AI 工作流的公司财务表现好 1.8 倍 —— 他们需要你这样的人。"
+    },
+    builder: {
       en: "Companies with 40%+ AI projects in production will double in 6 months — they're hiring people like you at a 56% salary premium.",
       cn: "AI 项目投产率超 40% 的公司将在 6 个月内翻倍 —— 他们正在以 56% 的薪资溢价招聘像你这样的人。"
     },
-    operator: {
+    leverager: {
       en: "72% of employers can't find AI talent at your level. You're the supply they're desperate for — and the premium keeps growing.",
       cn: "72% 的雇主找不到你这个水平的 AI 人才。你就是他们急需的供给 —— 而且溢价还在持续增长。"
     },
-    architect: {
-      en: "72% of employers can't find AI talent — at your level, the premium is even higher. Your leverage now is making others more capable.",
-      cn: "72% 的雇主找不到 AI 人才 —— 在你这个水平，溢价更高。你现在的杠杆是让更多人变得更强。"
+    amplifier: {
+      en: "72% of employers can't find AI talent — at your level, the premium is even higher. Your leverage now is making your entire organization more capable.",
+      cn: "72% 的雇主找不到 AI 人才 —— 在你这个水平，溢价更高。你现在的杠杆是让整个组织变得更强。"
+    },
+    visionary: {
+      en: "You're shaping the AI ecosystem itself. At this level, your impact comes from building platforms and infrastructure that enable thousands of others.",
+      cn: "你在塑造 AI 生态本身。在这个水平，你的影响力来自构建让成千上万人受益的平台和基础设施。"
     }
   };
   return msgs[archetypeKey] ? (cn ? msgs[archetypeKey].cn : msgs[archetypeKey].en) : '';
@@ -299,32 +303,31 @@ function generateMissions(axisScores, archetypeKey, answers) {
 
   const MISSION_BANK = {
     craft: {
-      en: { title: "🎯 Template Pack", why: "Repeatable quality beats one-off brilliance.", metric: "Create 2 templates, use each 3+ times in 2 weeks.", upgrade: "Convert one template into a shared team playbook." },
-      cn: { title: "🎯 存好你的「万能提示词」", why: "能反复用的好方法，比每次灵光一现更有价值。", metric: "存 2 个好用的提示词模板，2 周内各复用 3 次以上。", upgrade: "把一个模板整理成同事也能直接用的版本。" }
+      en: { title: "\uD83C\uDFAF Template Pack", why: "Repeatable quality beats one-off brilliance.", metric: "Create 2 templates, use each 3+ times in 2 weeks.", upgrade: "Convert one template into a shared team playbook." },
+      cn: { title: "\uD83C\uDFAF 存好你的「万能提示词」", why: "能反复用的好方法，比每次灵光一现更有价值。", metric: "存 2 个好用的提示词模板，2 周内各复用 3 次以上。", upgrade: "把一个模板整理成同事也能直接用的版本。" }
     },
     reliability: {
-      en: { title: "🛡️ Eval Lite", why: "You can't improve what you can't measure.", metric: "Build a 15-example eval set with a 1–5 rubric.", upgrade: "Add an eval gate to your workflow." },
-      cn: { title: "🛡️ 建一个「质量对照表」", why: "不能衡量的东西就无法改进。", metric: "准备 15 个你知道正确答案的例子，给 AI 回答打 1-5 分。", upgrade: "每次改提示词后都跑一遍对照表，确保没变差。" }
+      en: { title: "\uD83D\uDEE1\uFE0F Eval Lite", why: "You can't improve what you can't measure.", metric: "Build a 15-example eval set with a 1\u20135 rubric.", upgrade: "Add an eval gate to your workflow." },
+      cn: { title: "\uD83D\uDEE1\uFE0F 建一个「质量对照表」", why: "不能衡量的东西就无法改进。", metric: "准备 15 个你知道正确答案的例子，给 AI 回答打 1-5 分。", upgrade: "每次改提示词后都跑一遍对照表，确保没变差。" }
     },
     tech_depth: {
-      en: { title: "⚡ Automation Wedge", why: "One automated step changes your relationship with AI.", metric: "Automate 1 step so a task becomes push-button.", upgrade: "Add cost/latency routing by difficulty." },
-      cn: { title: "⚡ 自动化一个小步骤", why: "哪怕只自动化一步，你和 AI 的关系就会改变。", metric: "找到最枯燥的一步，让它变成一键完成。", upgrade: "尝试让多个步骤自动衔接。" }
+      en: { title: "\u26A1 Automation Wedge", why: "One automated step changes your relationship with AI.", metric: "Automate 1 step so a task becomes push-button.", upgrade: "Add cost/latency routing by difficulty." },
+      cn: { title: "\u26A1 自动化一个小步骤", why: "哪怕只自动化一步，你和 AI 的关系就会改变。", metric: "找到最枯燥的一步，让它变成一键完成。", upgrade: "尝试让多个步骤自动衔接。" }
     },
     agents: {
-      en: { title: "🤖 Checklist → Chain", why: "Manual coordination is your current bottleneck.", metric: "Convert one multi-step checklist into a semi-automated chain.", upgrade: "Add state tracking and retry logic." },
-      cn: { title: "🤖 把手动步骤串起来", why: "每次都手动协调多个步骤，是你当前最大的效率瓶颈。", metric: "选一个多步骤任务，让 AI 自动串联起来。", upgrade: "加入出错自动重试的机制。" }
+      en: { title: "\uD83E\uDD16 Checklist \u2192 Chain", why: "Manual coordination is your current bottleneck.", metric: "Convert one multi-step checklist into a semi-automated chain.", upgrade: "Add state tracking and retry logic." },
+      cn: { title: "\uD83E\uDD16 把手动步骤串起来", why: "每次都手动协调多个步骤，是你当前最大的效率瓶颈。", metric: "选一个多步骤任务，让 AI 自动串联起来。", upgrade: "加入出错自动重试的机制。" }
     },
     adoption: {
-      en: { title: "🚀 3 Reps Challenge", why: "Consistency beats intensity for building AI habits.", metric: "Use AI for 3 different real tasks this week.", upgrade: "Expand to a new domain you haven't tried AI in." },
-      cn: { title: "🚀 这周用 AI 做 3 件真事", why: "养成习惯靠的是持续，不是一次猛冲。", metric: "本周用 AI 完成 3 个不同的真实任务。", upgrade: "扩展到一个你还没试过 AI 的新场景。" }
+      en: { title: "\uD83D\uDE80 3 Reps Challenge", why: "Consistency beats intensity for building AI habits.", metric: "Use AI for 3 different real tasks this week.", upgrade: "Expand to a new domain you haven't tried AI in." },
+      cn: { title: "\uD83D\uDE80 这周用 AI 做 3 件真事", why: "养成习惯靠的是持续，不是一次猛冲。", metric: "本周用 AI 完成 3 个不同的真实任务。", upgrade: "扩展到一个你还没试过 AI 的新场景。" }
     },
     mindset: {
-      en: { title: "💡 Low-Risk Wins", why: "Confidence comes from small successes, not big leaps.", metric: "Find 3 low-stakes tasks where AI saves you 10+ minutes each.", upgrade: "Share one win with a colleague." },
-      cn: { title: "💡 从不怕出错的事开始", why: "信心来自小成功，不是大冒险。", metric: "找 3 个出错也没关系的任务，用 AI 各省 10 分钟以上。", upgrade: "把一个成功案例分享给同事。" }
+      en: { title: "\uD83D\uDCA1 Low-Risk Wins", why: "Confidence comes from small successes, not big leaps.", metric: "Find 3 low-stakes tasks where AI saves you 10+ minutes each.", upgrade: "Share one win with a colleague." },
+      cn: { title: "\uD83D\uDCA1 从不怕出错的事开始", why: "信心来自小成功，不是大冒险。", metric: "找 3 个出错也没关系的任务，用 AI 各省 10 分钟以上。", upgrade: "把一个成功案例分享给同事。" }
     }
   };
 
-  // Pick missions for weakest 3 axes (skip if already strong)
   for (const axis of sorted) {
     if (missions.length >= 3) break;
     if (axisScores[axis] >= 70) continue;
@@ -332,7 +335,6 @@ function generateMissions(axisScores, archetypeKey, answers) {
     if (m) missions.push(cn ? m.cn : m.en);
   }
 
-  // Fill remaining from archetype actions if needed
   if (missions.length < 3) {
     const arch = ARCHETYPES[archetypeKey];
     const archCN = ARCHETYPES_CN?.[archetypeKey];
@@ -351,8 +353,6 @@ function detectSignals(axisScores) {
   const sorted = AXES.slice().sort((a, b) => axisScores[b] - axisScores[a]);
   const strengths = sorted.filter(a => axisScores[a] >= 40).slice(0, 3);
 
-  // Smart bottleneck: skip agents/reliability if user is still early stage
-  // (those aren't real bottlenecks for beginners — adoption/craft/mindset are)
   const overall = Object.values(axisScores).reduce((s, v) => s + v, 0) / AXES.length;
   const skipIfEarly = overall < 40 ? ['agents', 'reliability'] : overall < 60 ? ['agents'] : [];
   const candidates = sorted.filter(a => !skipIfEarly.includes(a));
@@ -368,7 +368,7 @@ function getConfidence(scores) {
   return 'low';
 }
 
-// === SKILLS & ROLES (axis-based, not archetype-based) ===
+// === SKILLS & ROLES (axis-based) ===
 
 const SKILLS_BANK = {
   adoption: {
@@ -388,7 +388,7 @@ const SKILLS_BANK = {
     cn: { name: "建一个简单的「质量对照表」(Eval Set)", detail: "准备 15 个你知道正确答案的例子，给 AI 的回答打 1-5 分。每次改提示词后重新跑一遍，看分数有没有变差。这个习惯能防止 AI 输出质量悄悄下滑。" }
   },
   agents: {
-    en: { name: "Checklist → Chain", detail: "Take a multi-step task you do manually and convert it into a structured chain: define steps, inputs/outputs, and state. Start with semi-automation — you stay in the loop but stop doing the boring parts." },
+    en: { name: "Checklist \u2192 Chain", detail: "Take a multi-step task you do manually and convert it into a structured chain: define steps, inputs/outputs, and state. Start with semi-automation — you stay in the loop but stop doing the boring parts." },
     cn: { name: "把手动步骤串成自动链条", detail: "你有没有一件事需要好几步才能完成？比如「搜索→总结→发邮件」。把每一步写清楚，然后让 AI 自动串起来。你还是负责检查，但不用再手动做每一步了。" }
   },
   mindset: {
@@ -415,7 +415,7 @@ const ROLES_BANK = {
     cn: { name: "AI 输出质量把关人", detail: "在 AI 工作流里加入简单的检查环节 —— 比如评分标准、固定输出格式、抽样审核。你是让 AI 输出值得信赖的那个人。" }
   },
   agents: {
-    en: { name: "Orchestration Designer", detail: "Designs plan→act→check flows for multi-step AI tasks. Start with low-risk tasks like research and summarization. Keep humans in the loop; log errors." },
+    en: { name: "Orchestration Designer", detail: "Designs plan\u2192act\u2192check flows for multi-step AI tasks. Start with low-risk tasks like research and summarization. Keep humans in the loop; log errors." },
     cn: { name: "AI 流程编排者 (Orchestration Designer)", detail: "为多步骤任务设计「计划→执行→检查」的流程。从低风险的事开始，比如让 AI 自动搜索+总结。你负责监督，AI 负责跑腿。" }
   },
   mindset: {
@@ -442,7 +442,6 @@ function generateSkillsAndRoles(axisScores) {
     if (r) roles.push(cn ? r.cn : r.en);
   }
 
-  // If all axes high, show advanced skills/roles
   if (!skills.length) {
     const adv = [
       { en: { name: "Multiplier Builder", detail: "Build rails others can run on: tool registry, eval harness, governance framework, or training program. Pick one and roll it out beyond your team." },
@@ -470,7 +469,7 @@ function generateSkillsAndRoles(axisScores) {
 // === LABELS ===
 
 const EXPOSURE_LABELS = {
-  high: { label: "High Transformation Zone", detail: "AI will significantly reshape your work within 2–3 years." },
+  high: { label: "High Transformation Zone", detail: "AI will significantly reshape your work within 2\u20133 years." },
   moderate: { label: "Moderate Evolution Zone", detail: "AI will augment parts of your work. Starting now gives you an edge." },
   low: { label: "Gradual Change Zone", detail: "AI changes will come slower to your field, but AI literacy still matters." }
 };
@@ -478,5 +477,5 @@ const EXPOSURE_LABELS = {
 const READINESS_LABELS = {
   strong: { label: "Well Prepared", detail: "Strong AI skill foundation. Focus on deepening expertise." },
   building: { label: "Building Momentum", detail: "Right direction. Consistent AI skill-building will compound." },
-  early: { label: "Early Stage — High Growth Potential", detail: "Lots of room to grow. Small AI learning investments yield outsized returns." }
+  early: { label: "Early Stage \u2014 High Growth Potential", detail: "Lots of room to grow. Small AI learning investments yield outsized returns." }
 };

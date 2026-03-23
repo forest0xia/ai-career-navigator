@@ -343,7 +343,7 @@ async function showResults() {
 }
 
 function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools, sessionAnswers, sentProfile) {
-  const arch = ARCHETYPES[archetypeKey] || ARCHETYPES.observer;
+  const arch = ARCHETYPES[archetypeKey] || ARCHETYPES.dabbler;
   const expInfo = exposureLabel(exposure);
   const readInfo = readinessLabel(readiness);
   const community = Analytics.getCommunityStats();
@@ -423,11 +423,11 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   // Situation narrative
   const situation = generateSituation(axisScores, archetypeKey);
 
-  // Evolution map — 6 levels
-  const levels = ['observer', 'tourist', 'explorer', 'hacker', 'operator', 'architect'];
+  // Evolution map — 8 levels
+  const levels = ['dabbler', 'prompter', 'collaborator', 'designer', 'builder', 'leverager', 'amplifier', 'visionary'];
   const levelNames = isCN()
-    ? { observer: '👀 观察者', tourist: '🌱 游客', explorer: '🧭 探索者', hacker: '⚙️ 黑客', operator: '🧠 操作者', architect: '🏗️ 架构师' }
-    : { observer: '👀 Observer', tourist: '🌱 Tourist', explorer: '🧭 Explorer', hacker: '⚙️ Hacker', operator: '🧠 Operator', architect: '🏗️ Architect' };
+    ? { dabbler: '👀 体验者', prompter: '✏️ Prompt者', collaborator: '🤝 合作者', designer: '🔀 设计者', builder: '⚙️ 构建者', leverager: '🧠 杠杆者', amplifier: '📡 放大者', visionary: '🏗️ 生态者' }
+    : { dabbler: '👀 Dabbler', prompter: '✏️ Prompter', collaborator: '🤝 Collaborator', designer: '🔀 Designer', builder: '⚙️ Builder', leverager: '🧠 Leverager', amplifier: '📡 Amplifier', visionary: '🏗️ Visionary' };
   const evolutionMap = levels.map(l =>
     `<span style="padding:6px 10px;border-radius:6px;font-size:12px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
   ).join('<span style="color:var(--text2);opacity:0.3;margin:0 2px">→</span>');
