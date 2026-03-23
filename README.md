@@ -8,9 +8,9 @@ An interactive web assessment that helps professionals understand their position
 
 ## What It Does
 
-Users complete a 6–8 minute adaptive assessment and receive a personalized career profile including:
+Users complete a 4–6 minute adaptive assessment and receive a personalized career profile including:
 
-- **AI Maturity Level** — one of 6 progression levels (Observer → Tourist → Explorer → Workflow Hacker → Operator → System Architect)
+- **AI Maturity Level** — one of 7 progression levels (Dabbler → Prompter → Collaborator → Designer → System Builder → Amplifier → Visionary)
 - **6-Axis Radar Profile** — Adoption, Mindset, Craft, Tech Depth, Reliability, Agents (0-100% each)
 - **Sentiment Profile** — psychological orientation (Curious Explorer, Anxious Achiever, Confident Builder, etc.)
 - **AI Exposure Score** — how much AI will transform your specific industry
@@ -28,10 +28,10 @@ Users complete a 6–8 minute adaptive assessment and receive a personalized car
 | Scan | Trigger | Questions | Focus |
 |------|---------|-----------|-------|
 | **Quick Scan** | Low calibration scores | ~8 | Adoption + Mindset basics |
-| **Core Scan** | Most users | ~16 | Balanced across all 6 axes |
-| **Advanced Scan** | High calibration scores | ~21 | Full depth including Reliability + Agents |
+| **Core Scan** | Most users | ~10 | Balanced across all 6 axes |
+| **Advanced Scan** | High calibration scores | ~12 | Full depth including all axes |
 
-5 calibration questions determine which scan path you take. Progress bar shows current stage (Calibration → Scan → Wrap-up).
+4 calibration questions (domain + 3 scored) determine which scan path you take. Progress bar shows current stage (Calibration → Scan → Wrap-up).
 
 ### 6 Radar Axes
 
@@ -46,21 +46,35 @@ Users complete a 6–8 minute adaptive assessment and receive a personalized car
 
 ### Scoring
 
-- Per-axis: `points / max_possible × 100` (only counts questions the user actually answered)
-- Overall: weighted sum (Craft 25%, Reliability 20%, Mindset/Tech/Agents 15% each, Adoption 10%)
-- Guardrails: low adoption+craft caps at Tourist; high reliability floors at Operator; high agents+reliability floors at Architect
-- Cross-check: deadline pressure behavior adjusts score if inconsistent with claimed level
+- **Per-axis**: `points / max_possible × 100` (only counts questions the user actually answered)
+- **Overall**: weighted sum — Craft 25%, Agents 20%, Adoption 15%, Mindset 15%, Reliability 15%, Tech Depth 10%
+- **Guardrails**: low adoption+craft caps at Prompter; high reliability+craft floors at System Builder; high agents+reliability floors at Amplifier; top-tier across all three floors at Visionary
+- **Cross-scoring**: c3_quality scores into both Craft and Reliability axes; impact_scope scores into both Agents and Adoption; self_identify scores into both Adoption and Craft
 
-### 6 Progression Levels
+### Questions per Axis
 
-| Level | Overall Score | Description |
-|-------|--------------|-------------|
-| 👀 Observer | 0–20 | Watching from the sidelines |
-| 🌱 Tourist | 21–35 | Occasional AI user |
-| 🧭 Explorer | 36–50 | Regular user, discovering better prompts |
-| ⚙️ Workflow Hacker | 51–65 | Templates, processes, daily AI integration |
-| 🧠 Operator | 66–80 | Systems thinker, pipeline designer |
-| 🏗️ Architect | 81–100 | Builds tools and systems others use |
+| Axis | Weight | Questions | Max Points |
+|------|--------|-----------|------------|
+| Adoption | 15% | a1_frequency, a2_breadth, impact_scope, self_identify | 12 |
+| Mindset | 15% | m1_reaction, m2_confidence | 6 |
+| Craft | 25% | c1_repeat, c3_quality, self_identify | 9 |
+| Tech Depth | 10% | t1_mode | 3 |
+| Reliability | 15% | c3_quality (cross-score) | 3 |
+| Agents | 20% | g1_maturity, impact_scope | 6 |
+
+### 7 Progression Levels
+
+| Emoji | Key | EN Name | CN Name | Score Range |
+|-------|-----|---------|---------|-------------|
+| 👀 | dabbler | Tool Dabbler | 工具体验者 | 0–14 |
+| ✏️ | prompter | Prompt User | Prompt 使用者 | 15–28 |
+| 🤝 | collaborator | AI Collaborator | AI 合作者 | 29–42 |
+| 🔀 | designer | Workflow Designer | 工作流设计者 | 43–56 |
+| ⚙️ | system_builder | System Builder | 系统构建者 | 57–72 |
+| 📡 | amplifier | Org Amplifier | 组织放大者 | 73–87 |
+| 🏗️ | visionary | Ecosystem Builder | 生态构建者 | 88–100 |
+
+**Level design**: Levels 1–4 cover individual AI proficiency. System Builder represents mastery of building and operating AI systems. Amplifier is for those who scale AI capabilities across teams and organizations. Visionary is an aspirational ceiling for those building AI infrastructure, frontier models, or shaping the ecosystem itself.
 
 ## Data Sources
 
@@ -91,8 +105,8 @@ ai-career-navigator/
 ├── css/style.css
 ├── src/
 │   ├── data/
-│   │   ├── questions.js      # 21 questions, 6-axis scoring, adaptive branching
-│   │   └── archetypes.js     # 6 levels with actions, resources, skills
+│   │   ├── questions.js      # 12 questions, 6-axis scoring, adaptive branching
+│   │   └── archetypes.js     # 7 levels with actions, resources, skills
 │   ├── engine/
 │   │   ├── scoring.js        # Axis scoring, level determination, missions, skills/roles
 │   │   └── analytics.js      # Supabase REST API + localStorage

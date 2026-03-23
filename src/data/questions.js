@@ -150,7 +150,7 @@ const QUESTIONS = [
     ]
   },
 
-  // === IMPACT SCOPE (differentiates levels 6-8) ===
+  // === IMPACT SCOPE (differentiates upper levels) ===
   {
     id: "impact_scope",
     section: "future",
