@@ -1,6 +1,6 @@
-// AI Adoption Diagnostic v3 — 8-level system, 12 questions, 6-axis radar
+// AI Adoption Diagnostic v3 — 7-level system, 12 questions, 6-axis radar
 // Axes: adoption, mindset, craft, tech_depth, reliability, agents
-// Levels: dabbler, prompter, collaborator, designer, builder, leverager, amplifier, visionary
+// Levels: dabbler, prompter, collaborator, designer, system_builder, amplifier, visionary
 
 const SECTIONS = {
   calibration: "Calibration",
@@ -161,7 +161,7 @@ const QUESTIONS = [
       { text: "Still learning for myself", level: 1 },
       { text: "Use AI effectively in my own work", level: 2 },
       { text: "Help my team or design AI workflows for my org", level: 4 },
-      { text: "Build AI products, platforms, or contribute to the ecosystem", level: 5 }
+      { text: "Build AI infrastructure, frontier models, or shape the ecosystem", level: 5 }
     ]
   },
 
@@ -214,7 +214,7 @@ const QUESTIONS = [
       { text: "Beginner \u2014 still exploring what AI can do", level: 1 },
       { text: "Active user \u2014 AI helps me get work done faster", level: 3 },
       { text: "Builder \u2014 I design workflows or automations with AI", level: 5 },
-      { text: "Leader \u2014 I build AI systems for my team, org, or the ecosystem", level: 8 }
+      { text: "Leader \u2014 I build AI systems for my team, org, or the ecosystem", level: 7 }
     ]
   }
 ];

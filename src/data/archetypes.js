@@ -1,5 +1,5 @@
-// 8-level AI adoption archetypes — progression model
-// Based on: 工具体验者 → Prompt使用者 → AI合作者 → 工作流设计者 → 自动化构建者 → AI杠杆者 → 组织放大者 → 生态构建者
+// 7-level AI adoption archetypes — progression model
+// Based on: 工具体验者 → Prompt使用者 → AI合作者 → 工作流设计者 → 系统构建者 → 组织放大者 → 生态构建者
 
 const ARCHETYPES = {
   dabbler: {
@@ -78,48 +78,29 @@ const ARCHETYPES = {
       articles: ["Building Effective Agents — Anthropic's guide to agent design", "Prompt Engineering Guide — comprehensive techniques"]
     }
   },
-  builder: {
-    name: "Automation Builder",
+  system_builder: {
+    name: "System Builder",
     emoji: "⚙️",
     level: 4,
-    desc: "You build automated AI systems — using APIs, scripts, LangChain, or automation platforms to make AI do real work autonomously. You don't just use AI; you engineer how it operates. Most people plateau before reaching here.",
-    strengths: ["Technical integration skills", "Can build AI-powered automations", "Understands API-level AI interaction"],
-    blindSpot: "You may build for capability over reliability. The systems you create work for you but may break for others or at scale. Adding evaluation and monitoring is your next unlock.",
+    desc: "You build and operate AI-powered systems — using APIs, scripts, agents, or automation platforms. You engineer how AI runs, not just what it does. Your systems handle real work autonomously, with monitoring and quality gates. You think in loops: plan, act, check, retry.",
+    strengths: ["Technical integration and automation skills", "Systems mindset — thinks in autonomous loops", "Builds reliable AI pipelines, not just one-off prompts"],
+    blindSpot: "You may overbuild for capability instead of simplifying for reliability. The systems you create work for you but may break for others or at scale. Making systems simple, documented, and accessible to others is your next unlock.",
     actions: [
       { what: "Automate one complete workflow end-to-end", how: "Take a multi-step process and automate it fully: input → AI processing → output → delivery. Use APIs, scripts, or no-code tools. One automated workflow teaches more than ten manual ones." },
-      { what: "Add a quality gate to your automation", how: "Build in a check: eval criteria, test cases, or output validation. Automation without quality control is a liability, not an asset." },
-      { what: "Document your system for someone else to run", how: "Write up your automated workflow so a colleague could operate it. If only you can run it, it's a toy, not a system." }
-    ],
-    nextLevel: "When your systems run reliably without your intervention — when you're thinking about monitoring, evaluation, and scale — you're becoming an AI Leverager.",
-    resources: {
-      people: ["Swyx (Latent Space podcast — AI engineering)", "Matt Wolfe (YouTube — AI tools for creators)", "Riley Brown (YouTube — AI agents & automation)"],
-      books: ["The Creative Act by Rick Rubin — creativity principles that transcend tools", "Meditations by Marcus Aurelius — calm amid external chaos", "Steal Like an Artist by Austin Kleon — creative process in any era"],
-      articles: ["What I Think About When I Think About AI Agents — Simon Willison", "The AI-Augmented Creative — how top professionals use AI"]
-    }
-  },
-  leverager: {
-    name: "AI Leverager",
-    emoji: "🧠",
-    level: 5,
-    desc: "You've built AI into self-running systems. You think in autonomous loops — plan, act, check, retry. AI agents, RPA, and automation platforms are your tools. Your systems work while you sleep. The challenge now: reliability at scale and simplification.",
-    strengths: ["Systems mindset — you think in autonomous loops", "High-leverage thinking — builds systems, not just tools", "Strong agent intuition"],
-    blindSpot: "You may overbuild instead of simplifying. The best systems are the simplest ones that work reliably. Focus on reliability, evaluation, and making systems accessible to others.",
-    actions: [
-      { what: "Build a validation process for your most critical AI system", how: "Create evaluation criteria, test cases, and a scoring rubric. Run your AI system against them. This is what production-grade AI looks like." },
-      { what: "Add monitoring and alerting", how: "Your systems should tell you when they fail, not wait for you to check. Add logging, error detection, and alerts for quality drops." },
-      { what: "Simplify your most complex system", how: "Take your most elaborate setup and ask: what's the simplest version that still works? Reduce moving parts. Reliability compounds faster than capability." }
+      { what: "Add evaluation and monitoring to your systems", how: "Build in quality gates: eval criteria, test cases, output validation, logging, and alerts for quality drops. Systems without monitoring are liabilities, not assets." },
+      { what: "Document your system for someone else to run", how: "Write up your automated workflow so a colleague could operate it. If only you can run it, it's a toy, not a system. Simplify until someone else can maintain it." }
     ],
     nextLevel: "When you start building AI systems for your team or organization — not just yourself — you're becoming an Org Amplifier.",
     resources: {
-      people: ["Andrew Ng (DeepLearning.AI — AI strategy)", "Cassie Kozyrkov (Google — decision intelligence)", "Matt Shumer (X/Twitter — AI product building)"],
-      books: ["The Art of War by Sun Tzu — strategy under uncertainty", "Principles by Ray Dalio — decision-making frameworks", "The Obstacle Is the Way by Ryan Holiday — turning challenges into advantages"],
-      articles: ["AI Strategy for Leaders — Harvard Business Review", "The CEO's Guide to AI — McKinsey"]
+      people: ["Swyx (Latent Space podcast — AI engineering)", "Andrew Ng (DeepLearning.AI — AI strategy)", "Riley Brown (YouTube — AI agents & automation)"],
+      books: ["The Creative Act by Rick Rubin — creativity principles that transcend tools", "Principles by Ray Dalio — decision-making frameworks", "The Obstacle Is the Way by Ryan Holiday — turning challenges into advantages"],
+      articles: ["What I Think About When I Think About AI Agents — Simon Willison", "Building Effective Agents — Anthropic's guide to agent design"]
     }
   },
   amplifier: {
     name: "Org Amplifier",
     emoji: "📡",
-    level: 6,
+    level: 5,
     desc: "You use AI to restructure how your team or organization works. You design AI-powered processes, train colleagues, build shared AI infrastructure, and make AI a core part of organizational productivity. Your impact scales beyond yourself.",
     strengths: ["Organizational design thinking", "Builds AI capability in others", "Designs systems that work for teams, not just individuals"],
     blindSpot: "Your systems may reflect your mental model too strongly. The next challenge is making AI systems accessible to people who think differently than you — and measuring organizational impact.",
@@ -138,16 +119,16 @@ const ARCHETYPES = {
   visionary: {
     name: "Ecosystem Builder",
     emoji: "🏗️",
-    level: 7,
-    desc: "You build AI products, platforms, or infrastructure. You contribute to the AI ecosystem — through products, open-source tools, API platforms, or AI-native businesses. You shape how others interact with AI. Platform thinking is your competitive edge.",
-    strengths: ["Platform and product thinking", "Shapes the AI ecosystem", "Strategic vision for AI-native business models"],
-    blindSpot: "Building for scale requires governance, reliability, and user empathy. The hardest challenge isn't building — it's making your platforms trustworthy, accessible, and sustainable.",
+    level: 6,
+    desc: "You build AI infrastructure, train frontier models, or shape the AI ecosystem itself. You're not just using AI or building products with it — you're creating the foundations that others build on. Whether it's contributing to open-source AI frameworks, developing foundational models, building AI platforms at scale, or defining how industries adopt AI — you operate at the ecosystem level.",
+    strengths: ["Ecosystem-level thinking — builds foundations others rely on", "Deep technical and strategic vision", "Shapes how industries and communities interact with AI"],
+    blindSpot: "Operating at the frontier requires balancing innovation speed with governance, safety, and accessibility. The hardest challenge isn't building cutting-edge systems — it's ensuring they're trustworthy, equitable, and sustainable at scale.",
     actions: [
-      { what: "Launch an AI product or platform for external users", how: "Ship something that people outside your organization use. An API, a tool, a product, a framework. Real users teach you what no internal testing can." },
-      { what: "Build evaluation and governance into your systems", how: "Add automated quality checks, usage tracking, compliance monitoring, and failure detection. Reliable systems that self-monitor are 10x more valuable than clever ones that break silently." },
-      { what: "Contribute to the AI community", how: "Open-source a component, publish a benchmark, write about your approach, or mentor builders. The AI ecosystem is small — visibility compounds faster than skill alone." }
+      { what: "Build or contribute to AI infrastructure", how: "Work on foundational models, training pipelines, evaluation frameworks, or open-source AI tools. The ecosystem needs builders who think beyond products to platforms and standards." },
+      { what: "Define governance and safety standards", how: "Develop evaluation benchmarks, safety protocols, or compliance frameworks. As AI scales, the people who build trust into the infrastructure become indispensable." },
+      { what: "Shape the ecosystem through community", how: "Publish research, mentor the next generation of AI builders, contribute to open standards, or build community infrastructure. Your leverage is making the entire ecosystem stronger." }
     ],
-    nextLevel: "You're at the frontier. Your growth now comes from depth (reliability, evaluation, governance) and breadth (teaching others, building community, shaping how the world adopts AI).",
+    nextLevel: "You're at the frontier. Your growth comes from pushing the boundaries of what's possible while ensuring AI develops responsibly — through infrastructure, governance, and ecosystem leadership.",
     resources: {
       people: ["Andrej Karpathy (YouTube — AI concepts explained clearly)", "Simon Willison (blog — practical AI tools & agents)", "Sam Altman (OpenAI — where AI is heading)"],
       books: ["Antifragile by Nassim Taleb — building systems that thrive in chaos", "The Creative Act by Rick Rubin — creativity beyond tools", "Designing Your Life by Burnett & Evans — intentional career design"],
