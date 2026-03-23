@@ -10,7 +10,10 @@ const AXIS_DESCRIPTIONS = {
   agents: { en: "Autonomy and orchestration — multi-step tool use, agent loops, real production usage.", cn: "自主性和编排能力 —— 多步骤工具使用、智能体循环、真实生产使用。" }
 };
 
-const AXIS_WEIGHTS = { adoption: 0.10, mindset: 0.15, craft: 0.25, tech_depth: 0.15, reliability: 0.20, agents: 0.15 };
+// Weights rebalanced for 12-question set:
+// adoption (3 Qs: a1, a2, impact+self), mindset (2: m1, m2), craft (2: c1, c3+self),
+// tech_depth (1: t1), reliability (1: c3 cross-score), agents (2: g1, impact)
+const AXIS_WEIGHTS = { adoption: 0.15, mindset: 0.15, craft: 0.25, tech_depth: 0.10, reliability: 0.15, agents: 0.20 };
 
 // === BRANCHING ===
 
@@ -50,16 +53,13 @@ function getAdaptiveQuestions(scanType) {
     return [...QUESTIONS];
   }
 
-  // Core: calibration + adoption + mindset + craft(2) + t1_mode + r1_consistency + g1_maturity + impact + tools (~13 questions)
-  const adoption = QUESTIONS.filter(q => q.section === 'adoption' && !q.calibration);
-  const mindset = QUESTIONS.filter(q => q.section === 'mindset' && !q.calibration);
-  const craft = QUESTIONS.filter(q => q.section === 'craft' && !q.calibration && !q.crossCheck);
-  const tech = QUESTIONS.filter(q => q.id === 't1_mode');
-  const rel = QUESTIONS.filter(q => q.id === 'r1_consistency');
-  const agents = QUESTIONS.filter(q => q.id === 'g1_maturity');
-  const deadline = QUESTIONS.filter(q => q.crossCheck);
+  // Core: all non-calibration questions except tools/self/impact (already included)
+  const rest = QUESTIONS.filter(q =>
+    !getCalibrationIds().includes(q.id) &&
+    q.id !== 'ai_tools' && q.id !== 'self_identify' && q.id !== 'impact_scope'
+  );
 
-  const pool = [...cal, ...adoption, ...mindset, ...craft, ...tech, ...rel, ...agents, ...deadline, ...impact, ...tools];
+  const pool = [...cal, ...rest, ...selfId, ...impact, ...tools];
   const seen = new Set();
   return pool.filter(q => { if (seen.has(q.id)) return false; seen.add(q.id); return true; });
 }
@@ -139,16 +139,8 @@ function determineArchetype(scores) {
   return 'dabbler';
 }
 
-// Cross-check: deadline pressure vs claimed level
+// Cross-check stub (kept for API compatibility)
 function applyCrossCheck(scores, answers) {
-  const idx = answers['c4_deadline'];
-  if (idx === undefined) return scores;
-  const q = QUESTIONS.find(q => q.id === 'c4_deadline');
-  const pressureLevel = q?.options[idx]?.level || 0;
-  const gap = scores.avgLevel - pressureLevel;
-  if (gap >= 2) {
-    scores.overall = Math.round(scores.overall * 0.85);
-  }
   return scores;
 }
 
