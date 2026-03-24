@@ -423,11 +423,11 @@ function renderResultsPage(scores, archetypeKey, exposure, readiness, userTools,
   // Situation narrative
   const situation = generateSituation(axisScores, archetypeKey);
 
-  // Evolution map — 8 levels
-  const levels = ['dabbler', 'prompter', 'collaborator', 'designer', 'builder', 'leverager', 'amplifier', 'visionary'];
+  // Evolution map — 7 levels
+  const levels = ['dabbler', 'prompter', 'collaborator', 'designer', 'system_builder', 'amplifier', 'visionary'];
   const levelNames = isCN()
-    ? { dabbler: '👀 体验者', prompter: '✏️ Prompt者', collaborator: '🤝 合作者', designer: '🔀 设计者', builder: '⚙️ 构建者', leverager: '🧠 杠杆者', amplifier: '📡 放大者', visionary: '🏗️ 生态者' }
-    : { dabbler: '👀 Dabbler', prompter: '✏️ Prompter', collaborator: '🤝 Collaborator', designer: '🔀 Designer', builder: '⚙️ Builder', leverager: '🧠 Leverager', amplifier: '📡 Amplifier', visionary: '🏗️ Visionary' };
+    ? { dabbler: '👀 体验者', prompter: '✏️ Prompt者', collaborator: '🤝 合作者', designer: '🔀 设计者', system_builder: '⚙️ 构建者', amplifier: '📡 放大者', visionary: '🏗️ 生态者' }
+    : { dabbler: '👀 Dabbler', prompter: '✏️ Prompter', collaborator: '🤝 Collaborator', designer: '🔀 Designer', system_builder: '⚙️ Builder', amplifier: '📡 Amplifier', visionary: '🏗️ Visionary' };
   const evolutionMap = levels.map(l =>
     `<span style="padding:6px 10px;border-radius:6px;font-size:12px;${l === archetypeKey ? 'background:var(--accent-glow);color:var(--accent2);border:1px solid var(--accent);font-weight:600' : 'color:var(--text2);opacity:0.5'}">${levelNames[l]}</span>`
   ).join('<span style="color:var(--text2);opacity:0.3;margin:0 2px">→</span>');

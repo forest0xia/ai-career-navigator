@@ -1,6 +1,6 @@
-// AI Adoption Diagnostic v3 — 8-level system, 12 questions, 6-axis radar
+// AI Adoption Diagnostic v3 — 7-level system, 12 questions, 6-axis radar
 // Axes: adoption, mindset, craft, tech_depth, reliability, agents
-// Levels: dabbler, prompter, collaborator, designer, builder, leverager, amplifier, visionary
+// Levels: dabbler, prompter, collaborator, designer, system_builder, amplifier, visionary
 
 const SECTIONS = {
   calibration: "Calibration",
@@ -150,7 +150,7 @@ const QUESTIONS = [
     ]
   },
 
-  // === IMPACT SCOPE (differentiates levels 6-8) ===
+  // === IMPACT SCOPE (differentiates upper levels) ===
   {
     id: "impact_scope",
     section: "future",
@@ -161,7 +161,7 @@ const QUESTIONS = [
       { text: "Still learning for myself", level: 1 },
       { text: "Use AI effectively in my own work", level: 2 },
       { text: "Help my team or design AI workflows for my org", level: 4 },
-      { text: "Build AI products, platforms, or contribute to the ecosystem", level: 5 }
+      { text: "Build AI infrastructure, frontier models, or shape the ecosystem", level: 5 }
     ]
   },
 
@@ -203,22 +203,18 @@ const QUESTIONS = [
     ]
   },
 
-  // === SELF-IDENTIFY (8-level anchor) ===
+  // === SELF-IDENTIFY (4-tier anchor) ===
   {
     id: "self_identify",
     section: "future",
     title: "Which feels closest to you right now?",
     insight: 'Self-awareness about your current position is the first step to intentional growth. Where you are matters less than knowing where you want to go.<div class="source">— Deloitte Human Capital Trends 2025</div>',
-    axes: { adoption: [0, 1, 1, 2, 2, 3, 3, 4], craft: [0, 0, 1, 1, 2, 2, 3, 3] },
+    axes: { adoption: [0, 1, 2, 3], craft: [0, 1, 2, 3] },
     options: [
-      { text: "AI observer \u2014 watching from the sidelines", level: 1 },
-      { text: "Prompt beginner \u2014 learning to ask better questions", level: 2 },
-      { text: "AI collaborator \u2014 brainstorming and iterating with AI", level: 3 },
-      { text: "Workflow designer \u2014 designing how AI fits into processes", level: 4 },
-      { text: "Automation builder \u2014 building automated AI systems", level: 5 },
-      { text: "AI leverager \u2014 running autonomous AI systems at scale", level: 6 },
-      { text: "Org amplifier \u2014 spreading AI capability across teams", level: 7 },
-      { text: "Ecosystem builder \u2014 building AI products or platforms", level: 8 }
+      { text: "Beginner \u2014 still exploring what AI can do", level: 1 },
+      { text: "Active user \u2014 AI helps me get work done faster", level: 3 },
+      { text: "Builder \u2014 I design workflows or automations with AI", level: 5 },
+      { text: "Leader \u2014 I build AI systems for my team, org, or the ecosystem", level: 7 }
     ]
   }
 ];

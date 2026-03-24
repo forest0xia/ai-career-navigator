@@ -1,4 +1,4 @@
-// Scoring engine v3 — 6-axis percentage scoring, 8-level system, adaptive branching, guardrails
+// Scoring engine v3 — 6-axis percentage scoring, 7-level system, adaptive branching, guardrails
 
 const AXES = ['adoption', 'mindset', 'craft', 'tech_depth', 'reliability', 'agents'];
 const AXIS_DESCRIPTIONS = {
@@ -101,16 +101,15 @@ function calculateScores(answers) {
   return { axisScores, overall, avgLevel, answeredCount: levelCount };
 }
 
-// === LEVEL DETERMINATION (8 levels) ===
+// === LEVEL DETERMINATION (7 levels) ===
 
 const LEVELS = [
-  { key: 'dabbler', min: 0, max: 12 },
-  { key: 'prompter', min: 13, max: 25 },
-  { key: 'collaborator', min: 26, max: 37 },
-  { key: 'designer', min: 38, max: 50 },
-  { key: 'builder', min: 51, max: 62 },
-  { key: 'leverager', min: 63, max: 75 },
-  { key: 'amplifier', min: 76, max: 87 },
+  { key: 'dabbler', min: 0, max: 14 },
+  { key: 'prompter', min: 15, max: 28 },
+  { key: 'collaborator', min: 29, max: 42 },
+  { key: 'designer', min: 43, max: 56 },
+  { key: 'system_builder', min: 57, max: 72 },
+  { key: 'amplifier', min: 73, max: 87 },
   { key: 'visionary', min: 88, max: 100 }
 ];
 
@@ -119,13 +118,13 @@ function determineArchetype(scores) {
 
   // Guardrails
   if (axisScores.adoption <= 20 && axisScores.craft <= 20) {
-    overall = Math.min(overall, 25); // cap at Prompter
+    overall = Math.min(overall, 28); // cap at Prompter
   }
   if (axisScores.reliability >= 70 && axisScores.craft >= 60) {
-    overall = Math.max(overall, 63); // floor at Leverager
+    overall = Math.max(overall, 57); // floor at System Builder
   }
   if (axisScores.agents >= 75 && axisScores.reliability >= 60) {
-    overall = Math.max(overall, 76); // floor at Amplifier
+    overall = Math.max(overall, 73); // floor at Amplifier
   }
   if (axisScores.agents >= 85 && axisScores.reliability >= 75 && axisScores.craft >= 70) {
     overall = Math.max(overall, 88); // floor at Visionary
@@ -239,7 +238,7 @@ const INDUSTRY_AUTOMATION = {
   early: { rate: 25, en: "You're entering a job market where AI fluency is the new baseline. Building AI skills now puts you ahead of most candidates before you even start.", cn: "你正在进入一个 AI 素养成为基本门槛的就业市场。现在就建立 AI 技能，让你在起跑前就领先大多数候选人。" }
 };
 
-// Level-based motivational message (8 levels)
+// Level-based motivational message (7 levels)
 function getLevelMotivation(archetypeKey) {
   const cn = typeof isCN === 'function' && isCN();
   const msgs = {
@@ -259,21 +258,17 @@ function getLevelMotivation(archetypeKey) {
       en: "Your workflow thinking puts you in the top tier. Companies investing in AI workflows report 1.8x better financial results — and they need people like you.",
       cn: "你的工作流思维让你处于顶尖水平。投资 AI 工作流的公司财务表现好 1.8 倍 —— 他们需要你这样的人。"
     },
-    builder: {
-      en: "Companies with 40%+ AI projects in production will double in 6 months — they're hiring people like you at a 56% salary premium.",
-      cn: "AI 项目投产率超 40% 的公司将在 6 个月内翻倍 —— 他们正在以 56% 的薪资溢价招聘像你这样的人。"
-    },
-    leverager: {
-      en: "72% of employers can't find AI talent at your level. You're the supply they're desperate for — and the premium keeps growing.",
-      cn: "72% 的雇主找不到你这个水平的 AI 人才。你就是他们急需的供给 —— 而且溢价还在持续增长。"
+    system_builder: {
+      en: "72% of employers can't find AI talent at your level. You build and operate AI systems — that's the supply they're desperate for, at a 56%+ salary premium.",
+      cn: "72% 的雇主找不到你这个水平的 AI 人才。你能构建和运营 AI 系统 —— 这正是他们急需的能力，薪资溢价超过 56%。"
     },
     amplifier: {
       en: "72% of employers can't find AI talent — at your level, the premium is even higher. Your leverage now is making your entire organization more capable.",
       cn: "72% 的雇主找不到 AI 人才 —— 在你这个水平，溢价更高。你现在的杠杆是让整个组织变得更强。"
     },
     visionary: {
-      en: "You're shaping the AI ecosystem itself. At this level, your impact comes from building platforms and infrastructure that enable thousands of others.",
-      cn: "你在塑造 AI 生态本身。在这个水平，你的影响力来自构建让成千上万人受益的平台和基础设施。"
+      en: "You're shaping the AI ecosystem itself. At this level, your impact comes from building infrastructure, frontier models, and foundations that enable thousands of others.",
+      cn: "你在塑造 AI 生态本身。在这个水平，你的影响力来自构建基础设施、前沿模型和让成千上万人受益的底层能力。"
     }
   };
   return msgs[archetypeKey] ? (cn ? msgs[archetypeKey].cn : msgs[archetypeKey].en) : '';
